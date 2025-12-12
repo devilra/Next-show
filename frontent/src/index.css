@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#121212] text-white;
+  }
+}
+
+body {
+  font-family: "Lexend", sans-serif;
+}
