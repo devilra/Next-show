@@ -27,8 +27,9 @@ const UPCOMING_MOVIES = [
 // ⭐ Custom Next Arrow (Highlighted Style)
 const NextArrow = ({ className, style, onClick }) => {
   return (
-    <div
-      className={`
+    <div className="hidden md:hidden lg:block">
+      <div
+        className={`
         ${className} !right-[-25px] !z-20 !w-12 !h-12 
         flex items-center justify-center 
         rounded-full 
@@ -38,10 +39,11 @@ const NextArrow = ({ className, style, onClick }) => {
         hover:from-[#ffffff40] hover:to-[#00000080]
         transition-all duration-300 cursor-pointer shadow-lg
       `}
-      style={{ ...style, display: "flex" }}
-      onClick={onClick}
-    >
-      <HiChevronRight className="text-white text-3xl drop-shadow-xl" />
+        style={{ ...style, display: "flex" }}
+        onClick={onClick}
+      >
+        <HiChevronRight className="text-white text-3xl drop-shadow-xl" />
+      </div>
     </div>
   );
 };
@@ -49,8 +51,9 @@ const NextArrow = ({ className, style, onClick }) => {
 // ⭐ Custom Previous Arrow (Highlighted Style)
 const PrevArrow = ({ className, style, onClick }) => {
   return (
-    <div
-      className={`
+    <div className="hidden md:hidden lg:block">
+      <div
+        className={`
         ${className} !left-[-25px] !z-20 !w-12 !h-12 
         flex items-center justify-center 
         rounded-full 
@@ -60,10 +63,11 @@ const PrevArrow = ({ className, style, onClick }) => {
         hover:from-[#ffffff40] hover:to-[#00000080]
         transition-all duration-300 cursor-pointer shadow-lg
       `}
-      style={{ ...style, display: "flex" }}
-      onClick={onClick}
-    >
-      <HiChevronLeft className="text-white text-3xl drop-shadow-xl" />
+        style={{ ...style, display: "flex" }}
+        onClick={onClick}
+      >
+        <HiChevronLeft className="text-white text-3xl drop-shadow-xl" />
+      </div>
     </div>
   );
 };
@@ -121,19 +125,32 @@ const UpcomingMoviesCarousel = () => {
   };
 
   return (
-    <div className="bg-[#0f0f0f] pt-10 px-8">
+    <div className="bg-[#0f0f0f] pt-10 px-0 md:px-8">
       {/* Title Row */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-white text-3xl font-bold">Upcoming Movies</h2>
+      <div className="flex justify-between items-center px-3 md:px-0 mb-6">
+        <h2 className="text-white text-xl md:text-3xl font-bold">
+          Upcoming Movies
+        </h2>
 
         <span className="text-gray-400 flex items-center gap-2 hover:text-white cursor-pointer">
           View All <FaAngleRight />
         </span>
       </div>
 
-      {/* Slider */}
-      <div className="slider-container relative">
+      {/* lg,md Slider */}
+      <div className="slider-container hidden md:block relative">
         <Slider {...settings}>
+          {UPCOMING_MOVIES.map((movie) => (
+            <div key={movie.id}>
+              <MovieCard movie={movie} />
+            </div>
+          ))}
+        </Slider>
+      </div>
+
+      {/* mobile view Slider */}
+      <div className="slider-container md:hidden relative">
+        <Slider {...settings} slidesToShow={1}>
           {UPCOMING_MOVIES.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />

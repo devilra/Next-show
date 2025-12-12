@@ -22,3 +22,24 @@ body {
 .slick-next:before {
   display: none !important;
 }
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background: #19191a;
+  border-radius: 10px;
+}
+
+/* Scrollbar thumb (scroll handle) */
+::-webkit-scrollbar-thumb {
+  background: #f98603;
+}
+
+/* Hover effect */
+::-webkit-scrollbar-thumb:hover {
+  background: #d37305;
+}
