@@ -10,7 +10,7 @@ const Home = () => {
       <VideoDetailScreen />
       <UpcomingMoviesCarousel />
       <NewReleaseMoviesCarousel />
-      <MovieReviewsSection />
+     {/* <MovieReviewsSection /> */}
     </div>
   );
 };
