@@ -1,6 +1,6 @@
 import React from "react";
 
-const MovieReviewCard = ({ review }) => {
+const TrailerReviewCard = ({ review }) => {
   return (
     <div className="bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] rounded-xl overflow-hidden flex items-center p-2 gap-3 border border-dashed border-gray-800 hover:border-orange-400/60 transition-all duration-300 group group cursor-pointer w-full shadow-sm">
       {/* 1. Small Square Movie Image */}
@@ -55,4 +55,4 @@ const MovieReviewCard = ({ review }) => {
   );
 };
 
-export default MovieReviewCard;
+export default TrailerReviewCard;

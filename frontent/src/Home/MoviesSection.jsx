@@ -1,8 +1,6 @@
-// src/sections/MovieReviewsSection.js
-import React, { useState, useMemo } from "react";
-import MoviesReviewCard from "./MoviesReviewCard";
+import React from "react";
+import MovieReviewCard from "./MoviesReviewCard";
 
-// Data
 export const MOVIE_REVIEWS_DATA = [
   {
     id: 1,
@@ -204,98 +202,122 @@ export const MOVIE_REVIEWS_DATA = [
   },
 ];
 
-// 1. Updated Tab Names
-const REVIEW_TABS = [
-  { id: "UPCOMMING", label: "Upcoming" },
-  { id: "NEW", label: "New Releases" },
-  { id: "TRENDING", label: "Trending Now" },
-];
-
-const INITIAL_REVIEWS_COUNT = 9;
-const REVIEWS_PER_LOAD = 6;
-
-const MoviesSection = () => {
-  const [activeTab, setActiveTab] = useState("UPCOMMING");
-  const [reviewsToShow, setReviewsToShow] = useState(INITIAL_REVIEWS_COUNT);
-
-  const handleTabChange = (tabId) => {
-    setActiveTab(tabId);
-    setReviewsToShow(INITIAL_REVIEWS_COUNT);
-  };
-
-  // UPDATED: Simple and strict filtering based on streamType
-  const filteredReviews = useMemo(() => {
-    return MOVIE_REVIEWS_DATA.filter(
-      (review) => review.streamType === activeTab
-    );
-  }, [activeTab]);
-
-  const handleLoadMore = () => {
-    setReviewsToShow((prevCount) => prevCount + REVIEWS_PER_LOAD);
-  };
-
-  const allReviewsLoaded = filteredReviews.length <= reviewsToShow;
-
-  const getTabClasses = (tabId) =>
-    `py-2 px-6 text-[13px] md:text-md lg:text-lg font-semibold transition-all duration-300 
-     ${
-       activeTab === tabId
-         ? "bg-red-600 text-white rounded-t-lg shadow-lg"
-         : "text-gray-400 hover:text-white hover:bg-[#252525]"
-     }`;
+const MovieSection = () => {
+  const upcomingMovies = MOVIE_REVIEWS_DATA.filter(
+    (m) => m.streamType === "UPCOMMING"
+  );
+  const newReleases = MOVIE_REVIEWS_DATA.filter((m) => m.streamType === "NEW");
+  const trendingNow = MOVIE_REVIEWS_DATA.filter(
+    (m) => m.streamType === "TRENDING"
+  );
 
   return (
-    <div className="bg-[#0f0f0f] pt-10 px-8">
-      <h2 className="text-white text-xl md:text-3xl font-bold mb-6">Movies</h2>
+    <div className="bg-[#0f0f0f] py-10 px-4 md:px-8 border-t border-gray-800">
+      <h2 className="text-white text-xl md:text-2xl font-black mb-6 uppercase tracking-wider">
+        Movies
+      </h2>
 
-      {/* TAB NAVIGATION */}
-      <div className="flex border-b border-gray-700 mb-8">
-        {REVIEW_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={getTabClasses(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* REVIEW GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[600px] overflow-y-scroll pr-4 custom-scroll">
-        {filteredReviews.length > 0 ? (
-          filteredReviews
-            .slice(0, reviewsToShow)
-            .map((review) => (
-              <MoviesReviewCard key={review.id} review={review} />
-            ))
-        ) : (
-          <p className="text-gray-500 col-span-2 py-10 text-center text-xl italic">
-            No {activeTab.toLowerCase()} movies available right now.
-          </p>
-        )}
-      </div>
-
-      {/* VIEW MORE BUTTON */}
-      {filteredReviews.length > INITIAL_REVIEWS_COUNT && !allReviewsLoaded && (
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={handleLoadMore}
-            className="py-3 px-8 bg-gray-700 text-white font-semibold rounded-lg hover:bg-red-600 transition duration-300"
-          >
-            View More {activeTab} ({filteredReviews.length - reviewsToShow}{" "}
-            remaining)
-          </button>
+      {/* Main Container - 3 Vertical Columns Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border border-yellow-500/20 p-5 rounded-xl bg-[#0a0a0a]">
+        {/* Column 1: UPCOMING (With Scroll) */}
+        <div className="flex flex-col">
+          <h3 className="text-white font-bold mb-4 uppercase rounded-sm text-xs tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+            Upcoming
+          </h3>
+          <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+            {upcomingMovies.map((movie) => (
+              <div
+                key={movie.id}
+                className="relative group rounded-xl overflow-hidden border border-gray-800 bg-[#1a1a1a]"
+              >
+                {/* Bigger Image Container */}
+                <div className="h-72 w-full overflow-hidden">
+                  <img
+                    src={movie.img}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    alt={movie.movie}
+                  />
+                  <div className="absolute top-2 left-2 bg-gradient-to-r from-[#e3af05] via-[#e6cb35] to-[#727402] text-black text-[10px] font-bold px-2 py-0.5 rounded">
+                    JAN 1, 2026
+                  </div>
+                </div>
+                {/* Details below image */}
+                <div className="p-4 bg-gradient-to-b from-[#1a1a1a] to-black">
+                  <h4 className="text-white text-lg font-black mb-2 uppercase">
+                    {movie.movie}
+                  </h4>
+                  <div className="text-[11px] space-y-1">
+                    <p className="text-gray-400">
+                      <span className="text-gray-500 font-bold">Director:</span>{" "}
+                      {movie.director}
+                    </p>
+                    <p className="text-gray-400 truncate">
+                      <span className="text-gray-500 font-bold">Cast:</span>{" "}
+                      {movie.cast}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
 
-      {allReviewsLoaded && filteredReviews.length > INITIAL_REVIEWS_COUNT && (
-        <p className="text-center text-green-400 mt-10 font-medium pb-10">
-          You have viewed all {activeTab} content.
-        </p>
-      )}
+        {/* Column 2: NEW RELEASES (With Scroll) */}
+        <div className="flex flex-col">
+          <h3 className="text-white font-bold mb-4 rounded-sm uppercase text-xs tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+            New Releases
+          </h3>
+          <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+            {newReleases.length > 0 ? (
+              newReleases.map((movie) => (
+                <MovieReviewCard key={movie.id} review={movie} />
+              ))
+            ) : (
+              <p className="text-gray-600 italic text-sm">
+                No new releases found.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Column 3: TRENDING NOW (With Scroll) */}
+        <div className="flex flex-col">
+          <h3 className="text-white font-bold mb-4 rounded-sm uppercase text-xs tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+            Trending Now
+          </h3>
+          <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+            {trendingNow.length > 0 ? (
+              trendingNow.map((movie) => (
+                <MovieReviewCard key={movie.id} review={movie} />
+              ))
+            ) : (
+              <p className="text-gray-600 italic text-sm">
+                Nothing trending right now.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Optional Custom Scrollbar Styling (Add to your global CSS or index.css) */}
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #1a1a1a;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #333;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #a084ff;
+        }
+      `}</style>
     </div>
   );
 };
 
-export default MoviesSection;
+export default MovieSection;

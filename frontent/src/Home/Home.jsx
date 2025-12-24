@@ -5,6 +5,7 @@ import NewReleaseMoviesCarousel from "../NewMovies/NewReleaseMoviesCarousel";
 import YoutubeVideoReviews from "./YoutubeVideoreviews";
 import MovieStreamingSection from "./MovieStreamingSection";
 import MoviesSection from "./MoviesSection";
+import TrailerSection from "./TrailerSection";
 
 const Home = () => {
   return (
@@ -14,6 +15,7 @@ const Home = () => {
       <NewReleaseMoviesCarousel /> */}
       <MovieStreamingSection />
       <MoviesSection />
+      <TrailerSection />
       {/* <YoutubeVideoReviews /> */}
     </div>
   );

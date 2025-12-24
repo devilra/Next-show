@@ -1,5 +1,6 @@
 import React from "react";
 import StreamingReviewCard from "./StreamingReviewCard";
+import TrailerReviewCard from "./TrailerReviewCard";
 
 export const MOVIE_REVIEWS_DATA = [
   {
@@ -202,7 +203,7 @@ export const MOVIE_REVIEWS_DATA = [
   },
 ];
 
-const MovieStreamingSection = () => {
+const TrailerSection = () => {
   const upcomingMovies = MOVIE_REVIEWS_DATA.filter(
     (m) => m.streamType === "UPCOMMING"
   );
@@ -214,14 +215,14 @@ const MovieStreamingSection = () => {
   return (
     <div className="bg-[#0f0f0f] py-10 px-4 md:px-8 border-t border-gray-800">
       <h2 className="text-white text-xl md:text-2xl font-black mb-6 uppercase tracking-wider">
-        Streaming Now
+        Trailers
       </h2>
 
       {/* Main Container - 3 Vertical Columns Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border border-yellow-500/20 p-5 rounded-xl bg-[#0a0a0a]">
         {/* Column 1: UPCOMING (With Scroll) */}
         <div className="flex flex-col">
-          <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+          <h3 className="text-white font-bold mb-4 uppercase text-xs tracking-[0.2em] rounded-sm border-l-4 border-orange-400 pl-3">
             Upcoming
           </h3>
           <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
@@ -264,13 +265,13 @@ const MovieStreamingSection = () => {
 
         {/* Column 2: NEW RELEASES (With Scroll) */}
         <div className="flex flex-col">
-          <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+          <h3 className="text-white font-bold mb-4 uppercase text-xs tracking-[0.2em] rounded-sm border-l-4 border-orange-400 pl-3">
             New Releases
           </h3>
           <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
             {newReleases.length > 0 ? (
               newReleases.map((movie) => (
-                <StreamingReviewCard key={movie.id} review={movie} />
+                <TrailerReviewCard key={movie.id} review={movie} />
               ))
             ) : (
               <p className="text-gray-600 italic text-sm">
@@ -282,13 +283,13 @@ const MovieStreamingSection = () => {
 
         {/* Column 3: TRENDING NOW (With Scroll) */}
         <div className="flex flex-col">
-          <h3 className="text-white font-bold mb-4 uppercase rounded-sm text-xs tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+          <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
             Trending Now
           </h3>
           <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
             {trendingNow.length > 0 ? (
               trendingNow.map((movie) => (
-                <StreamingReviewCard key={movie.id} review={movie} />
+                <TrailerReviewCard key={movie.id} review={movie} />
               ))
             ) : (
               <p className="text-gray-600 italic text-sm">
@@ -320,4 +321,4 @@ const MovieStreamingSection = () => {
   );
 };
 
-export default MovieStreamingSection;
+export default TrailerSection;
