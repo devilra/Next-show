@@ -69,3 +69,12 @@ body {
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: #d37305; /* Hover pannum pothu konjam light gray */
 }
+
+.slick-left-align .slick-track {
+  margin-left: 0 !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+}
+.slick-left-align .slick-slide {
+  height: inherit !important;
+}
