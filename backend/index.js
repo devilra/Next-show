@@ -10,6 +10,7 @@ const StreamingVideoRoutes = require("./routes/StreamingNow/StreamVideoRoutes");
 const HomeStreamRoutes = require("./routes/HomePageRoutes/HomeStreamRoute");
 const HomeMoviesRoutes = require("./routes/HomePageRoutes/HomeMovieRoute");
 const HomeTrailersRoutes = require("./routes/HomePageRoutes/HomeTrailersRoute");
+const CentralizedMovieRoutes = require("./routes/CentralizedMovieRoute/CentralizedmovieRoute");
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use("/api/home", HomeStreamRoutes);
 app.use("/api/stream", StreamingVideoRoutes);
 app.use("/api/home", HomeMoviesRoutes);
 app.use("/api/home", HomeTrailersRoutes);
+app.use("/api/centralized", CentralizedMovieRoutes);
 
 // Simple root route for testing
 app.get("/", (req, res) => {

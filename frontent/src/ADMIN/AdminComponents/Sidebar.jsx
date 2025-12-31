@@ -130,6 +130,22 @@ const Sidebar = () => {
               StreamingNow
             </NavLink>
           </li>
+          <li>
+            <NavLink
+              to="centralized"
+              className={({ isActive }) =>
+                `flex items-center p-3 rounded-lg transition truncate duration-200 
+               ${
+                 isActive
+                   ? "bg-orange-400 text-white shadow-lg"
+                   : "text-gray-300 hover:bg-gray-700 hover:text-white"
+               }`
+              }
+            >
+              <HiNewspaper className="mr-3" />
+              Centralized Create Movie
+            </NavLink>
+          </li>
           {/* <li>
             <NavLink
               to="serviceContent"

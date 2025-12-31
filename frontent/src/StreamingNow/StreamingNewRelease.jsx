@@ -77,7 +77,7 @@ const MovieCard = ({ movie }) => (
 );
 
 // ⭐ MAIN COMPONENT
-const NewReleaseMoviesCarousel = ({ newReleases }) => {
+const StreamingNewRelease = ({ newReleases }) => {
   const settings = {
     className: "center",
     centerMode: true,
@@ -137,4 +137,4 @@ const NewReleaseMoviesCarousel = ({ newReleases }) => {
   );
 };
 
-export default NewReleaseMoviesCarousel;
+export default StreamingNewRelease;

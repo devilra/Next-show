@@ -14,6 +14,9 @@ import "nprogress/nprogress.css"; // Import CSS
 import Login from "./ADMIN/Login";
 import AdminProtect from "./ADMIN/AdminComponents/AdminProtect";
 import StreamingContent from "./ADMIN/Dashboard/StreamingNow/StreamingContent";
+import CentralizedContent from "./ADMIN/Dashboard/CentralizedContent/CentralizedContent";
+import News from "./News/News";
+import About from "./About/About";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -47,7 +50,10 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/new" element={<NewMovies />} />
         <Route path="/stream" element={<StreamingNow />} />
+
         <Route path="/trailer" element={<Trailer />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/about" element={<About />} />
         <Route path="/auth/login" element={<Login />} />
 
         {/* Admin Dashboard */}
@@ -56,6 +62,7 @@ const App = () => {
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<DashboardHome />} />
             <Route path="stream" element={<StreamingContent />} />
+            <Route path="centralized" element={<CentralizedContent />} />
           </Route>
         </Route>
       </Routes>

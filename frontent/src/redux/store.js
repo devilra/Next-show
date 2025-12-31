@@ -6,6 +6,7 @@ import StreaminVideoSection from "../redux/StreamingNowSlice/StreamVideo";
 import HomeStreamSection from "../redux/HomeContentSlice/HomeStreamSlice";
 import HomeMovieSection from "../redux/HomeContentSlice/HomeMovieSlice";
 import HomeTrailerSection from "../redux/HomeContentSlice/HomeTrailerSlice";
+import CentralizedMovieCreate from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     homeStreaming: HomeStreamSection,
     homeMovies: HomeMovieSection,
     homeTrailers: HomeTrailerSection,
+    centralizedMovies: CentralizedMovieCreate,
   },
 });
