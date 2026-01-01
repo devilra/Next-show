@@ -16,7 +16,7 @@ import StreamingContent from "./ADMIN/Dashboard/StreamingNow/StreamingContent";
 import CentralizedContent from "./ADMIN/Dashboard/CentralizedContent/CentralizedContent";
 import News from "./News/News";
 import About from "./About/About";
-import ScrollToTop from "./Components/ScrolltoTop";
+import ScrollToTop from "./Components/ScrollTop";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
