@@ -13,10 +13,40 @@ const parseBool = (value) => value === "true" || value === true;
  * ==========================================
  */
 
+// Oru common helper function to parse movie data
+const parseMovieFields = (movie) => {
+  const data = movie.get({ plain: true }); // Sequelize object-ah plain JSON-ah mathuthu
+
+  try {
+    // Data string-ah iruntha mattum parse pannu, illana empty array kudu
+    data.language = data.language
+      ? typeof data.language === "string"
+        ? JSON.parse(data.language)
+        : data.language
+      : [];
+    data.genres = data.genres
+      ? typeof data.genres === "string"
+        ? JSON.parse(data.genres)
+        : data.genres
+      : [];
+
+    // Oru vela parse pannathuku apparamum munnadi mari double-string-ah iruntha (re-parsing)
+    if (typeof data.language === "string")
+      data.language = JSON.parse(data.language);
+    if (typeof data.genres === "string") data.genres = JSON.parse(data.genres);
+  } catch (e) {
+    console.log("Parse Error for movie:", data.title, e);
+    data.language = [];
+    data.genres = [];
+  }
+
+  return data;
+};
+
 // @desc    Get New Movies Page (Upcoming & Released)
 exports.getNewMoviesPageData = async (req, res) => {
   try {
-    const [upcoming, newReleases] = await Promise.all([
+    const [upcomingRaw, newReleasesRaw] = await Promise.all([
       CentralizedMovieCreate.findAll({
         where: {
           showInNewMovies: true,
@@ -34,6 +64,9 @@ exports.getNewMoviesPageData = async (req, res) => {
         order: [["order", "ASC"]],
       }),
     ]);
+
+    const upcoming = upcomingRaw.map(parseMovieFields);
+    const newReleases = newReleasesRaw.map(parseMovieFields);
 
     // Check if both lists are empty
     if (upcoming.length === 0 && newReleases.length === 0) {
@@ -56,7 +89,7 @@ exports.getNewMoviesPageData = async (req, res) => {
 
 exports.getStreamingNowPageData = async (req, res) => {
   try {
-    const [upcoming, newReleases] = await Promise.all([
+    const [upcomingRaw, newReleasesRaw] = await Promise.all([
       CentralizedMovieCreate.findAll({
         where: {
           showInStreamingNow: true,
@@ -74,6 +107,10 @@ exports.getStreamingNowPageData = async (req, res) => {
         order: [["order", "ASC"]],
       }),
     ]);
+
+    // Parse language and genres here
+    const upcoming = upcomingRaw.map(parseMovieFields);
+    const newReleases = newReleasesRaw.map(parseMovieFields);
 
     // Check if both lists are empty
     if (upcoming.length === 0 && newReleases.length === 0) {

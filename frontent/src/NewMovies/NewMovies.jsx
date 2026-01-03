@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { unwrapResult } from "@reduxjs/toolkit";
 import Nprogress from "nprogress";
 import { fetchNewMoviesPage } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
+import LoadingComponents from "../Components/LoadingComponents";
 
 const NewMovies = () => {
   const dispatch = useDispatch();
@@ -56,12 +57,7 @@ const NewMovies = () => {
 
   // Loading Screen
   if (isPageLoading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[75vh] bg-white">
-        <FaSpinner className="animate-spin text-indigo-600 text-5xl mb-4" />
-        <p className="text-gray-500 font-medium">Loading New Movies...</p>
-      </div>
-    );
+    return <LoadingComponents />;
   }
 
   // Error handle (Optional)

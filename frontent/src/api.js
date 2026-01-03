@@ -6,4 +6,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // 401 vanthaal local storage mattum clear pannunga.
+    // Redirect-ai inge thavirkkavum, ithu thaan loop-ku kaaranam.
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("nextShow_admin");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

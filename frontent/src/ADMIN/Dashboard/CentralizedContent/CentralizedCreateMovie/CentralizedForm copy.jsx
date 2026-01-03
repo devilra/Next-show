@@ -10,7 +10,6 @@ import {
   fetchAllMoviesAdmin,
   updateMovie,
 } from "../../../../redux/CentralizedMovieSlice/CentralizedMovieSlice";
-import { Autocomplete, Chip, TextField } from "@mui/material";
 
 const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
   const dispatch = useDispatch();
@@ -27,7 +26,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     releaseDate: dayjs().format("DD-MM-YYYY"),
     certification: "U/A 18+",
     durationOrSeason: "", // Added
-    language: ["Tamil"], // Added
+    language: "Tamil", // Added
     imdbRating: 0,
     userRating: 0, // Added
     ratingCount: 0, // Added
@@ -50,8 +49,6 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     isActive: true, // Added
   };
 
-  console.log(initialFormState);
-
   const [formData, setFormData] = useState(initialFormState);
   const [bannerFile, setBannerFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -68,50 +65,14 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     "Romance",
   ];
 
-  const LANGUAGE_OPTIONS = [
-    "Tamil",
-    "Telugu",
-    "Hindi",
-    "Malayalam",
-    "Kannada",
-    "English",
-    "Korean",
-    "Japanese",
-    "Bengali",
-    "Marathi",
-  ];
   useEffect(() => {
     if (contentData && isOpen) {
-      const parseArrayData = (data) => {
-        if (!data) return [];
-
-        // Ippo varra data already Array-ah iruntha direct-ah edukka koodathu,
-        // ஏன்னா array-kulla oru string-ah double-stringify panni irukkalam.
-        let result = data;
-
-        // Intha loop string-ah irukkara varaikkum thirumba thirumba parse pannum
-        // (Double-stringified data-vai handle panna ithu best way)
-        while (typeof result === "string") {
-          try {
-            const parsed = JSON.parse(result);
-            // Oru vela parse pannathukku apparam result same-ah iruntha loop-ah break panniru
-            if (parsed === result) break;
-            result = parsed;
-          } catch (e) {
-            // Normal string-ah iruntha ("Tamil") loop-ah break panni array-va mathu
-            break;
-          }
-        }
-
-        // Final-ah array-ah illana array-kulla pottu anupu
-        return Array.isArray(result) ? result : [result];
-      };
-
       setFormData({
         ...initialFormState,
         ...contentData,
-        genres: parseArrayData(contentData.genres),
-        language: parseArrayData(contentData.language),
+        genres: Array.isArray(contentData.genres)
+          ? contentData.genres
+          : [contentData.genres],
       });
       setPreview(contentData.bannerImage);
     } else {
@@ -121,9 +82,9 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     }
   }, [contentData, isOpen]);
 
-  const handleDateChange = (field, newValue) => {
+  const handleDateChange = (newValue) => {
     if (newValue)
-      setFormData({ ...formData, [field]: newValue.format("DD-MM-YYYY") });
+      setFormData({ ...formData, releaseDate: newValue.format("DD-MM-YYYY") });
   };
 
   const handleFileChange = (e) => {
@@ -137,13 +98,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (key === "genres" || key === "language") {
-        data.append(key, JSON.stringify(formData[key]));
-      } else {
-        data.append(key, formData[key]);
-      }
-    });
+    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
     if (bannerFile) data.append("bannerImage", bannerFile);
 
     if (!isEdit && !bannerFile) return alert("Banner image is required!");
@@ -317,7 +272,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
 
           {/* Section 3: Technical Details */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* <div>
+            <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Language
               </label>
@@ -329,7 +284,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 }
                 className="w-full border-b p-2"
               />
-            </div> */}
+            </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Duration / Season
@@ -344,7 +299,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 className="w-full border-b p-2"
               />
             </div>
-            {/* <div>
+            <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Genres
               </label>
@@ -356,8 +311,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 }
                 className="w-full border-b p-2"
               />
-            </div> */}
-
+            </div>
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 Release Date
@@ -369,156 +323,13 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                       ? dayjs(formData.releaseDate, "DD-MM-YYYY")
                       : null
                   }
-                  onChange={(val) => handleDateChange("releaseDate", val)}
+                  onChange={handleDateChange}
                   format="DD-MM-YYYY"
                   slotProps={{
                     textField: { variant: "standard", fullWidth: true },
                   }}
                 />
               </LocalizationProvider>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                Theatres Release Date
-              </label>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={
-                    formData.theatreReleaseDate
-                      ? dayjs(formData.theatreReleaseDate, "DD-MM-YYYY")
-                      : null
-                  }
-                  onChange={(val) =>
-                    handleDateChange("theatreReleaseDate", val)
-                  }
-                  format="DD-MM-YYYY"
-                  slotProps={{
-                    textField: { variant: "standard", fullWidth: true },
-                  }}
-                />
-              </LocalizationProvider>
-            </div>
-            <div className="">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                OTT Release Date
-              </label>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={
-                    formData.ottReleaseDate
-                      ? dayjs(formData.ottReleaseDate, "DD-MM-YYYY")
-                      : null
-                  }
-                  onChange={(val) => handleDateChange("ottReleaseDate", val)}
-                  format="DD-MM-YYYY"
-                  slotProps={{
-                    textField: { variant: "standard", fullWidth: true },
-                  }}
-                />
-              </LocalizationProvider>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1 ">
-              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                Genres (Select Multiple)
-              </label>
-              <Autocomplete
-                multiple
-                options={GENRE_OPTIONS}
-                value={formData.genres}
-                onChange={(event, newValue) => {
-                  setFormData({ ...formData, genres: newValue });
-                }}
-                // Intha renderValue-ah replace pannunga
-                renderValue={(value, getTagProps) => {
-                  // Safe check: value array-ah illana array-ah maathuvom
-                  const valuesArray = Array.isArray(value)
-                    ? value
-                    : value
-                    ? [value]
-                    : [];
-
-                  return valuesArray.map((option, index) => {
-                    const { key, ...tagProps } = getTagProps({ index });
-                    return (
-                      <Chip
-                        key={key}
-                        label={option}
-                        {...tagProps}
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                      />
-                    );
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    placeholder="Add Genres"
-                    sx={{
-                      backgroundColor: "#f9fafb",
-                      borderRadius: "12px",
-                      "& fieldset": {
-                        border: "none",
-                        ring: "1px solid #e5e7eb",
-                      },
-                    }}
-                  />
-                )}
-              />
-            </div>
-            <div className="space-y-1 ">
-              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
-                language
-              </label>
-              <Autocomplete
-                multiple
-                options={LANGUAGE_OPTIONS}
-                value={formData.language}
-                onChange={(event, newValue) => {
-                  setFormData({ ...formData, language: newValue });
-                }}
-                renderValue={(value, getTagProps) => {
-                  const valuesArray = Array.isArray(value)
-                    ? value
-                    : value
-                    ? [value]
-                    : [];
-
-                  return valuesArray.map((option, index) => {
-                    const { key, ...tagProps } = getTagProps({ index });
-                    return (
-                      <Chip
-                        key={key}
-                        label={option}
-                        {...tagProps}
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                      />
-                    );
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="outlined"
-                    placeholder="Add Genres"
-                    sx={{
-                      backgroundColor: "#f9fafb",
-                      borderRadius: "12px",
-                      "& fieldset": {
-                        border: "none",
-                        ring: "1px solid #e5e7eb",
-                      },
-                    }}
-                  />
-                )}
-              />
             </div>
           </div>
 

@@ -59,6 +59,19 @@ const CentralizedMovieCreate = sequelize.define(
       allowNull: true,
       defaultValue: "TBA",
     },
+    // 📅 Theater Release Date
+    theatreReleaseDate: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      defaultValue: "TBA",
+    },
+
+    // 📅 OTT Release Date
+    ottReleaseDate: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      defaultValue: "TBA",
+    },
     // 🔞 Censor Certificate (U, U/A, A)
     certification: {
       type: DataTypes.STRING(20),
@@ -73,7 +86,7 @@ const CentralizedMovieCreate = sequelize.define(
     },
     // 🌐 Primary Language
     language: {
-      type: DataTypes.STRING(50),
+      type: DataTypes.JSON,
       allowNull: true,
       defaultValue: "Tamil", // Unga primary language-ai default-ah vachukalam
     },
@@ -150,9 +163,9 @@ const CentralizedMovieCreate = sequelize.define(
     },
     // 🎭 Genre
     genres: {
-      type: DataTypes.STRING,
+      type: DataTypes.JSON,
       allowNull: true,
-      defaultValue: "Drama", // Common genre
+      defaultValue: ["Drama"], // Common genre
     },
     // 📝 Long Description
     longDescription: {

@@ -14,19 +14,30 @@ import Login from "./ADMIN/Login";
 import AdminProtect from "./ADMIN/AdminComponents/AdminProtect";
 import StreamingContent from "./ADMIN/Dashboard/StreamingNow/StreamingContent";
 import CentralizedContent from "./ADMIN/Dashboard/CentralizedContent/CentralizedContent";
-import News from "./News/News";
 import About from "./About/About";
+import News from "./News/News";
 import ScrollToTop from "./Components/ScrollTop";
+import { useDispatch } from "react-redux";
+import { getMeAdmin } from "./redux/AdminAuthSlice/AdminAuthSlice";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
 
 const App = () => {
   const location = useLocation();
+  const dispatch = useDispatch();
 
   NProgress.configure({
     showSpinner: false,
   });
+
+  useEffect(() => {
+    const localAdmin = localStorage.getItem("nextShow_admin");
+    // Path "/auth/login" aaga illai endral mattum session check seiyavum
+    if (localAdmin && !location.pathname.startsWith("/auth/login")) {
+      dispatch(getMeAdmin());
+    }
+  }, [dispatch]); // location.pathname dependency-il irukkum pothu careful-aga handle seiyavum
 
   useEffect(() => {
     NProgress.start();

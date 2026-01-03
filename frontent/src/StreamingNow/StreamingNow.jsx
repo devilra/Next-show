@@ -8,6 +8,7 @@ import Nprogress from "nprogress";
 import { fetchActiveStreaming } from "../redux/StreamingNowSlice/StreamVideo";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { fetchStreamingNowPage } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
+import LoadingComponents from "../Components/LoadingComponents";
 
 const StreamingNow = () => {
   const dispatch = useDispatch();
@@ -16,7 +17,7 @@ const StreamingNow = () => {
   const { activeItems } = useSelector((state) => state.streamingNow);
   const { streamingData } = useSelector((state) => state.centralizedMovies);
 
-  console.log(streamingData);
+  //console.log(streamingData);
 
   const hasData =
     activeItems.length > 0 ||
@@ -49,14 +50,7 @@ const StreamingNow = () => {
 
   // Loading Screen
   if (isPageLoading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[45vh] md:h-[75vh] bg-gray-50">
-        <FaSpinner className="animate-spin text-[#2A3855] text-5xl mb-4" />
-        {/* <p className="text-[#2A3855] font-medium animate-pulse">
-              Loading amazing content...
-            </p> */}
-      </div>
-    );
+    return <LoadingComponents />;
   }
 
   return (

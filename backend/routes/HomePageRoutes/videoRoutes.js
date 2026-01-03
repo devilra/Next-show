@@ -16,7 +16,7 @@ const router = express.Router();
 router.get("/video-all", AdminAuthProtect, getAllVideos);
 
 //  UI-க்காக Active வீடியோக்களை மட்டும் பெறுதல் (Public Route)
-router.get("/video-active", AdminAuthProtect, getActiveVideos);
+router.get("/video-active", getActiveVideos);
 
 // 2. புதிய வீடியோ பேனரை உருவாக்குதல் (Create)
 // bannerImage மற்றும் videoUrl ஆகிய இரண்டு fields-ஐயும் multer கவனிக்கும்

@@ -17,6 +17,7 @@ import { fetchActiveBlogs } from "../redux/HomeContentSlice/blogSlice";
 import { fetchActiveHomeStream } from "../redux/HomeContentSlice/HomeStreamSlice";
 import { fetchActiveHomeMovies } from "../redux/HomeContentSlice/HomeMovieSlice";
 import { fetchActiveHomeTrailers } from "../redux/HomeContentSlice/HomeTrailerSlice";
+import LoadingComponents from "../Components/LoadingComponents";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ const Home = () => {
   const { activeHomeMovies } = useSelector((state) => state.homeMovies);
   const { activeHomeTrailers } = useSelector((state) => state.homeTrailers);
 
-  console.log(activeItems);
+  console.log(activeVideos, activeBlogs);
 
   const hasData = activeVideos.length > 0 && activeBlogs.length > 0;
 
@@ -62,15 +63,19 @@ const Home = () => {
   }, [dispatch]);
 
   // Loading Screen
+  // if (isPageLoading) {
+  //   return (
+  //     <div className="flex flex-col justify-center items-center h-[45vh] md:h-[75vh] bg-gray-50">
+  //       <FaSpinner className="animate-spin text-[#2A3855] text-5xl mb-4" />
+  //       {/* <p className="text-[#2A3855] font-medium animate-pulse">
+  //         Loading amazing content...
+  //       </p> */}
+  //     </div>
+  //   );
+  // }
+
   if (isPageLoading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-[45vh] md:h-[75vh] bg-gray-50">
-        <FaSpinner className="animate-spin text-[#2A3855] text-5xl mb-4" />
-        {/* <p className="text-[#2A3855] font-medium animate-pulse">
-          Loading amazing content...
-        </p> */}
-      </div>
-    );
+    return <LoadingComponents />;
   }
 
   return (
@@ -84,6 +89,7 @@ const Home = () => {
       <MovieStreamingSection activeItems={activeItems} />
       <MoviesSection activeHomeMovies={activeHomeMovies} />
       <TrailerSection activeHomeTrailers={activeHomeTrailers} />
+
       {/* <YoutubeVideoReviews /> */}
     </div>
   );

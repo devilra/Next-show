@@ -9,24 +9,31 @@ const AdminProtect = ({ children }) => {
 
   // Local Storage-இல் admin data இருக்கிறதா என சரிபார்க்கவும்
 
-  const localAdmin = localStorage.getItem("nextShow_admin");
+  // const localAdmin = localStorage.getItem("nextShow_admin");
 
   // ----------------------------------------------------
   // 1. Initial Loading State (Session Check நடக்கும்போது)
   // ----------------------------------------------------
-
   if (isLoading) {
-    // isLoading இருக்கும் போது ஒரு Loading Screen-ஐக் காட்டலாம்.
-    // இது வேகமான UX-க்காக Local Storage-இல் Admin இருக்கும்போது தேவையில்லை,
-    // ஆனால் Server-ஐ சரிபார்க்கும் போது பிழை வராமல் இருக்க நல்லது
-    return <div>Verifying Admin Session...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+        <span className="ml-3 text-white">Verifying Session...</span>
+      </div>
+    );
   }
 
   // ----------------------------------------------------
   // 2. Authentication Check (Login ஆகவில்லை என்றால்)
   // ----------------------------------------------------
 
-  if (!admin && !localAdmin) {
+  // if (!admin && !localAdmin) {
+  //   // Login Page-க்கு திருப்பி அனுப்பவும் (Redirect)
+  //   // state: { from: location } கொடுப்பது, login செய்த பிறகு அதே page-க்கு திரும்ப உதவும்.
+  //   return <Navigate to="/auth/login" replace />;
+  // }
+
+  if (!admin) {
     // Login Page-க்கு திருப்பி அனுப்பவும் (Redirect)
     // state: { from: location } கொடுப்பது, login செய்த பிறகு அதே page-க்கு திரும்ப உதவும்.
     return <Navigate to="/auth/login" replace />;

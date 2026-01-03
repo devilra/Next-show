@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
 
 // Slick CSS imports
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { FaAngleRight } from "react-icons/fa";
 
 const videoPlaylist = [
   {
@@ -100,10 +102,10 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
     slidesToShow: 4,
     slidesToScroll: 1,
     arrows: false,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 600, settings: { slidesToShow: 2 } },
-    ],
+    // responsive: [
+    //   { breakpoint: 1024, settings: { slidesToShow: 3 } },
+    //   { breakpoint: 600, settings: { slidesToShow: 2 } },
+    // ],
   };
 
   // ஒருவேளை டேட்டா இன்னும் வரவில்லை என்றால்
@@ -218,10 +220,17 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
 
       {/* RIGHT SIDE: NEWS LIST */}
       <div className="w-full md:w-[30%] bg-[#0d1017] flex flex-col border-l mt-20 border-gray-800">
-        <div className="p-5 border-b border-gray-800">
+        <div className="p-5 border-b border-gray-800 flex justify-between items-center">
           <h3 className="text-gray-400 uppercase text-xs font-bold tracking-[0.2em]">
-            Blogs
+            News
           </h3>
+
+          <Link
+            to="/news"
+            className="text-gray-400 uppercase text-xs font-bold tracking-[0.2em] flex items-center gap-2 hover:text-white cursor-pointer"
+          >
+            View All <FaAngleRight />
+          </Link>
         </div>
 
         <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-8">
