@@ -75,11 +75,9 @@ const VideoSectionForm = ({ isOpen, onClose, videoData, setAlert }) => {
     if (!isEdit && !files.bannerImage)
       return alert("Banner image is required!");
 
-    // const action = isEdit
-    //   ? updateVideoSection({ id: videoData.id, formData: data })
-    //   : createVideoSection(data);
-
-    const action = null;
+    const action = isEdit
+      ? updateVideoSection({ id: videoData.id, formData: data })
+      : createVideoSection(data);
 
     dispatch(action)
       .unwrap()
