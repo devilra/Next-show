@@ -44,12 +44,16 @@ const HomeStreamingForm = ({ isOpen, onClose, contentData, setAlert }) => {
 
   useEffect(() => {
     if (contentData && isOpen) {
+      const formattedDateForPicker = contentData.releaseDate
+        ? dayjs(contentData.releaseDate, "DD MMM YYYY").format("DD-MM-YYYY")
+        : "";
+
       setFormData({
         title: contentData.title || "",
         streamType: contentData.streamType || "NEW", // Edit mode-ல் streamType செட் செய்தல்
         director: contentData.director || "",
         cast: contentData.cast || "",
-        releaseDate: contentData.releaseDate || "",
+        releaseDate: formattedDateForPicker,
         certification: contentData.certification || "",
         durationOrSeason: contentData.durationOrSeason || "",
         language: contentData.language || "",
@@ -101,7 +105,20 @@ const HomeStreamingForm = ({ isOpen, onClose, contentData, setAlert }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
-    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+
+    // DB-la store aaga vendiya format (10 JAN 2026)
+    // Dayjs use panni MMM uppercase-la vara .toUpperCase() use panrom
+    const dbDateFormat = dayjs(formData.releaseDate, "DD-MM-YYYY")
+      .format("DD MMM YYYY")
+      .toUpperCase();
+
+    Object.keys(formData).forEach((key) => {
+      if (key === "releaseDate") {
+        data.append(key, dbDateFormat); // Updated format here
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
     if (bannerFile) data.append("bannerImage", bannerFile);
 
     if (!isEdit && !bannerFile) return alert("Banner image is required!");

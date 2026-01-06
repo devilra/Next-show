@@ -118,7 +118,7 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
   // }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#0a0d14] text-white overflow-hidden mt-20 md:mt-0 ">
+    <div className="flex flex-col md:flex-row h-screen md:h-[450px] bg-[#0a0d14] text-white overflow-hidden mt-20 md:mt-0 ">
       {/* FULL VIDEO PLAYER OVERLAY */}
       {isWatchingFull && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
@@ -139,7 +139,7 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
       )}
 
       {/* LEFT SIDE: MAIN PLAYER & CAROUSEL */}
-      <div className="w-full md:w-[70%] flex flex-col relative border-r border-gray-800">
+      <div className="w-full md:w-[70%]  flex flex-col relative border-r border-gray-800">
         <div className="relative flex-1 bg-black group overflow-hidden">
           {/* Preview Video */}
           <video
@@ -194,7 +194,7 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
         </div>
 
         {/* BOTTOM: THUMBNAIL CAROUSEL */}
-        <div className="h-36 bg-[#0f121a] p-4 border-t border-gray-800">
+        {/* <div className="h-36 bg-[#0f121a] p-4 border-t border-gray-800">
           <Slider ref={sliderRef} {...settings}>
             {activeVideos.map((item, index) => (
               <div key={item.id} className="px-2 outline-none">
@@ -215,7 +215,7 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
               </div>
             ))}
           </Slider>
-        </div>
+        </div> */}
       </div>
 
       {/* RIGHT SIDE: NEWS LIST */}
