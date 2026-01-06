@@ -208,7 +208,7 @@ const MovieStreamingSection = ({ activeItems }) => {
   const trendingNow = activeItems.filter((m) => m.streamType === "TRENDING");
 
   return (
-    <div className="bg-[#0f0f0f] py-10 px-4 md:px-8 border-t border-gray-800">
+    <div className="bg-[#0f0f0f] pt-2 pb-5 px-4 md:px-8 border-t border-gray-800">
       <h2 className="text-white text-xl md:text-2xl font-black mb-6 uppercase tracking-wider">
         Streaming Now
       </h2>
