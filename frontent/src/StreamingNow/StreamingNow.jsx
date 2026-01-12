@@ -60,7 +60,7 @@ const StreamingNow = () => {
       <StreamingNewRelease newReleases={streamingData.newReleases} />
       <StreamingUpcommingMovies upcoming={streamingData.upcoming} />
 
-      {/* <StreamingTrailer upcoming={streamingData.upcoming} /> */}
+      <StreamingTrailer newReleases={streamingData.newReleases} />
     </div>
   );
 };

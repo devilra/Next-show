@@ -77,7 +77,7 @@ const NewMovies = () => {
       {/* <NewVideoSection /> */}
       <NewReleaseMoviesCarousel newReleases={newMoviesData.newReleases} />
       <UpcomingMoviesCarousel upcomingMovies={newMoviesData.upcoming} />
-      {/* <NewMoviesTrailerCarousel upcomingMovies={newMoviesData.upcoming} /> */}
+      <NewMoviesTrailerCarousel newReleases={newMoviesData.newReleases} />
     </div>
   );
 };

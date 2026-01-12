@@ -28,7 +28,7 @@ const LoadingComponents = () => {
         className="flex flex-col items-center"
       >
         <img
-          src="logo3.png"
+          src="/logo3.png"
           alt="Loading"
           className="w-28 md:w-36 drop-shadow-[0_0_25px_rgba(255,0,0,0.55)]"
         />

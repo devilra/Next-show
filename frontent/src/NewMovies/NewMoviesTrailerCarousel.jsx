@@ -96,7 +96,7 @@ const MovieCard = ({ movie }) => (
 );
 
 // 5. Main Carousel Component
-const NewMoviesTrailerCarousel = ({ upcomingMovies }) => {
+const NewMoviesTrailerCarousel = ({ newReleases }) => {
   const settings = {
     className: "center",
     centerMode: true,
@@ -142,7 +142,7 @@ const NewMoviesTrailerCarousel = ({ upcomingMovies }) => {
       {/* lg,md Slider */}
       <div className=" hidden md:block slick-left-align">
         <Slider {...settings}>
-          {upcomingMovies.map((movie) => (
+          {newReleases.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>
@@ -153,7 +153,7 @@ const NewMoviesTrailerCarousel = ({ upcomingMovies }) => {
       {/* mobile view Slider */}
       <div className="slick-left-align md:hidden relative">
         <Slider {...settings} slidesToShow={1}>
-          {upcomingMovies.map((movie) => (
+          {newReleases.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>
