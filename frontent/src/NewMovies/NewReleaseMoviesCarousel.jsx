@@ -104,9 +104,7 @@ const NewReleaseMoviesCarousel = ({ newReleases }) => {
     <div className="bg-[#0f0f0f] pt-10 px-0  md:px-8">
       {/* 🎬 Section Title */}
       <div className="flex justify-between items-center px-3 md:px-0 mb-6">
-        <h2 className="text-white text-xl md:text-3xl font-bold">
-          New Release Movies
-        </h2>
+        <h2 className="text-white text-xl md:text-3xl font-bold">New Movies</h2>
         <span className="text-gray-400 flex items-center gap-2 hover:text-white cursor-pointer">
           View All <FaAngleRight />
         </span>

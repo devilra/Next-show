@@ -19,6 +19,7 @@ import News from "./News/News";
 import ScrollToTop from "./Components/ScrollTop";
 import { useDispatch } from "react-redux";
 import { getMeAdmin } from "./redux/AdminAuthSlice/AdminAuthSlice";
+import MovieDetailsPage from "./MovieDetails/MovieDetailsPage";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -66,6 +67,7 @@ const App = () => {
         <Route path="/news" element={<News />} />
         <Route path="/about" element={<About />} />
         <Route path="/auth/login" element={<Login />} />
+        <Route path="/movie/:id" element={<MovieDetailsPage />} />
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminProtect />}>
@@ -76,6 +78,15 @@ const App = () => {
             <Route path="centralized" element={<CentralizedContent />} />
           </Route>
         </Route>
+        {/* Optional: 404 */}
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen bg-black text-white flex items-center justify-center">
+              Page Not Found
+            </div>
+          }
+        />
       </Routes>
 
       {!hideLayout && <Footer />}

@@ -10,6 +10,7 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import Nprogress from "nprogress";
 import { fetchNewMoviesPage } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 import LoadingComponents from "../Components/LoadingComponents";
+import NewMoviesTrailerCarousel from "./NewMoviesTrailerCarousel";
 
 const NewMovies = () => {
   const dispatch = useDispatch();
@@ -72,10 +73,11 @@ const NewMovies = () => {
   }
 
   return (
-    <div>
-      <NewVideoSection />
-      <UpcomingMoviesCarousel upcomingMovies={newMoviesData.upcoming} />
+    <div className="mt-16">
+      {/* <NewVideoSection /> */}
       <NewReleaseMoviesCarousel newReleases={newMoviesData.newReleases} />
+      <UpcomingMoviesCarousel upcomingMovies={newMoviesData.upcoming} />
+      <NewMoviesTrailerCarousel upcomingMovies={newMoviesData.upcoming} />
     </div>
   );
 };

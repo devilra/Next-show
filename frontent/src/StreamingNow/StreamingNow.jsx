@@ -9,6 +9,7 @@ import { fetchActiveStreaming } from "../redux/StreamingNowSlice/StreamVideo";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { fetchStreamingNowPage } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 import LoadingComponents from "../Components/LoadingComponents";
+import StreamingTrailer from "./StreamingTrailer";
 
 const StreamingNow = () => {
   const dispatch = useDispatch();
@@ -54,10 +55,11 @@ const StreamingNow = () => {
   }
 
   return (
-    <div>
-      <StreamVideoSection activeItems={activeItems} />
+    <div className="mt-16">
+      {/* <StreamVideoSection activeItems={activeItems} /> */}
       <StreamingUpcommingMovies upcoming={streamingData.upcoming} />
       <StreamingNewRelease newReleases={streamingData.newReleases} />
+      <StreamingTrailer upcoming={streamingData.upcoming} />
     </div>
   );
 };

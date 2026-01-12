@@ -223,7 +223,7 @@ const TrailerSection = ({ activeHomeTrailers }) => {
         {/* Column 1: UPCOMING (With Scroll) */}
         <div className="flex flex-col">
           <h3 className="text-white font-bold mb-4 uppercase text-xs tracking-[0.2em] rounded-sm border-l-4 border-orange-400 pl-3">
-            Upcoming
+            New movies
           </h3>
           {/* <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
             {upcomingMovies.map((movie) => (
@@ -275,7 +275,7 @@ const TrailerSection = ({ activeHomeTrailers }) => {
         {/* Column 2: NEW RELEASES (With Scroll) */}
         <div className="flex flex-col">
           <h3 className="text-white font-bold mb-4 uppercase text-xs tracking-[0.2em] rounded-sm border-l-4 border-orange-400 pl-3">
-            New Releases
+            Upcoming
           </h3>
           <div className="space-y-4 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
             {newReleases.length > 0 ? (
