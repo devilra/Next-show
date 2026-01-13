@@ -215,10 +215,28 @@ const MovieStreamingSection = ({ activeItems }) => {
 
       {/* Main Container - 3 Vertical Columns Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border border-yellow-500/20 p-5 rounded-xl bg-[#0a0a0a]">
-        {/* Column 1: UPCOMING (With Scroll) */}
+        {/* Column 2: NEW RELEASES (With Scroll) */}
         <div className="flex flex-col">
           <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
             New movies
+          </h3>
+          <div className="space-y-4 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
+            {newReleases.length > 0 ? (
+              newReleases.map((movie) => (
+                <StreamingReviewCard key={movie.id} review={movie} />
+              ))
+            ) : (
+              <p className="text-gray-600 italic text-sm">
+                No new movies found.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Column 1: UPCOMING (With Scroll) */}
+        <div className="flex flex-col">
+          <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
+            Upcoming
           </h3>
           {/* <div className="space-y-4 h-[520px] overflow-y-auto pr-2 custom-scrollbar">
             {upcomingMovies.map((movie) => (
@@ -264,24 +282,6 @@ const MovieStreamingSection = ({ activeItems }) => {
             ) : (
               <p className="text-gray-600 italic text-sm">
                 No Upcomming found.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Column 2: NEW RELEASES (With Scroll) */}
-        <div className="flex flex-col">
-          <h3 className="text-white font-bold mb-4 uppercase text-xs rounded-sm tracking-[0.2em] border-l-4 border-orange-400 pl-3">
-            Upcoming
-          </h3>
-          <div className="space-y-4 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
-            {newReleases.length > 0 ? (
-              newReleases.map((movie) => (
-                <StreamingReviewCard key={movie.id} review={movie} />
-              ))
-            ) : (
-              <p className="text-gray-600 italic text-sm">
-                No new releases found.
               </p>
             )}
           </div>
