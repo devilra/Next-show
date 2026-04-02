@@ -1,0 +1,5 @@
+backend/node_modules
+frontent/node_modules
+frontent/.env
+backend/.env
+backend/cpanel-nextshow-ENV-images
