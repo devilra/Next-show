@@ -1,124 +1,115 @@
 import React, { useState, useEffect, useRef } from "react";
-import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import Slider from "react-slick";
+import {
+  HiChevronLeft,
+  HiChevronRight,
+  HiVolumeOff,
+  HiVolumeUp,
+} from "react-icons/hi";
 import { Link } from "react-router-dom";
+import { FaAngleRight, FaPlay, FaPlus } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Slick CSS imports
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FaAngleRight } from "react-icons/fa";
 
-const videoPlaylist = [
-  {
-    id: 1,
-    movieName: "Jana Nayagan",
-    title: "Jana Nayagan  Joseph Vijay  H. Vinoth",
-    description:
-      "Jana Nayagan ('People's Hero') is an upcoming Indian Tamil-language action thriller...",
-    src: "/video/jn.mp4", // Video available
-    thumbnail: "/thumbnail/jana.jpg",
-    date: "JAN 9, 2026",
-  },
-  {
-    id: 2,
-    movieName: "Madharasi",
-    title: "Madharasi Movie News starring Sivakarthikeyan",
-    description:
-      "Madharaasi (2025) is an AR Murugadoss-directed Tamil action thriller starring Sivakarthikeyan as Raghu, a man with mental issues who develops superpowers from trauma, fighting a gang importing guns into Tamil Nadu, with themes of love healing him and confronting gun culture, featuring strong action, Anirudh's music, and a compelling performance from Sivakarthikeyan as a vigilante hero. ",
-    src: "/video/madarasi-trailer.mp4", // No video (Button hidden)
-    thumbnail: "/thumbnail/madara.jpg",
-    date: "FEB 15, 2025",
-  },
-  {
-    id: 3,
-    movieName: "Sardar 2",
-    title: "Sardar 2 Movie News from Nextshow",
-    description:
-      "Sardar 2 is a high-stakes Tamil spy-action sequel to the 2022 hit, directed by P.S. Mithran, with Karthi reprising his role as the secret agent, taking on a massive threat known as 1Black Dagger1 (played by S.J. Suryah) in a bigger, more intense political thriller with new additions like Malavika Mohanan and Ashika Ranganath, promising global espionage and action when it releases in late 2025. ",
-    src: "/video/sardar-2.mp4",
-    thumbnail: "/thumbnail/sardar-2.jpg",
-    date: "JUN 7, 2025",
-  },
-  {
-    id: 4,
-    movieName: "Test (2025)",
-    title: "Test (2025)",
-    description:
-      "Test (2025) is a Tamil hyperlink sports drama about three individuals whose lives intertwine around an India-Pakistan cricket match",
-    src: "/video/test.mp4",
-    thumbnail: "/thumbnail/test.jpg",
-    date: "APR 4, 2025",
-  },
-  {
-    id: 5,
-    movieName: "Thanal (2025)",
-    title: "Test (2025)",
-    description: " ",
-    src: "/video/thanal.mp4",
-    thumbnail: "/thumbnail/thanal.jpg",
-    date: "SEP 12, 2025",
-  },
-];
-
-export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
+export default function VideoDetailScreen({ activeVideos, activeBlogs = [] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isWatchingFull, setIsWatchingFull] = useState(false);
-  const videoRef = useRef(null);
-  const fullVideoRef = useRef(null);
-  const sliderRef = useRef(null);
-  const currentVideo = activeVideos[currentIndex];
+  const [isMuted, setIsMuted] = useState(true); // ✅ Global Volume/Play Toggle State
+  const iframeRef = useRef(null); // ✅ Iframe-ai control panna ref
+  const [direction, setDirection] = useState(0); // 2. Direction track panna state
 
-  // Auto-play preview video when index changes
+  // ✅ Extract and Merge Upcoming Trailers logic
+  const upcomingTrailers = [
+    ...(activeVideos?.theatrical?.upcoming || []),
+    ...(activeVideos?.streaming?.upcoming || []),
+  ];
+
+  const currentVideo = upcomingTrailers[currentIndex];
+
+  // console.log("Current Video", upcomingTrailers);
+
+  // ✅ Volume control logic (Without reloading iframe)
   useEffect(() => {
-    if (!isWatchingFull && videoRef.current) {
-      videoRef.current.load();
-      videoRef.current.play().catch(() => {});
+    if (iframeRef.current) {
+      const command = isMuted ? "mute" : "unMute";
+
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: "command", func: command, args: [] }),
+        "*",
+      );
     }
-    if (sliderRef.current) {
-      sliderRef.current.slickGoTo(currentIndex);
+  }, [isMuted]);
+
+  // ✅ YouTube Normal URL-ai Embed URL-ah mathura function
+  const getEmbedUrl = (url) => {
+    if (!url) return "";
+    const regExp =
+      /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\b\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    const videoId = match && match[2].length === 11 ? match[2] : null;
+
+    if (!videoId) return;
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&rel=0&modestbranding=1&enablejsapi=1`;
+  };
+
+  const getFullVideoUrl = (url) => {
+    if (!url) return "";
+    const regExp =
+      /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\b\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    const videoId = match && match[2].length === 11 ? match[2] : null;
+    return videoId
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&rel=0`
+      : "";
+  };
+
+  const handleWatchNow = () => setIsWatchingFull(true);
+  const handleExitFullVideo = () => setIsWatchingFull(false);
+
+  // ✅ Toggle Volume/Play Function
+  const toggleVolume = () => {
+    setIsMuted(!isMuted);
+  };
+
+  // 3. Slide variants logic
+  const variants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 100 : -100,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 100 : -100,
+      opacity: 0,
+    }),
+  };
+
+  const paginate = (newDirection) => {
+    setDirection(newDirection);
+    if (newDirection === 1) {
+      setCurrentIndex((prev) => (prev + 1) % upcomingTrailers.length);
+    } else {
+      setCurrentIndex((prev) =>
+        prev > 0 ? prev - 1 : upcomingTrailers.length - 1,
+      );
     }
-  }, [currentIndex, isWatchingFull, currentVideo, activeVideos.length]);
-
-  // Handle Watch Now Action
-  const handleWatchNow = () => {
-    setIsWatchingFull(true);
-    // Give a small timeout for the DOM to render the fullVideo element
-    setTimeout(() => {
-      if (fullVideoRef.current) {
-        fullVideoRef.current.muted = false;
-        fullVideoRef.current.play().catch(() => {});
-      }
-    }, 200);
   };
 
-  const handleExitFullVideo = () => {
-    setIsWatchingFull(false);
-  };
-
-  const settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: false,
-    // responsive: [
-    //   { breakpoint: 1024, settings: { slidesToShow: 3 } },
-    //   { breakpoint: 600, settings: { slidesToShow: 2 } },
-    // ],
-  };
-
-  // ஒருவேளை டேட்டா இன்னும் வரவில்லை என்றால்
-  // if (!activeVideos || activeVideos.length === 0) {
-  //   return (
-  //     <div className="h-screen bg-[#0a0d14] flex items-center justify-center text-white">
-  //       No active banners found.
-  //     </div>
-  //   );
-  // }
+  if (upcomingTrailers.length === 0) {
+    return (
+      <div className="h-[450px] bg-[#0a0d14] flex  items-center justify-center text-gray-500 font-medium">
+        No Upcoming Trailers Found
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen md:h-[450px] bg-[#0a0d14] text-white overflow-hidden mt-20 md:mt-0 ">
+    <div className="flex flex-col md:flex-row h-screen md:h-[450px] bg-[#0a0d14] text-white overflow-hidden mt-20 md:pt-[5px] ">
       {/* FULL VIDEO PLAYER OVERLAY */}
       {isWatchingFull && (
         <div className="fixed inset-0 z-[100] bg-black flex flex-col">
@@ -128,137 +119,202 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs }) {
           >
             ← Back
           </button>
-          <video
-            ref={fullVideoRef}
-            src={currentVideo?.videoUrl}
-            className="w-full h-full object-contain"
-            controls
-            autoPlay
-          />
+          <iframe
+            ref={iframeRef} // ✅ Connect ref
+            key={currentVideo?.trailerUrl} // ✅ Video maarumpothu matum reload aagum
+            src={getFullVideoUrl(currentVideo?.trailerUrl)}
+            className="w-full h-[150%] -translate-y-[15%] object-cover scale-[1.4] opacity-80"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          ></iframe>
         </div>
       )}
 
-      {/* LEFT SIDE: MAIN PLAYER & CAROUSEL */}
-      <div className="w-full md:w-[65%]  flex flex-col relative border-r border-gray-800">
-        <div className="relative flex-1 bg-black group overflow-hidden">
-          {/* Preview Video */}
-          <video
-            ref={videoRef}
-            src={currentVideo?.videoUrl}
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-          />
+      {/* LEFT SIDE: MAIN PLAYER & MOVIE DETAILS */}
+      <div className="w-full md:w-[65%] flex flex-col relative border-r border-gray-800">
+        <div className="relative h-[300px] md:h-full bg-black group overflow-hidden">
+          {/* ✅ YouTube Background Video */}
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              className="absolute inset-0 "
+            >
+              <iframe
+                ref={iframeRef} // 👈 Inga thaan 'ref' irukanum
+                src={getEmbedUrl(currentVideo?.trailerUrl)}
+                className="w-full h-[150%] -translate-y-[15%] object-cover scale-[1.4] opacity-80"
+                frameBorder="0"
+                allow="autoplay; encrypted-media"
+              ></iframe>
+            </motion.div>
+          </AnimatePresence>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14] via-transparent to-transparent"></div>
+          {/* Cinematic Overlays */}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-[#2b2c2e]/40 via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14] via-transparent to-transparent pointer-events-none"></div>
+
+          {/* ✅ VOLUME TOGGLE BUTTON */}
+          <button
+            onClick={toggleVolume}
+            className="absolute right-6 bottom-12 md:bottom-20 lg:bottom-12 z-30 bg-black/40 hover:bg-white/20 p-3 rounded-full border border-white/10 transition-all active:scale-90"
+            title={isMuted ? "Unmute & Play" : "Mute & Stop"}
+          >
+            {isMuted ? (
+              <HiVolumeOff size={18} />
+            ) : (
+              <HiVolumeUp size={18} className="text-orange-400" />
+            )}
+          </button>
 
           {/* Navigation Controls */}
           <button
-            onClick={() =>
-              setCurrentIndex((prev) =>
-                prev > 0 ? prev - 1 : activeVideos.length - 1
-              )
-            }
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 p-3 rounded-full hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={() => paginate(-1)}
+            className="absolute -left-2 top-1/2 md:left-1 cursor-pointer -translate-y-1/2 z-30 bg-black/40 p-2 rounded-full hover:bg-white/10 lg:opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <HiChevronLeft size={30} />
+            <HiChevronLeft className="text-lg md:text-2xl lg:text-3xl" />
           </button>
 
           <button
-            onClick={() =>
-              setCurrentIndex((prev) => (prev + 1) % activeVideos.length)
-            }
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 p-3 rounded-full hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={() => paginate(1)}
+            className="absolute -right-2 md:right-1 cursor-pointer top-1/2 -translate-y-1/2 z-30 bg-black/40 p-2 rounded-full hover:bg-white/10 lg:opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            <HiChevronRight size={30} />
+            <HiChevronRight className="text-lg md:text-2xl lg:text-3xl" />
           </button>
 
-          {/* Title and Action Button */}
-          <div className="absolute bottom-10 left-10 hidden md:block z-20">
-            <h2 className="text-4xl font-bold drop-shadow-2xl text-white tracking-tighter mb-4">
-              {currentVideo?.title}
-            </h2>
-
-            {/* Conditional Rendering for Watch Now Button */}
-            {currentVideo?.videoUrl ? (
-              <button
-                onClick={handleWatchNow}
-                className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-10 rounded-md transition transform hover:scale-105 shadow-lg flex items-center gap-2"
+          {/* ✅ MOVIE DETAILS SECTION (Image style implementation) */}
+          <div className="absolute bottom-12 md:bottom-20 lg:bottom-12 left-6 md:left-12 z-20 max-w-[90%] md:max-w-[70%] space-y-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-3"
               >
-                <span>Watch Now</span>
-              </button>
-            ) : (
-              <p className="text-gray-400 italic">No Video Available</p>
-            )}
+                {/* Title / Logo Style */}
+                <h1 className="text-2xl md:text-3xl lg:text-4xl  uppercase tracking-tighter drop-shadow-lg text-white mb-2">
+                  {currentVideo?.title}
+                </h1>
+
+                {/* Metadata (IMDb, Year, Duration, Language) */}
+                {/* <div className="flex flex-wrap items-center gap-3 text-[14px] font-bold text-gray-300">
+              <span className="text-blue-400 font-extrabold tracking-wide">
+                IMDb {currentVideo?.imdbRating || "8.5"}
+              </span>
+              <span className="w-1.5 h-1.5 bg-gray-500 rounded-full"></span>
+              <span className="text-white bg-blue-600/20 px-2 py-0.5 rounded text-[11px] uppercase">
+                Newly Added
+              </span>
+            </div> */}
+
+                <div className="flex flex-wrap items-center gap-3 text-[10px] md:text-[13px] text-white/90">
+                  <span>
+                    {currentVideo?.theatreReleaseDate
+                      ? new Date(currentVideo?.theatreReleaseDate).getFullYear()
+                      : "TBA"}
+                  </span>
+                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                  <span>{currentVideo?.durationOrSeason || "2h 45m"}</span>
+                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                  <span className="border border-white/40 px-1.5 rounded text-[10px]">
+                    {currentVideo.certification}
+                  </span>
+                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                  <div className="flex items-center gap-2">
+                    {currentVideo?.language?.map((lang, index) => (
+                      <React.Fragment key={index}>
+                        <span>{lang}</span>
+                        {/* Last language-ku aprom dots (dot separator) vara koodathu */}
+                        {index < currentVideo.language.length - 1 && (
+                          <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-[13px] md:text-[14px] hidden md:hidden lg:block text-gray-300 leading-relaxed line-clamp-3  max-w-xl drop-shadow-md">
+                  {currentVideo?.longDescription || "TBA"}
+                </p>
+
+                {/* Genres */}
+                {/* ✅ Dynamic Genres with Dot Separator */}
+                <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-[13px]  text-white/80">
+                  {currentVideo?.genres && currentVideo.genres.length > 0 ? (
+                    currentVideo.genres.map((genre, idx) => (
+                      <React.Fragment key={idx}>
+                        <span>{genre}</span>
+                        {/* Last genre-ku aprom dot vara koodathu */}
+                        {idx < currentVideo.genres.length - 1 && (
+                          <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                        )}
+                      </React.Fragment>
+                    ))
+                  ) : (
+                    /* Data illana mattum default-ah ithu show aagum */
+                    <span>Action • Drama • Thriller</span>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-4 pt-4">
+                  <button
+                    onClick={handleWatchNow}
+                    className="bg-gradient-to-r from-orange-600 to-orange-300 hover:opacity-75 cursor-pointer text-white  py-3 px-8 md:px-9 rounded-lg transition transform active:scale-95 shadow-xl flex items-center gap-3 text-sm md:text-base"
+                  >
+                    <FaPlay size={14} /> <span>WATCH NOW</span>
+                  </button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
-
-        {/* BOTTOM: THUMBNAIL CAROUSEL */}
-        {/* <div className="h-36 bg-[#0f121a] p-4 border-t border-gray-800">
-          <Slider ref={sliderRef} {...settings}>
-            {activeVideos.map((item, index) => (
-              <div key={item.id} className="px-2 outline-none">
-                <div
-                  onClick={() => setCurrentIndex(index)}
-                  className={`relative cursor-pointer transition-all duration-300 rounded-md overflow-hidden border-2 h-24 ${
-                    currentIndex === index
-                      ? "border-[#f98603] scale-95 shadow-lg"
-                      : "border-transparent opacity-50 hover:opacity-100"
-                  }`}
-                >
-                  <img
-                    src={item.bannerImage}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-          </Slider>
-        </div> */}
       </div>
 
       {/* RIGHT SIDE: NEWS LIST */}
-      <div className="w-full md:w-[35%] bg-[#0d1017] flex flex-col border-l mt-20 border-gray-800">
-        <div className="p-5 border-b border-gray-800 flex justify-between items-center">
-          <h3 className="text-gray-400 uppercase text-xs font-bold tracking-[0.2em]">
-            News
+      <div className="w-full md:w-[32%] bg-[#0d1017] flex flex-col border-l mt-20 md:mt-0 border-gray-800/50">
+        <div className="p-5 border-b border-gray-800/50 flex justify-between items-center">
+          <h3 className="text-gray-400 uppercase text-[11px] font-black tracking-[0.25em]">
+            Trending News
           </h3>
-
           <Link
             to="/news"
-            className="text-gray-400 uppercase text-xs font-bold tracking-[0.2em] flex items-center gap-2 hover:text-white cursor-pointer"
+            className="text-gray-400 uppercase text-[10px] font-bold tracking-[0.1em] flex items-center gap-1.5 hover:text-white transition-colors"
           >
-            View All <FaAngleRight />
+            See All <FaAngleRight />
           </Link>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar  p-5 space-y-8">
-          {activeBlogs.map((movie) => (
-            <div
-              key={movie.id}
-              className="flex gap-4 group transition-all duration-300 border-b border-white/5 pb-4 last:border-0 cursor-pointer"
-            >
+        <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6">
+          {activeBlogs.map((blog) => (
+            <div key={blog.id} className="flex gap-4 group cursor-pointer">
               <div className="flex-1">
-                <h4 className="text-[15px] font-semibold text-white/70 group-hover:text-blue-400 leading-tight mb-2 transition-colors">
-                  {movie.title}
+                <h4 className="text-[14px] font-bold text-white/80 group-hover:text-blue-400 leading-snug mb-1 transition-colors line-clamp-2">
+                  {blog.title}
                 </h4>
-                <p className="text-gray-500 text-[11px] line-clamp-2 leading-relaxed font-light">
-                  {movie.shortDescription}
+                <p className="text-gray-500 text-[11px] line-clamp-1 font-medium">
+                  {blog.newsDate}
                 </p>
               </div>
-
-              <div className="flex flex-col items-center shrink-0">
-                <div className="w-20 h-14 rounded overflow-hidden shadow-lg grayscale group-hover:grayscale-0 transition-all duration-500">
+              <div className="shrink-0">
+                <div className="w-20 h-14 rounded-md overflow-hidden shadow-md grayscale group-hover:grayscale-0 transition-all duration-500 border border-white/5">
                   <img
-                    src={movie.bannerImage}
+                    src={blog.bannerImage}
                     alt=""
-                    className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                </div>
-                <div className="mt-2 bg-[#1a1e26] px-2 py-1 rounded text-[9px] text-gray-500 font-bold uppercase whitespace-nowrap group-hover:text-white transition-colors">
-                  {/* {movie.date.split(",")[0]} */}
-                  {movie.newsDate}
                 </div>
               </div>
             </div>

@@ -4,13 +4,18 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaTachometerAlt, FaSignOutAlt } from "react-icons/fa"; // Icons-க்காக react-icons பயன்படுத்துகிறேன்
 import { IoHomeSharp } from "react-icons/io5";
-import { MdOutlineMiscellaneousServices } from "react-icons/md";
-import { AiOutlineSolution } from "react-icons/ai";
+import { MdLocalMovies, MdOutlineMiscellaneousServices } from "react-icons/md";
+import { AiOutlineLoading, AiOutlineSolution } from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import { HiNewspaper } from "react-icons/hi";
 import { logoutAdmin } from "../../redux/AdminAuthSlice/AdminAuthSlice";
+import { SlTrash } from "react-icons/sl";
+import { FaTrash } from "react-icons/fa6";
+import { useQuery } from "@tanstack/react-query";
+import api from "../../api";
+import { BiSolidError } from "react-icons/bi";
 
 // MuiAlert-ஐ helper function ஆக மாற்றவும்
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -25,6 +30,22 @@ const Sidebar = () => {
   const [snackOpen, setSnackOpen] = useState(false);
   const [snackMsg, setSnackMsg] = useState("");
   const [snackType, setSnackType] = useState("success"); // default success
+
+  const {
+    data: trashMovies,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["trash-movies"],
+    queryFn: async () => {
+      const response = await api.get("/admin/get-trash-movies");
+      // console.log("Trash response", response.data);
+      return response.data;
+    },
+    refetchOnWindowFocus: true,
+  });
+
+  const trashCount = trashMovies?.data?.length || 0;
 
   const handleSnackClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -142,8 +163,48 @@ const Sidebar = () => {
                }`
               }
             >
-              <HiNewspaper className="mr-3" />
-              Centralized Create Movie
+              <MdLocalMovies className="mr-3" />
+              Centralized Movie
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="trash"
+              className={({ isActive }) =>
+                `flex items-center justify-between  p-3 rounded-lg transition truncate duration-200 
+               ${
+                 isActive
+                   ? "bg-orange-400 text-white shadow-lg"
+                   : "text-gray-300 hover:bg-gray-700 hover:text-white"
+               }`
+              }
+            >
+              <div className="flex items-center">
+                <FaTrash className="mr-3" />
+                Trash
+              </div>
+              {/* 🔥 TRASH BADGE / LOADING SPINNER */}
+              <div className="flex items-center justify-center min-w-[20px]">
+                {isLoading ? (
+                  // Data fetch aagura varai spinner kaatuvom
+                  <AiOutlineLoading
+                    className="animate-spin text-white"
+                    size={16}
+                  />
+                ) : isError ? (
+                  <BiSolidError
+                    size={20}
+                    className="text-red-500"
+                    title="Failed to load count"
+                  />
+                ) : (
+                  trashCount > 0 && (
+                    <span className="bg-orange-500 text-white text-[12px] font-bold px-[9px] py-1 rounded-full ">
+                      {trashCount}
+                    </span>
+                  )
+                )}
+              </div>
             </NavLink>
           </li>
           <li>
@@ -254,7 +315,15 @@ const Sidebar = () => {
         <Alert
           onClose={handleSnackClose}
           severity={snackType}
-          sx={{ width: "100%" }}
+          sx={{
+            borderRadius: "8px",
+            fontSize: "15px",
+            fontWeight: "500",
+            minWidth: "400px",
+            maxWidth: "600px",
+            alignItems: "center",
+            boxShadow: "0px 10px 20px rgba(0,0,0,0.15)",
+          }}
         >
           {snackMsg}
         </Alert>

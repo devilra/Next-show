@@ -10,6 +10,8 @@ import {
   fetchAllMoviesAdmin,
   updateMovie,
 } from "../../../../redux/CentralizedMovieSlice/CentralizedMovieSlice";
+import { Autocomplete, Chip, TextField } from "@mui/material";
+import { FaPlus, FaTrash } from "react-icons/fa6";
 
 const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
   const dispatch = useDispatch();
@@ -19,14 +21,17 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     title: "",
     showInNewMovies: false,
     showInStreamingNow: false,
+    showInHomepage: false, // ✨ NEW: Homepage section state added
     status: "RELEASED", // Upcoming, Released, Postponed
     streamType: "NEW_RELEASE", // NEW_RELEASE, TRENDING, UPCOMING
     director: "TBA",
+    writer: "TBA", // ✨ PUTUSU: Added writer
+    producer: "TBA", // ✨ PUTUSU: Added producer
     cast: "",
     releaseDate: dayjs().format("DD-MM-YYYY"),
     certification: "U/A 18+",
     durationOrSeason: "", // Added
-    language: "Tamil", // Added
+    language: ["Tamil"], // Added
     imdbRating: 0,
     userRating: 0, // Added
     ratingCount: 0, // Added
@@ -42,6 +47,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     metaTitle: "",
     metaDescription: "",
     genres: ["Drama"], // Added
+    galleryLinks: [], // ✨ Added galleryLink state
     theatreReleaseDate: dayjs().format("DD-MM-YYYY"),
     ottReleaseDate: dayjs().format("DD-MM-YYYY"),
     longDescription: "", // Added
@@ -49,11 +55,43 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     isActive: true, // Added
   };
 
+  //console.log(contentData);
+
   const [formData, setFormData] = useState(initialFormState);
   const [bannerFile, setBannerFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  console.log(formData);
 
   const isEdit = !!contentData;
+
+  // ✨ --- Gallery Logic Start ---
+  const handleGalleryChange = (index, value) => {
+    const updatedLinks = [...formData.galleryLinks];
+    updatedLinks[index] = value;
+    setFormData({ ...formData, galleryLinks: updatedLinks });
+  };
+
+  const addGalleryField = () => {
+    // Kadaisi field empty-ah iruntha thirumba add panna allow panna koodathu
+    const lastLink = formData.galleryLinks[formData.galleryLinks.length - 1];
+
+    console.log(formData);
+
+    // Gallery empty-ah illama irunthalo, illana last link empty-ah irunthalo return pannu
+    if (formData.galleryLinks.length > 0 && lastLink.trim() === "") {
+      return; // Do nothing
+    }
+
+    setFormData({
+      ...formData,
+      galleryLinks: [...formData.galleryLinks, ""],
+    });
+  };
+
+  const removeGalleryField = (index) => {
+    const updatedLinks = formData.galleryLinks.filter((_, i) => i !== index);
+    setFormData({ ...formData, galleryLinks: updatedLinks });
+  };
 
   const GENRE_OPTIONS = [
     "Action",
@@ -65,14 +103,51 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     "Romance",
   ];
 
+  const LANGUAGE_OPTIONS = [
+    "Tamil",
+    "Telugu",
+    "Hindi",
+    "Malayalam",
+    "Kannada",
+    "English",
+    "Korean",
+    "Japanese",
+    "Bengali",
+    "Marathi",
+  ];
   useEffect(() => {
     if (contentData && isOpen) {
+      const parseArrayData = (data) => {
+        if (!data) return [];
+
+        // Ippo varra data already Array-ah iruntha direct-ah edukka koodathu,
+        // ஏன்னா array-kulla oru string-ah double-stringify panni irukkalam.
+        let result = data;
+
+        // Intha loop string-ah irukkara varaikkum thirumba thirumba parse pannum
+        // (Double-stringified data-vai handle panna ithu best way)
+        while (typeof result === "string") {
+          try {
+            const parsed = JSON.parse(result);
+            // Oru vela parse pannathukku apparam result same-ah iruntha loop-ah break panniru
+            if (parsed === result) break;
+            result = parsed;
+          } catch (e) {
+            // Normal string-ah iruntha ("Tamil") loop-ah break panni array-va mathu
+            break;
+          }
+        }
+
+        // Final-ah array-ah illana array-kulla pottu anupu
+        return Array.isArray(result) ? result : [result];
+      };
+
       setFormData({
         ...initialFormState,
         ...contentData,
-        genres: Array.isArray(contentData.genres)
-          ? contentData.genres
-          : [contentData.genres],
+        genres: parseArrayData(contentData.genres),
+        language: parseArrayData(contentData.language),
+        galleryLinks: parseArrayData(contentData.galleryLinks), // ✨ Parse galleryLink
       });
       setPreview(contentData.bannerImage);
     } else {
@@ -82,9 +157,9 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     }
   }, [contentData, isOpen]);
 
-  const handleDateChange = (newValue) => {
+  const handleDateChange = (field, newValue) => {
     if (newValue)
-      setFormData({ ...formData, releaseDate: newValue.format("DD-MM-YYYY") });
+      setFormData({ ...formData, [field]: newValue.format("DD-MM-YYYY") });
   };
 
   const handleFileChange = (e) => {
@@ -98,7 +173,13 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
-    Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+    Object.keys(formData).forEach((key) => {
+      if (key === "genres" || key === "language" || key === "galleryLinks") {
+        data.append(key, JSON.stringify(formData[key]));
+      } else {
+        data.append(key, formData[key]);
+      }
+    });
     if (bannerFile) data.append("bannerImage", bannerFile);
 
     if (!isEdit && !bannerFile) return alert("Banner image is required!");
@@ -114,7 +195,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
         onClose();
         setAlert(
           "success",
-          `Movie ${isEdit ? "updated" : "published"} successfully!`
+          `Movie ${isEdit ? "updated" : "published"} successfully!`,
         );
       })
       .catch((err) => setAlert("error", err));
@@ -182,16 +263,18 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 Streaming Section
               </label>
             </div>
-            {/* <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={formData.isTrending}
+                checked={formData.showInHomepage}
                 onChange={(e) =>
-                  setFormData({ ...formData, isTrending: e.target.checked })
+                  setFormData({ ...formData, showInHomepage: e.target.checked })
                 }
               />
-              <label className="font-bold text-gray-700">Trending</label>
-            </div> */}
+              <label className="font-bold text-gray-700">
+                Homepage Section
+              </label>
+            </div>
           </div>
 
           {/* Section 2: Core Info */}
@@ -272,7 +355,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
 
           {/* Section 3: Technical Details */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            {/* <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Language
               </label>
@@ -284,7 +367,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 }
                 className="w-full border-b p-2"
               />
-            </div>
+            </div> */}
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Duration / Season
@@ -299,7 +382,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 className="w-full border-b p-2"
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase">
                 Genres
               </label>
@@ -311,7 +394,8 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 }
                 className="w-full border-b p-2"
               />
-            </div>
+            </div> */}
+
             <div>
               <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 Release Date
@@ -323,13 +407,156 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                       ? dayjs(formData.releaseDate, "DD-MM-YYYY")
                       : null
                   }
-                  onChange={handleDateChange}
+                  onChange={(val) => handleDateChange("releaseDate", val)}
                   format="DD-MM-YYYY"
                   slotProps={{
                     textField: { variant: "standard", fullWidth: true },
                   }}
                 />
               </LocalizationProvider>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                Theatres Release Date
+              </label>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={
+                    formData.theatreReleaseDate
+                      ? dayjs(formData.theatreReleaseDate, "DD-MM-YYYY")
+                      : null
+                  }
+                  onChange={(val) =>
+                    handleDateChange("theatreReleaseDate", val)
+                  }
+                  format="DD-MM-YYYY"
+                  slotProps={{
+                    textField: { variant: "standard", fullWidth: true },
+                  }}
+                />
+              </LocalizationProvider>
+            </div>
+            <div className="">
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                OTT Release Date
+              </label>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={
+                    formData.ottReleaseDate
+                      ? dayjs(formData.ottReleaseDate, "DD-MM-YYYY")
+                      : null
+                  }
+                  onChange={(val) => handleDateChange("ottReleaseDate", val)}
+                  format="DD-MM-YYYY"
+                  slotProps={{
+                    textField: { variant: "standard", fullWidth: true },
+                  }}
+                />
+              </LocalizationProvider>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1 ">
+              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
+                Genres (Select Multiple)
+              </label>
+              <Autocomplete
+                multiple
+                options={GENRE_OPTIONS}
+                value={formData.genres}
+                onChange={(event, newValue) => {
+                  setFormData({ ...formData, genres: newValue });
+                }}
+                // Intha renderValue-ah replace pannunga
+                renderValue={(value, getTagProps) => {
+                  // Safe check: value array-ah illana array-ah maathuvom
+                  const valuesArray = Array.isArray(value)
+                    ? value
+                    : value
+                      ? [value]
+                      : [];
+
+                  return valuesArray.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key}
+                        label={option}
+                        {...tagProps}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    );
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Add Genres"
+                    sx={{
+                      backgroundColor: "#f9fafb",
+                      borderRadius: "12px",
+                      "& fieldset": {
+                        border: "none",
+                        ring: "1px solid #e5e7eb",
+                      },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="space-y-1 ">
+              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">
+                language
+              </label>
+              <Autocomplete
+                multiple
+                options={LANGUAGE_OPTIONS}
+                value={formData.language}
+                onChange={(event, newValue) => {
+                  setFormData({ ...formData, language: newValue });
+                }}
+                renderValue={(value, getTagProps) => {
+                  const valuesArray = Array.isArray(value)
+                    ? value
+                    : value
+                      ? [value]
+                      : [];
+
+                  return valuesArray.map((option, index) => {
+                    const { key, ...tagProps } = getTagProps({ index });
+                    return (
+                      <Chip
+                        key={key}
+                        label={option}
+                        {...tagProps}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    );
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    placeholder="Add Genres"
+                    sx={{
+                      backgroundColor: "#f9fafb",
+                      borderRadius: "12px",
+                      "& fieldset": {
+                        border: "none",
+                        ring: "1px solid #e5e7eb",
+                      },
+                    }}
+                  />
+                )}
+              />
             </div>
           </div>
 
@@ -346,6 +573,34 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                   setFormData({ ...formData, director: e.target.value })
                 }
                 className="w-full border-b p-2"
+              />
+            </div>
+            {/* ✨ Writer Field Added */}
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase">
+                Writer
+              </label>
+              <input
+                type="text"
+                value={formData.writer}
+                onChange={(e) =>
+                  setFormData({ ...formData, writer: e.target.value })
+                }
+                className="w-full border-b p-2 outline-none focus:border-indigo-500 bg-transparent"
+              />
+            </div>
+            {/* ✨ Producer Field Added */}
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase">
+                Producer
+              </label>
+              <input
+                type="text"
+                value={formData.producer}
+                onChange={(e) =>
+                  setFormData({ ...formData, producer: e.target.value })
+                }
+                className="w-full border-b p-2 outline-none focus:border-indigo-500 bg-transparent"
               />
             </div>
             <div>
@@ -503,6 +758,66 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                 className="w-full border-b p-2 bg-transparent"
                 placeholder="https://..."
               />
+            </div>
+            <div className="md:col-span-3">
+              <label className="block text-[10px] font-bold text-gray-400 pb-3 uppercase">
+                Movie Gallery Links (Posters/Screenshots)
+              </label>
+              <button
+                type="button"
+                disabled={
+                  formData.galleryLinks.length > 0 &&
+                  formData.galleryLinks[
+                    formData.galleryLinks.length - 1
+                  ].trim() === ""
+                }
+                onClick={addGalleryField}
+                className={`flex items-center gap-1 cursor-pointer px-3 py-1 rounded-lg text-[11px] transition-all
+    ${
+      formData.galleryLinks.length > 0 &&
+      formData.galleryLinks[formData.galleryLinks.length - 1].trim() === ""
+        ? "bg-gray-300 cursor-not-allowed text-gray-500"
+        : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+    }`}
+              >
+                <FaPlus size={10} /> Add Link
+              </button>
+              <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                {formData.galleryLinks.map((link, index) => (
+                  <div
+                    key={index}
+                    className="flex gap-3 mt-5 items-center group"
+                  >
+                    {/* ✨ Serial Number Badge */}
+                    <div className="flex-shrink-0 w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-[11px] shadow-sm border border-indigo-200">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        placeholder="Enter Image URL (e.g., https://site.com/photo.jpg)"
+                        value={link}
+                        onChange={(e) =>
+                          handleGalleryChange(index, e.target.value)
+                        }
+                        className="w-full border rounded-xl p-2.5 outline-none focus:border-indigo-500 bg-white"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryField(index)}
+                      className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    >
+                      <FaTrash size={14} />
+                    </button>
+                  </div>
+                ))}
+                {formData.galleryLinks.length === 0 && (
+                  <p className="text-gray-400 text-center py-2 italic text-[12px]">
+                    No gallery links added yet.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 

@@ -4,16 +4,16 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-// ⭐ New Release Movies Data
-const NEW_RELEASE_MOVIES = [
-  { id: 1, title: "Love Today", imageUrl: "/newrelease/l.avif" },
-  { id: 2, title: "Dude", imageUrl: "/newrelease/d.jpg" },
-  { id: 3, title: "Thalaivan Thalaivii", imageUrl: "/newrelease/t.webp" },
-  { id: 4, title: "Aaryan", imageUrl: "/newrelease/a.jpg" },
-  { id: 5, title: "Madharaasi", imageUrl: "/newrelease/m.jpg" },
-  { id: 6, title: "Bison Kaalamaadan", imageUrl: "/newrelease/b.jpg" },
-  { id: 7, title: "Shakthi Thirumagan", imageUrl: "/newrelease/s.jpg" },
-];
+// ⭐ YouTube Thumbnail Generator Function (Same as your ReviewCard)
+const getYouTubeThumbnail = (url) => {
+  if (!url) return "https://via.placeholder.com/480x360?text=No+Trailer";
+  const regExp =
+    /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\b\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11
+    ? `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
+    : "https://via.placeholder.com/480x360?text=Invalid+URL";
+};
 
 // ⭐ Arrows Reusable
 const NextArrow = ({ className, style, onClick }) => (
@@ -59,29 +59,38 @@ const PrevArrow = ({ className, style, onClick }) => (
 );
 
 // ⭐ Movie Card
-const MovieCard = ({ movie }) => (
-  <Link
-    to={`/movie/${movie.slug}`}
-    className="p-2 cursor-pointer block transition duration-300 hover:scale-[1.03] rounded-lg overflow-hidden"
-  >
-    <div className="bg-[#1a1a1a] rounded-lg shadow-lg">
-      <img
-        src={movie.bannerImage}
-        alt={movie.title}
-        className="w-full object-cover rounded-t-lg"
-        style={{ height: "350px" }}
-      />
-      <div className="p-3 text-center">
-        <h3 className="text-white text-md font-semibold truncate">
-          {movie.title}
-        </h3>
+const MovieCard = ({ movie }) => {
+  // ✅ Trailer URL iruntha thumbnail edukkum, illana bannerImage fallback
+  const displayImage = movie.trailerUrl
+    ? getYouTubeThumbnail(movie.trailerUrl)
+    : movie.bannerImage;
+
+  return (
+    <Link
+      to={`/movie/${movie.slug}`}
+      className="p-2 cursor-pointer block transition duration-300 hover:scale-[1.03] rounded-lg overflow-hidden"
+    >
+      <div className="bg-[#1a1a1a] rounded-lg shadow-lg">
+        <img
+          src={displayImage}
+          alt={movie.title}
+          className="w-full object-cover rounded-t-lg"
+          style={{ height: "350px" }}
+        />
+        <div className="p-3 text-center">
+          <h3 className="text-white text-md font-semibold truncate">
+            {movie.title}
+          </h3>
+        </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
 
 // ⭐ MAIN COMPONENT
-const NewReleaseMoviesCarousel = ({ newReleases }) => {
+const NewReleaseMoviesCarousel = ({ newReleases, newMovies }) => {
+  // console.log("New Movies", newMovies);
+
   const settings = {
     className: "center",
     centerMode: true,
@@ -117,7 +126,7 @@ const NewReleaseMoviesCarousel = ({ newReleases }) => {
       {/*lg,md Slider */}
       <div className="slick-left-align hidden md:block relative">
         <Slider {...settings}>
-          {newReleases.map((movie) => (
+          {newMovies.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>
@@ -128,7 +137,7 @@ const NewReleaseMoviesCarousel = ({ newReleases }) => {
       {/* mobile Slider */}
       <div className="slick-left-align md:hidden relative">
         <Slider {...settings} slidesToShow={1}>
-          {newReleases.map((movie) => (
+          {newMovies.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>

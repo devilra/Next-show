@@ -4,26 +4,16 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { FaAngleRight } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-// 1. Sample Data (Mock)
-const UPCOMING_MOVIES = [
-  // 2025-ல் அதிகம் எதிர்பார்க்கப்படும் அல்லது வெளியாகும் படங்கள்
-  { id: 1, title: "Jana Nayagan", imageUrl: "/upcomming/j.jpg" }, // Vijay's final film announcement
-  { id: 2, title: "Vidaa Muyarchi", imageUrl: "/upcomming/v.jpg" }, // Ajith's highly anticipated film
-  { id: 3, title: "Vettaiyan", imageUrl: "/upcomming/vettaiyan.jpg" }, // Rajinikanth's 2025 release
-  {
-    id: 4,
-    title: "The Greatest of All Time (GOAT)",
-    imageUrl: "/upcomming/goat.jpg",
-  }, // Major sci-fi project
-  { id: 5, title: "Indian 2", imageUrl: "/upcomming/i.jpeg" }, // Conclusion of the sequel
-  { id: 7, title: "Captain Miller 2", imageUrl: "/upcomming/c.jpg" }, // Sequel to the 2024 hit
-  { id: 8, title: "Thug Life", imageUrl: "/upcomming/t.jpg" }, // Kamal Haasan's gangster saga
-
-  // மற்ற முக்கியப் படங்கள்
-  { id: 9, title: "Ayalaan 2", imageUrl: "/upcomming/a.jpg" },
-  { id: 10, title: "Maanavan", imageUrl: "/upcomming/m.jpg" },
-  { id: 11, title: "Yaanai", imageUrl: "/upcomming/t.jpg" },
-];
+// ⭐ YouTube Thumbnail Generator Function (Same as your ReviewCard)
+const getYouTubeThumbnail = (url) => {
+  if (!url) return "https://via.placeholder.com/480x360?text=No+Trailer";
+  const regExp =
+    /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\b\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11
+    ? `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`
+    : "https://via.placeholder.com/480x360?text=Invalid+URL";
+};
 
 // ⭐ Custom Next Arrow (Highlighted Style)
 const NextArrow = ({ className, style, onClick }) => {
@@ -74,29 +64,35 @@ const PrevArrow = ({ className, style, onClick }) => {
 };
 
 // 4. Movie Card Component
-const MovieCard = ({ movie }) => (
-  <Link
-    to={`/movie/${movie.slug}`}
-    className="p-2 block cursor-pointer transition duration-300 hover:scale-[1.03] rounded-lg overflow-hidden"
-  >
-    <div className="bg-[#1a1a1a] rounded-lg shadow-lg">
-      <img
-        src={movie.bannerImage}
-        alt={movie.title}
-        className="w-full object-cover rounded-t-lg"
-        style={{ height: "350px" }}
-      />
-      <div className="p-3 text-center">
-        <h3 className="text-white text-md font-semibold truncate">
-          {movie.title}
-        </h3>
+const MovieCard = ({ movie }) => {
+  const displayImage = movie.trailerUrl
+    ? getYouTubeThumbnail(movie.trailerUrl)
+    : movie.bannerImage;
+
+  return (
+    <Link
+      to={`/movie/${movie.slug}`}
+      className="p-2 block cursor-pointer transition duration-300 hover:scale-[1.03] rounded-lg overflow-hidden"
+    >
+      <div className="bg-[#1a1a1a] rounded-lg shadow-lg">
+        <img
+          src={displayImage}
+          alt={movie.title}
+          className="w-full object-cover rounded-t-lg"
+          style={{ height: "350px" }}
+        />
+        <div className="p-3 text-center">
+          <h3 className="text-white text-md font-semibold truncate">
+            {movie.title}
+          </h3>
+        </div>
       </div>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
 
 // 5. Main Carousel Component
-const StreamingTrailer = ({ newReleases }) => {
+const StreamingTrailer = ({ newReleases, trendingStream }) => {
   const settings = {
     className: "center",
     centerMode: true,
@@ -142,7 +138,7 @@ const StreamingTrailer = ({ newReleases }) => {
       {/* lg,md Slider */}
       <div className="slick-left-align hidden md:block relative">
         <Slider {...settings}>
-          {newReleases.map((movie) => (
+          {trendingStream.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>
@@ -153,7 +149,7 @@ const StreamingTrailer = ({ newReleases }) => {
       {/* mobile view Slider */}
       <div className="slick-left-align md:hidden relative">
         <Slider {...settings} slidesToShow={1}>
-          {newReleases.map((movie) => (
+          {trendingStream.map((movie) => (
             <div key={movie.id}>
               <MovieCard movie={movie} />
             </div>

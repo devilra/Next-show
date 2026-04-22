@@ -1,4 +1,5 @@
 const slugify = require("slugify");
+const moment = require("moment");
 const CentralizedMovieCreate = require("../../models/CentralizedMoviesCreateModels/CentralizedMovieCreate");
 
 /**
@@ -181,10 +182,10 @@ exports.getStreamingNowPageData = async (req, res) => {
 
 // @desc    Get Full Movie Details by Slug
 exports.getMovieDetailsBySlug = async (req, res) => {
-  console.log("Function start");
+  console.log("GET MOVIE DETAILS function start");
   try {
     const { slug } = req.params;
-    console.log("Slug", slug);
+    // console.log("Slug", slug);
 
     const movie = await CentralizedMovieCreate.findOne({
       where: {
@@ -201,12 +202,41 @@ exports.getMovieDetailsBySlug = async (req, res) => {
     // Atomic increment for popularity tracking
     await movie.increment("viewCount");
 
+    const parsedData = parseMovieFields(movie);
+    // console.log("BACKEND Movie", parsedData);
+
+    // ✨ DATE FORMATTING FUNCTION
+    // ✨ UPDATED DATE FORMATTING FUNCTION (Using Moment)
+    const formatDate = (dateValue) => {
+      console.log("FORMAT DATE INPUT:", dateValue);
+
+      // 1. Check if value is null, undefined or string 'null'
+      if (!dateValue || dateValue === "null") return "TBA";
+
+      // 2. Use Moment to parse and validate
+      const m = moment(dateValue);
+
+      if (!m.isValid()) {
+        return "TBA"; // Valid date illana TBA kuduthudunga
+      }
+
+      // 3. Format it as "Apr 22 2026"
+      return m.format("MMM DD YYYY");
+    };
+
     // ✨ INGA THAAN CHANGE: Response anupurathuku munnadi parse pannanum
-    const processedMovie = parseMovieFields(movie);
+    const processedMovie = {
+      ...parsedData,
+      releaseDate: formatDate(parsedData.releaseDate),
+      theatreReleaseDate: formatDate(parsedData.theatreReleaseDate),
+      ottReleaseDate: formatDate(parsedData.ottReleaseDate),
+    };
+
+    console.log("PROCESS MOVIE", processedMovie);
 
     res.status(200).json({ success: true, data: processedMovie });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -279,7 +309,7 @@ exports.createMovie = async (req, res) => {
     const { title, galleryLinks } = req.body;
     // console.log(req.body);
 
-    //console.log(req.body);
+    console.log(req.body);
     if (!title)
       return res
         .status(400)
@@ -363,6 +393,8 @@ exports.updateMovie = async (req, res) => {
 
     let updateData = { ...req.body };
 
+    console.log("UPDATE DATA", updateData);
+
     // 📸 Update Gallery Links if provided
     if (updateData.galleryLinks) {
       const linksArray =
@@ -381,6 +413,30 @@ exports.updateMovie = async (req, res) => {
       updateData.bannerImage = req.files["bannerImage"][0].path;
       updateData.imagePublicId = req.files["bannerImage"][0].filename;
     }
+
+    // --- NEW DATE HANDLING LOGIC ---
+
+    const dateFields = [
+      "releaseDate",
+      "theatreReleaseDate",
+      "ottReleaseDate",
+      "trendingStartDate",
+    ];
+
+    dateFields.forEach((field) => {
+      // 'null' string-ah vanthalum illai empty-ah vanthalum real null-ah mathidum
+      if (
+        updateData[field] === "null" ||
+        updateData[field] === "" ||
+        updateData[field] === undefined
+      ) {
+        updateData[field] = null;
+      } else {
+        // Valid date-ah nu check panni handle pannum
+        const mDate = moment(updateData[field]);
+        updateData[field] = mDate.isValid() ? mDate.toDate() : null;
+      }
+    });
 
     // Ensuring correct data types
     const booleanFields = [
@@ -417,7 +473,7 @@ exports.updateMovie = async (req, res) => {
     });
   } catch (error) {
     console.error("Update Error:", error);
-    res.status(500).json({ success: false, message: "Failed to update movie" });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -427,7 +483,7 @@ exports.deleteMovie = async (req, res) => {
     const movie = await CentralizedMovieCreate.findByPk(req.params.id);
     if (!movie)
       return res
-        .status(404) 
+        .status(404)
         .json({ success: false, message: "Record not found" });
 
     await movie.destroy(); // Hooks will handle Cloudinary deletion

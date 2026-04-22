@@ -88,11 +88,45 @@ body {
 
 /* Progress bar-oda right side-la irukura antha light glow (peg) */
 #nprogress .peg {
-  box-shadow: 0 0 30px #8d8782, 0 0 15px #dbb697 !important;
+  box-shadow:
+    0 0 30px #8d8782,
+    0 0 15px #dbb697 !important;
 }
 
 /* Spinner (antha rounding loading circle) oda color */
 #nprogress .spinner-icon {
   border-top-color: #fb923c !important;
   border-left-color: #fb923c !important;
+}
+
+@keyframes bell-shake {
+  0% {
+    transform: rotate(0);
+  }
+  15% {
+    transform: rotate(15deg);
+  }
+  30% {
+    transform: rotate(-15deg);
+  }
+  45% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+.animate-bell-shake:hover {
+  animation: bell-shake 0.5s ease-in-out;
+  transform-origin: top center;
 }

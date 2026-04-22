@@ -11,6 +11,8 @@ import Nprogress from "nprogress";
 import { fetchNewMoviesPage } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 import LoadingComponents from "../Components/LoadingComponents";
 import NewMoviesTrailerCarousel from "./NewMoviesTrailerCarousel";
+import { useQuery } from "@tanstack/react-query";
+import api from "../api";
 
 const NewMovies = () => {
   const dispatch = useDispatch();
@@ -21,7 +23,20 @@ const NewMovies = () => {
     (state) => state.centralizedMovies,
   );
 
-  console.log(newMoviesData);
+  const {
+    data: homeMoviesData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["json-upload-movies"],
+    queryFn: async () => {
+      const response = await api.get("/admin/get-public-home-data");
+      // console.log("New Movies Data", response.data.data);
+      return response.data.data;
+    },
+  });
+
+  // console.log(newMoviesData);
   // Data irukkannu check pannikirom (to avoid re-fetching)
   const hasData =
     newMoviesData.upcoming?.length > 0 || newMoviesData.newReleases?.length > 0;
@@ -55,17 +70,15 @@ const NewMovies = () => {
   }, [dispatch, hasData]);
 
   // Loading Screen
-  if (isPageLoading) {
+  if (isLoading) {
     return <LoadingComponents />;
   }
 
   // Error handle (Optional)
-  if (isPublicError) {
+  if (isError) {
     return (
       <div className="flex justify-center items-center h-[50vh]">
-        <p className="text-red-500">
-          Failed to load content. Please try again
-        </p>
+        <p className="text-red-500">Failed to load content. Please try again</p>
       </div>
     );
   }
@@ -73,9 +86,18 @@ const NewMovies = () => {
   return (
     <div className="mt-16">
       {/* <NewVideoSection /> */}
-      <NewReleaseMoviesCarousel newReleases={newMoviesData.newReleases} />
-      <UpcomingMoviesCarousel upcomingMovies={newMoviesData.upcoming} />
-      <NewMoviesTrailerCarousel newReleases={newMoviesData.newReleases} />
+      <NewReleaseMoviesCarousel
+        newReleases={newMoviesData.newReleases}
+        newMovies={homeMoviesData.theatrical.newRelease}
+      />
+      <UpcomingMoviesCarousel
+        upcomingMovies={newMoviesData.upcoming}
+        upcomming={homeMoviesData.theatrical.upcoming}
+      />
+      <NewMoviesTrailerCarousel
+        newReleases={newMoviesData.newReleases}
+        trendingMovies={homeMoviesData.theatrical.trending}
+      />
     </div>
   );
 };

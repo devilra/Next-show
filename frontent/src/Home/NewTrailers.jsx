@@ -4,6 +4,8 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import Slider from "react-slick";
 import VideoPlayer from "../Components/VideoPlayer";
 import api from "../api";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 export const trailerData = [
   {
@@ -303,21 +305,6 @@ const VideoInfo = ({
           </span>
         </div>
       </div>
-
-      {/* Stats Area */}
-      {/* <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 text-[10px] text-gray-400">
-            <FaEye className="text-red-600" /> {views || "0"}
-          </span>
-          <span className="flex items-center gap-1 text-[10px] text-gray-400">
-            <FaRegClock className="text-gray-500" /> {postedTime || "Just now"}
-          </span>
-        </div>
-        <div className="text-[10px] font-bold text-gray-600 bg-white/5 px-2 py-0.5 rounded uppercase">
-          HD
-        </div>
-      </div> */}
     </div>
   );
 };
@@ -326,7 +313,7 @@ const NextArrow = ({ className, style, onClick }) => (
   <div className="hidden md:hidden lg:block">
     <div
       className={`
-      ${className}  !right-[-25px] !z-20 !w-12 !h-12 
+      ${className}  !right-[-20px] !z-20 !w-12 !h-12 
       flex items-center justify-center 
       rounded-full 
       bg-gradient-to-br from-[#ffffff25] to-[#00000055]
@@ -347,7 +334,7 @@ const PrevArrow = ({ className, style, onClick }) => (
   <div className="hidden md:hidden lg:block">
     <div
       className={`
-      ${className} !left-[-25px] !z-20 !w-12 !h-12 
+      ${className} !left-[-20px] !z-20 !w-12 !h-12 
       flex items-center justify-center 
       rounded-full 
       bg-gradient-to-br from-[#ffffff25] to-[#00000055]
@@ -367,6 +354,7 @@ const PrevArrow = ({ className, style, onClick }) => (
 const NewTrailers = ({ activeTrailers }) => {
   const [activeVideoId, setActiveVideoId] = useState(null);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+  const [selectedTrailer, setSelectedTrailer] = useState(null);
 
   console.log("Active Trailers", activeTrailers);
 
@@ -393,43 +381,44 @@ const NewTrailers = ({ activeTrailers }) => {
   };
 
   // Base Settings - CenterMode 'false' panniye left alignment varum
-  const getSettings = (itemCount) => ({
-    dots: false,
-    // infinite: itemCount > 5, // 5 item-ku mela iruntha mattum infinite loop aagum
-    speed: 500,
-    infinite: true,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    centerMode: false,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
+  const getSettings = (itemCount) => {
+    const slidesToShow = 5;
 
-    afterChange: () => {
-      // safety cleanup
-      const iframes = document.querySelectorAll("iframe");
-      iframes.forEach((iframe) => {
-        iframe.src = iframe.src;
-      });
-    },
-    responsive: [
-      {
-        breakpoint: 1280,
-        settings: { slidesToShow: 4 },
+    // Video count slidesToShow-vida kammiya iruntha arrows show panna koodathu
+    const showArrows = itemCount > slidesToShow;
+    return {
+      dots: false,
+      // infinite: itemCount > 5, // 5 item-ku mela iruntha mattum infinite loop aagum
+      speed: 500,
+      infinite: false,
+      slidesToShow: 5,
+      slidesToScroll: 1,
+      centerMode: false,
+      nextArrow: <NextArrow />,
+      prevArrow: <PrevArrow />,
+      beforeChange: (current, next) => {
+        setActiveVideoId(null); // Slide aagum pothu ethavathu video play aagittu iruntha atha thumbnail-ukku mathidum
       },
-      {
-        breakpoint: 1024,
-        settings: { slidesToShow: 3 },
-      },
-      {
-        breakpoint: 768, // Tablet
-        settings: { slidesToShow: 2, arrows: true },
-      },
-      {
-        breakpoint: 480, // Mobile
-        settings: { slidesToShow: 2, arrows: false, dots: true },
-      },
-    ],
-  });
+      responsive: [
+        {
+          breakpoint: 1280,
+          settings: { slidesToShow: 6 },
+        },
+        {
+          breakpoint: 1024,
+          settings: { slidesToShow: 3 },
+        },
+        {
+          breakpoint: 768, // Tablet
+          settings: { slidesToShow: 2, arrows: true },
+        },
+        {
+          breakpoint: 480, // Mobile
+          settings: { slidesToShow: 1.3, arrows: false, dots: true },
+        },
+      ],
+    };
+  };
 
   const renderSection = (title, type) => {
     const filtered = trailerData.filter((item) => item.streamType === type);
@@ -440,93 +429,193 @@ const NewTrailers = ({ activeTrailers }) => {
 
     return (
       <div className="bg-[#0a0a0a]   overflow-hidden">
-        {/* <div className="flex items-center justify-between mb-8 border-l-4 border-orange-400 rounded-sm pl-4">
-          <div>
-            <h2 className="text-white text-2xl md:text-3xl font-black uppercase tracking-tighter">
-              Latest Trailers
-            </h2>
-            <p className="text-gray-500 text-xs mt-1 uppercase tracking-widest">
-              Stay updated with new releases
-            </p>
-          </div>
-          <FaYoutube className="text-red-600 text-3xl opacity-50" />
-        </div> */}
+        <div className="hidden md:block lg:block">
+          <Slider {...sectionSettings}>
+            {activeTrailers.map((item) => {
+              const videoId = getYouTubeID(item.trailerUrl);
+              const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
-        <Slider {...sectionSettings}>
-          {activeTrailers.map((item) => {
-            const videoId = getYouTubeID(item.trailerUrl);
-            const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-
-            return (
-              <div key={item.id} className="px-2 pb-4">
-                <div className="relative bg-[#111] rounded-2xl overflow-hidden border-2 border-dotted border-white/5 hover:border-orange-400 transition-all duration-500 group shadow-2xl">
-                  {/* 🔥 Movie Name Badge (Card-க்கு மேலேயே காட்டும்) */}
-                  {/* <div className="absolute top-3 left-3 z-10">
+              return (
+                <div key={item.id} className="px-2 pb-4">
+                  <div
+                    onClick={() => setSelectedTrailer(item)}
+                    className="relative bg-[#111] rounded-2xl cursor-pointer overflow-hidden border-2 border-dotted border-white/5 hover:border-orange-400 transition-all duration-500 group shadow-2xl"
+                  >
+                    {/* 🔥 Movie Name Badge (Card-க்கு மேலேயே காட்டும்) */}
+                    {/* <div className="absolute top-3 left-3 z-10">
                     <span className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg uppercase tracking-wider backdrop-blur-sm">
                       {item.movieName}
                     </span>
                   </div> */}
 
-                  {/* Video/Thumbnail Section */}
-                  <div className="relative aspect-video bg-black overflow-hidden">
-                    {activeVideoId === item.id ? (
-                      <VideoPlayer
-                        videoOptions={{
-                          autoplay: true,
-                          controls: true,
-                          fluid: true,
-                          techOrder: ["youtube"],
-                          sources: [
-                            { src: item.trailerUrl, type: "video/youtube" },
-                          ],
-                        }}
-                        onVideoEnd={() => setActiveVideoId(null)}
+                    {/* Video/Thumbnail Section */}
+                    <div className="relative aspect-video bg-black overflow-hidden">
+                      <img
+                        src={thumbnail}
+                        alt={item.movieName}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700"
                       />
-                    ) : (
-                      <div
-                        onClick={() => setActiveVideoId(item.id)}
-                        className="w-full h-full flex items-center justify-center cursor-pointer relative"
-                      >
-                        <img
-                          src={thumbnail}
-                          alt={item.movieName}
-                          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700"
-                        />
 
-                        {/* Play Button Overlay */}
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                          <div className="w-12 h-12 bg-red-600 text-white flex items-center justify-center rounded-full scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-                            <FaPlay className="ml-1" />
-                          </div>
-                        </div>
-
-                        {/* Duration Tag (Static or from Props) */}
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-[10px] px-2 py-0.5 rounded text-white font-bold">
-                          {item.videoLength || "2:30"}
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                        <div className="w-12 h-12 bg-red-600 text-white flex items-center justify-center rounded-full scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                          <FaPlay className="ml-1" />
                         </div>
                       </div>
-                    )}
+
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-[10px] px-2 py-0.5 rounded text-white font-bold">
+                        {item.videoLength || "2:30"}
+                      </div>
+                    </div>
+
+                    {/* Info Section */}
+                    <VideoInfo
+                      videoUrl={item.trailerUrl}
+                      views={item.views}
+                      postedTime={item.postedTimeDisplay}
+                      movieName={item.movieName}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </Slider>
+        </div>
+
+        {/* Mobile device only carosel */}
+
+        <div className="md:hidden">
+          <Slider {...sectionSettings} slidesToShow={2}>
+            {activeTrailers.map((item) => {
+              const videoId = getYouTubeID(item.trailerUrl);
+              const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+              return (
+                <div key={item.id} className="px-2 pb-4">
+                  <div
+                    onClick={() => setSelectedTrailer(item)}
+                    className="relative bg-[#111] rounded-2xl cursor-pointer overflow-hidden border-2 border-dotted border-white/5 hover:border-orange-400 transition-all duration-500 group shadow-2xl"
+                  >
+                    {/* 🔥 Movie Name Badge (Card-க்கு மேலேயே காட்டும்) */}
+                    {/* <div className="absolute top-3 left-3 z-10">
+                    <span className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg uppercase tracking-wider backdrop-blur-sm">
+                      {item.movieName}
+                    </span>
+                  </div> */}
+
+                    {/* Video/Thumbnail Section */}
+                    <div className="relative aspect-video bg-black overflow-hidden">
+                      <img
+                        src={thumbnail}
+                        alt={item.movieName}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700"
+                      />
+
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
+                        <div className="w-12 h-12 bg-red-600 text-white flex items-center justify-center rounded-full scale-90 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                          <FaPlay className="ml-1" />
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-2 right-2 bg-black/80 text-[10px] px-2 py-0.5 rounded text-white font-bold">
+                        {item.videoLength || "2:30"}
+                      </div>
+                    </div>
+
+                    {/* Info Section */}
+                    <VideoInfo
+                      videoUrl={item.trailerUrl}
+                      views={item.views}
+                      postedTime={item.postedTimeDisplay}
+                      movieName={item.movieName}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </Slider>
+        </div>
+
+        {/* 🔥 --- VIDEO MODAL (CENTER POPUP) --- 🔥 */}
+        <AnimatePresence>
+          {selectedTrailer && (
+            <>
+              {/* Backdrop: Click panna video stop aagum */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedTrailer(null)}
+                className="fixed inset-0 bg-black/10 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+              >
+                {/* Modal Content */}
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                  onClick={(e) => e.stopPropagation()} // Stop propagation to prevent closing when clicking inside
+                  className="relative w-full max-w-2xl bg-[#111] rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedTrailer(null)}
+                    className="absolute top-4 right-4 z-[110] bg-white/10 hover:bg-orange-500 p-2 rounded-full transition-all text-white shadow-lg"
+                  >
+                    <X size={20} />
+                  </button>
+                  {/* Video Player Container */}
+                  <div className="aspect-video w-full bg-black">
+                    <VideoPlayer
+                      videoOptions={{
+                        autoplay: true,
+                        controls: true,
+                        fluid: true,
+                        techOrder: ["youtube"],
+                        sources: [
+                          {
+                            src: selectedTrailer.trailerUrl,
+                            type: "video/youtube",
+                          },
+                        ],
+                      }}
+                      onVideoEnd={() => setSelectedTrailer(null)}
+                    />
                   </div>
 
-                  {/* Info Section */}
-                  <VideoInfo
-                    videoUrl={item.trailerUrl}
-                    views={item.views}
-                    postedTime={item.postedTimeDisplay}
-                    movieName={item.movieName}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </Slider>
+                  {/* Video Details inside Modal */}
+                  <div className="p-6 bg-[#111]">
+                    <h3 className="text-xl font-black text-white uppercase tracking-wider mb-2">
+                      {selectedTrailer.movieName} -{" "}
+                      <span className="text-orange-500 font-medium text-sm capitalize">
+                        Official Trailer
+                      </span>
+                    </h3>
+                    {/* <div className="flex gap-4 text-xs text-gray-400">
+                      <p>
+                        Director:{" "}
+                        <span className="text-gray-200">
+                          {selectedTrailer.director}
+                        </span>
+                      </p>
+                      <p>
+                        Cast:{" "}
+                        <span className="text-gray-200">
+                          {selectedTrailer.cast}
+                        </span>
+                      </p>
+                    </div> */}
+                  </div>
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     );
   };
 
   return (
     <div className="bg-[#0a0a0a] pt-10 px-4 md:px-8  text-white">
-      <h2 className="text-white text-xl md:text-2xl font-black mb-6 uppercase tracking-wider">
+      <h2 className="text-white text-xl mb-3 font-black uppercase tracking-wider">
         New Trailers
       </h2>
       {/* {renderSection("Upcoming", "UPCOMMING")} */}

@@ -3,3 +3,5 @@ frontent/node_modules
 frontent/.env
 backend/.env
 backend/cpanel-nextshow-ENV-images
+backend/Centralizedmovie_sample.json
+backend/movies_bulk.json

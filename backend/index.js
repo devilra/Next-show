@@ -3,7 +3,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const sequelize = require("./config/db");
 require("dotenv").config();
-require("./models/associationIndex");
+// require("./models/associationIndex");
+// require("./models/CentralizedMoviesCreateModels/CentralizedJsonBulkCreate");
+// require("./models/DeletedRestoreMovies/DeletedMovies");
 const adminAuthRoutes = require("./routes/AdminAuthRoutes/AdminRoutes");
 const VideoSectionRoutes = require("./routes/HomePageRoutes/videoRoutes");
 const BlogSectionRoutes = require("./routes/HomePageRoutes/blogRoutes");
@@ -13,17 +15,25 @@ const HomeMoviesRoutes = require("./routes/HomePageRoutes/HomeMovieRoute");
 const HomeTrailersRoutes = require("./routes/HomePageRoutes/HomeTrailersRoute");
 const CentralizedMovieRoutes = require("./routes/CentralizedMovieRoute/CentralizedmovieRoute");
 const NewTrailersRoutes = require("./routes/HomePageRoutes/NewTrailersRoute");
+const { initMovieSchedular } = require("./scheduled-job/movieScheduler");
+const CentralizedJsonMovieRoute = require("./routes/CentralizedMovieRoute/CentralizedJsonMovieRoute");
 
 const app = express();
 
 app.use(express.json({ limit: "100mb" }));
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "https://nextshow.in",
+      "https://next-show-eight.vercel.app",
+      "http://localhost:5173",
+      "https://nextshow.vercel.app",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   }),
 );
+
 app.use(cookieParser()); // Cookie parser-க்கு
 app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
@@ -39,6 +49,7 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
       alter: true,
     });
     console.log("✅ Tables synced successfully!");
+    initMovieSchedular();
   } catch (error) {
     console.error("❌ DB Errors:", error);
   }
@@ -53,6 +64,10 @@ app.use("/api/home", HomeMoviesRoutes);
 app.use("/api/home", HomeTrailersRoutes);
 app.use("/api/centralized", CentralizedMovieRoutes);
 app.use("/api/trailers", NewTrailersRoutes);
+
+//Centralized Json BulK Movie Create Route
+
+app.use("/api/admin", CentralizedJsonMovieRoute);
 
 // Simple root route for testing
 app.get("/", (req, res) => {

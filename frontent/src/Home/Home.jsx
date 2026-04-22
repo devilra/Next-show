@@ -21,6 +21,8 @@ import LoadingComponents from "../Components/LoadingComponents";
 import { fetchHomePageData } from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 import NewTrailers from "./NewTrailers";
 import { fetchActiveTrailers } from "../redux/HomeContentSlice/NewTrailerSlice";
+import { useQuery } from "@tanstack/react-query";
+import api from "../api";
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -37,7 +39,20 @@ const Home = () => {
     (state) => state.centralizedMovies,
   );
 
-  console.log(homePageData);
+  const {
+    data: homeMoviesData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["json-upload-movies"],
+    queryFn: async () => {
+      const response = await api.get("/admin/get-public-home-data");
+      console.log(response.data);
+      return response.data.data;
+    },
+  });
+
+  // console.log(homePageData);
 
   const hasData = activeVideos.length > 0 && activeBlogs.length > 0;
 
@@ -84,20 +99,26 @@ const Home = () => {
   //   );
   // }
 
-  if (isPageLoading) {
+  if (isLoading) {
     return <LoadingComponents />;
   }
 
   return (
     <div className="pb-10">
       <VideoDetailScreen
-        activeVideos={activeVideos}
+        activeVideos={homeMoviesData}
         activeBlogs={activeBlogs}
       />
       {/* <UpcomingMoviesCarousel />
       <NewReleaseMoviesCarousel /> */}
-      <MovieStreamingSection activeItems={activeItems} />
-      <MoviesSection activeItems={activeHomeMovies} />
+      <MovieStreamingSection
+        activeItems={activeItems}
+        streamingData={homeMoviesData?.streaming}
+      />
+      <MoviesSection
+        activeItems={activeHomeMovies}
+        newMovies={homeMoviesData.theatrical}
+      />
 
       {/* <TrailerSection activeHomeTrailers={activeHomeTrailers} /> */}
       <NewTrailers activeTrailers={activeTrailers} />

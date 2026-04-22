@@ -28,7 +28,7 @@ const Dashboard = () => {
 
         {/* Content Area */}
         {/* mt-16 header space-kaga, p-8 padding-kaga */}
-        <div className="p-8 mt-16 text-white">
+        <div className="mt-16 text-white">
           {/* --- TESTING SECTION START --- */}
           {/* <div className="bg-gradient-to-b from-purple-900/20 to-transparent p-6 rounded-xl border border-gray-800 mb-6">
             <h3 className="text-xl font-bold">Scroll Testing Mode Active</h3>

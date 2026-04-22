@@ -126,7 +126,7 @@ const MovieGallery = ({ movie }) => {
   // if (galleryLinks.length === 0) return null;
 
   return (
-    <div className="py-8 bg-[#0f0f0f] text-white">
+    <div className="py-8  text-white">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6 px-2">
         <div className="flex items-center gap-2 group cursor-pointer">

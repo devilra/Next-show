@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FaCloudUploadAlt, FaTimes, FaSpinner, FaImage } from "react-icons/fa";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -10,7 +10,13 @@ import {
   fetchAllMoviesAdmin,
   updateMovie,
 } from "../../../../redux/CentralizedMovieSlice/CentralizedMovieSlice";
-import { Autocomplete, Chip, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Chip,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 import { FaPlus, FaTrash } from "react-icons/fa6";
 
 const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
@@ -28,7 +34,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     writer: "TBA", // ✨ PUTUSU: Added writer
     producer: "TBA", // ✨ PUTUSU: Added producer
     cast: "",
-    releaseDate: dayjs().format("DD-MM-YYYY"),
+    releaseDate: null,
     certification: "U/A 18+",
     durationOrSeason: "", // Added
     language: ["Tamil"], // Added
@@ -38,7 +44,7 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     viewCount: 0,
     isTrending: false,
     trailerUrl: "",
-    availableOn: "Theatres",
+    availableOn: ["Theatres"],
     watchUrl: "", // Added
     musicDirector: "N/A",
     cinematography: "N/A", // Added
@@ -48,8 +54,9 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
     metaDescription: "",
     genres: ["Drama"], // Added
     galleryLinks: [], // ✨ Added galleryLink state
-    theatreReleaseDate: dayjs().format("DD-MM-YYYY"),
-    ottReleaseDate: dayjs().format("DD-MM-YYYY"),
+    theatreReleaseDate: null,
+    ottReleaseDate: null,
+    isManualUpdate: false,
     longDescription: "", // Added
     order: 1, // Added
     isActive: true, // Added
@@ -159,7 +166,10 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
 
   const handleDateChange = (field, newValue) => {
     if (newValue)
-      setFormData({ ...formData, [field]: newValue.format("DD-MM-YYYY") });
+      setFormData({
+        ...formData,
+        [field]: newValue ? newValue.format("YYYY-MM-DD") : null,
+      });
   };
 
   const handleFileChange = (e) => {
@@ -223,58 +233,83 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
         >
           {/* Section 1: Visibility & Status */}
           <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.isActive}
-                onChange={(e) =>
-                  setFormData({ ...formData, isActive: e.target.checked })
-                }
-              />
-              <label className="font-bold text-gray-700">Active Status</label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.showInNewMovies}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    showInNewMovies: e.target.checked,
-                  })
-                }
-              />
-              <label className="font-bold text-gray-700">
-                New Movie Section
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.showInStreamingNow}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    showInStreamingNow: e.target.checked,
-                  })
-                }
-              />
-              <label className="font-bold text-gray-700">
-                Streaming Section
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={formData.showInHomepage}
-                onChange={(e) =>
-                  setFormData({ ...formData, showInHomepage: e.target.checked })
-                }
-              />
-              <label className="font-bold text-gray-700">
-                Homepage Section
-              </label>
-            </div>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={formData.isActive}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                  color="primary"
+                />
+              }
+              label={
+                <span className="font-bold text-gray-700 text-[13px]">
+                  Active Status
+                </span>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={formData.showInNewMovies}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      showInNewMovies: e.target.checked,
+                    })
+                  }
+                  color="primary"
+                />
+              }
+              label={
+                <span className="font-bold text-gray-700 text-[13px]">
+                  New Movie Section
+                </span>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={formData.showInStreamingNow}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      showInStreamingNow: e.target.checked,
+                    })
+                  }
+                  color="primary"
+                />
+              }
+              label={
+                <span className="font-bold text-gray-700 text-[13px]">
+                  Streaming Section
+                </span>
+              }
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={formData.showInHomepage}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      showInHomepage: e.target.checked,
+                    })
+                  }
+                  color="primary"
+                />
+              }
+              label={
+                <span className="font-bold text-gray-700 text-[13px]">
+                  Homepage Section
+                </span>
+              }
+            />
           </div>
 
           {/* Section 2: Core Info */}
@@ -294,21 +329,48 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                   className="w-full border-b p-2 outline-none focus:border-indigo-500 bg-transparent"
                 />
               </div>
-              <div>
+              <div className="bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 col-span-2 md:col-span-1">
                 <label className="block text-[10px] font-bold text-gray-400 uppercase">
                   Stream Type
                 </label>
-                <select
-                  value={formData.streamType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, streamType: e.target.value })
-                  }
-                  className="w-full border-b p-2 bg-transparent outline-none"
-                >
-                  <option value="NEW_RELEASE">New Release</option>
-                  <option value="TRENDING">Trending</option>
-                  <option value="UPCOMING">Upcoming</option>
-                </select>
+                <div className="flex flex-col gap-2">
+                  <select
+                    value={formData.streamType}
+                    disabled={!formData.isManualUpdate} // ✨ Disable if checkbox is false
+                    onChange={(e) =>
+                      setFormData({ ...formData, streamType: e.target.value })
+                    }
+                    className={`w-full border-b p-2 bg-transparent outline-none transition-all ${
+                      !formData.isManualUpdate
+                        ? "cursor-not-allowed text-gray-400 border-gray-200" // ✨ Disabled styles
+                        : "cursor-pointer text-black border-indigo-200" // ✨ Enabled styles
+                    }`}
+                  >
+                    <option value="NEW_RELEASE">New Release</option>
+                    <option value="TRENDING">Trending</option>
+                    <option value="UPCOMING">Upcoming</option>
+                  </select>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={formData.isManualUpdate}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            isManualUpdate: e.target.checked,
+                          })
+                        }
+                        color="primary"
+                      />
+                    }
+                    label={
+                      <span className="text-[12px] font-medium text-gray-700">
+                        Manual Update
+                      </span>
+                    }
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-gray-400 uppercase">
@@ -403,14 +465,18 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={
-                    formData.releaseDate
-                      ? dayjs(formData.releaseDate, "DD-MM-YYYY")
+                    formData.releaseDate && formData.releaseDate !== "TBA"
+                      ? dayjs(formData.releaseDate, "YYYY-MM-DD")
                       : null
                   }
                   onChange={(val) => handleDateChange("releaseDate", val)}
                   format="DD-MM-YYYY"
                   slotProps={{
-                    textField: { variant: "standard", fullWidth: true },
+                    textField: {
+                      variant: "standard",
+                      fullWidth: true,
+                      placeholder: "TBA",
+                    },
                   }}
                 />
               </LocalizationProvider>
@@ -422,8 +488,9 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={
-                    formData.theatreReleaseDate
-                      ? dayjs(formData.theatreReleaseDate, "DD-MM-YYYY")
+                    formData.theatreReleaseDate &&
+                    formData.theatreReleaseDate !== "TBA"
+                      ? dayjs(formData.theatreReleaseDate, "YYYY-MM-DD")
                       : null
                   }
                   onChange={(val) =>
@@ -431,7 +498,11 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
                   }
                   format="DD-MM-YYYY"
                   slotProps={{
-                    textField: { variant: "standard", fullWidth: true },
+                    textField: {
+                      variant: "standard",
+                      fullWidth: true,
+                      placeholder: "TBA",
+                    },
                   }}
                 />
               </LocalizationProvider>
@@ -443,14 +514,18 @@ const CentralizedForm = ({ isOpen, onClose, contentData, setAlert }) => {
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   value={
-                    formData.ottReleaseDate
-                      ? dayjs(formData.ottReleaseDate, "DD-MM-YYYY")
+                    formData.ottReleaseDate && formData.ottReleaseDate !== "TBA"
+                      ? dayjs(formData.ottReleaseDate, "YYYY-MM-DD")
                       : null
                   }
                   onChange={(val) => handleDateChange("ottReleaseDate", val)}
                   format="DD-MM-YYYY"
                   slotProps={{
-                    textField: { variant: "standard", fullWidth: true },
+                    textField: {
+                      variant: "standard",
+                      fullWidth: true,
+                      placeholder: "TBA",
+                    },
                   }}
                 />
               </LocalizationProvider>
