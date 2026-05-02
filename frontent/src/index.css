@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#121212] text-white;
+  }
+}
+
+body {
+  font-family: "Lexend", sans-serif;
+}
+
+/* ======================================================= */
+/* Custom CSS for React-Slick Arrows (To hide default icons) */
+/* ======================================================= */
+
+/*
+  react-slick-ன் அடிப்படை அம்புகளை (::before element-ஆல் உருவாக்கப்படுபவை) 
+  மறைக்கிறது, இதனால் Custom Arrow-கள் மட்டுமே தெரியும்.
+*/
+.slick-prev:before,
+.slick-next:before {
+  display: none !important;
+}
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+/* Scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background: #19191a;
+  border-radius: 10px;
+}
+
+/* Scrollbar thumb (scroll handle) */
+::-webkit-scrollbar-thumb {
+  background: #f98603;
+}
+
+/* Hover effect */
+::-webkit-scrollbar-thumb:hover {
+  background: #d37305;
+}
+
+@layer utilities {
+  .no-scrollbar ::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none; /* Firefox */
+  }
+}
+
+/* Custom Scrollbar Styles */
+.custom-scroll::-webkit-scrollbar {
+  width: 2px; /* Inga neenga width-a 10px or 12px nu increase pannikalam */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent; /* Track-a transparent-ah vechukurathu nalla irukum */
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #f98603; /* gray-700 color */
+  /* Thumb corners round-ah iruka */
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #d37305; /* Hover pannum pothu konjam light gray */
+}
+
+.slick-left-align .slick-track {
+  margin-left: 0 !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+}
+.slick-left-align .slick-slide {
+  height: inherit !important;
+}
+
+/* Progress bar-oda main color */
+#nprogress .bar {
+  background: #fb923c !important; /* Unga custom color (e.g., Orange) */
+  height: 3px !important; /* Bar-oda thickness */
+  z-index: 10000 !important; /* Navbar-ku mela theriyanum-na */
+}
+
+/* Progress bar-oda right side-la irukura antha light glow (peg) */
+#nprogress .peg {
+  box-shadow:
+    0 0 30px #8d8782,
+    0 0 15px #dbb697 !important;
+}
+
+/* Spinner (antha rounding loading circle) oda color */
+#nprogress .spinner-icon {
+  border-top-color: #fb923c !important;
+  border-left-color: #fb923c !important;
+}
+
+@keyframes bell-shake {
+  0% {
+    transform: rotate(0);
+  }
+  15% {
+    transform: rotate(15deg);
+  }
+  30% {
+    transform: rotate(-15deg);
+  }
+  45% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  85% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+.animate-bell-shake:hover {
+  animation: bell-shake 0.5s ease-in-out;
+  transform-origin: top center;
+}
+
+/* Intha code unga entire website selection-aiyum unga theme-ku mathidum */
+::selection {
+  background-color: #fb923c; /* tailwind orange-400 */
+  color: white; /* Black text for contrast */
+}
+
+/* For Firefox */
+::-moz-selection {
+  background-color: #fb923c;
+  color: #000000;
+}
