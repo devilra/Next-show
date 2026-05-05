@@ -121,7 +121,7 @@ const Home = () => {
       />
 
       {/* <TrailerSection activeHomeTrailers={activeHomeTrailers} /> */}
-      {/* <NewTrailers activeTrailers={activeTrailers} /> */}
+      <NewTrailers activeTrailers={activeTrailers} />
 
       {/* <YoutubeVideoReviews /> */}
     </div>

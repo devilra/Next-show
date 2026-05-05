@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 logic.md
+NewsPageIdeas.md
 
 # Editor directories and files
 .vscode/*

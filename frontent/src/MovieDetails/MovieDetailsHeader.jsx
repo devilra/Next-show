@@ -15,6 +15,8 @@ import {
   Monitor,
   X,
   Clock,
+  ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import { FaPlay } from "react-icons/fa";
 import VideoPlayer from "../Components/VideoPlayer";
@@ -39,6 +41,8 @@ const MovieDetailsHeader = ({ movie }) => {
   };
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const trailerUrl = "https://youtu.be/zdu0YzzJ10o?si=tEbfZkJtD4F5ELlk";
   const [activeModal, setActiveModal] = useState(null); // 'boxOffice', 'theater', 'ott'
 
@@ -99,6 +103,19 @@ const MovieDetailsHeader = ({ movie }) => {
       return [];
     }
   };
+
+  useEffect(() => {
+    if (isGalleryOpen || activeModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup function when component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isGalleryOpen, activeModal]);
 
   const genres = parseData(movie?.genres);
 
@@ -164,6 +181,56 @@ const MovieDetailsHeader = ({ movie }) => {
 
   const videoId = getYouTubeID(movie.trailerUrl);
   const thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+  // 1. Safe Parse Gallery Links
+  const galleryArray = parseData(movie?.galleryLinks) || [];
+
+  // 2. Thumbnail Logic for Gallery
+  const getDisplayThumbnail = () => {
+    if (galleryArray.length > 0) {
+      const firstVideoId = getYouTubeID(galleryArray[0]);
+      return `https://img.youtube.com/vi/${firstVideoId}/maxresdefault.jpg`;
+    }
+    const trailerVideoId = getYouTubeID(movie.trailerUrl);
+    return `https://img.youtube.com/vi/${trailerVideoId}/maxresdefault.jpg`;
+  };
+
+  // Slider Navigation Logic
+  const nextImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex < galleryArray.length - 1)
+      setCurrentIndex((prev) => prev + 1);
+  };
+  const prevImage = (e) => {
+    e.stopPropagation();
+    if (currentIndex > 0) setCurrentIndex((prev) => prev - 1);
+  };
+
+  // 2. PC Double Click Logic
+  const handleDoubleClick = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left; // Click panna idathoda X position
+    const width = rect.width;
+
+    if (x > width / 2) {
+      nextImage(); // Right side double click
+    } else {
+      prevImage(); // Left side double click
+    }
+  };
+
+  // 3. Swipe Logic for Framer Motion
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset, velocity) => Math.abs(offset) * velocity;
+
+  const onDragEnd = (e, { offset, velocity }) => {
+    const swipe = swipePower(offset.x, velocity.x);
+    if (swipe < -swipeConfidenceThreshold) {
+      nextImage();
+    } else if (swipe > swipeConfidenceThreshold) {
+      prevImage();
+    }
+  };
 
   const modalContent = {
     boxOffice: {
@@ -634,15 +701,29 @@ const MovieDetailsHeader = ({ movie }) => {
         {/* Poster & Sidebar Horizontal on Mobile, Vertical on Desktop */}
         <div className="order-1 lg:order-none md:col-span-3 grid grid-cols-12 gap-2 h-[150px] md:h-full">
           {/* Poster */}
-          <div className="col-span-4 md:col-span-12 relative mb-1 md:mb-0 group overflow-hidden rounded-lg cursor-pointer">
+          {/* --- POSTER / GALLERY THUMBNAIL CLICKABLE --- */}
+          <div
+            onClick={() => galleryArray.length > 0 && setIsGalleryOpen(true)}
+            className="col-span-4 md:col-span-12 relative mb-1 md:mb-0 group overflow-hidden rounded-lg cursor-pointer"
+          >
             <img
-              src={thumbnail}
-              alt="Poster"
+              src={getDisplayThumbnail()}
+              alt="Gallery Preview"
               className="w-full h-full object-cover saturate-125 border-r border-white/10"
             />
             <div className="absolute top-0 left-0 p-1 md:p-2 bg-black/40">
               <Plus size={20} />
             </div>
+            {galleryArray.length > 1 && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-[1px] group-hover:bg-black/40 transition-all">
+                <div className="flex items-center gap-1">
+                  <Plus size={18} className="text-white font-bold" />
+                  <span className="text-lg font-bold text-white">
+                    {galleryArray.length}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="col-span-8 md:hidden flex flex-col">
@@ -695,7 +776,7 @@ const MovieDetailsHeader = ({ movie }) => {
         </div>
 
         {/* Video Player Area - Main Focus */}
-        <div className="order-1 md:col-span-9 md:mr-3 md:order-2 lg:order-none  bg-black relative rounded-lg group overflow-hidden aspect-video md:aspect-auto">
+        <div className="order-1 md:col-span-9 md:mr-3 md:order-2 lg:order-none   relative rounded-lg group overflow-hidden aspect-video md:aspect-auto">
           {isPlaying ? (
             <div className="w-full h-full">
               <VideoPlayer
@@ -738,6 +819,98 @@ const MovieDetailsHeader = ({ movie }) => {
             </div>
           )}
         </div>
+
+        {/* --- FRAMER MOTION GALLERY MODAL --- */}
+        <AnimatePresence>
+          {isGalleryOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[999] bg-black/95 pt-0 md:pt-20 flex items-center justify-center p-4"
+              onClick={() => setIsGalleryOpen(false)}
+            >
+              {/* Close Button */}
+              <button className="absolute top-20 right-[45%] md:hidden text-white/70 hover:text-white transition-colors">
+                <X size={32} />
+              </button>
+              {/* Main Image Container */}
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="relative max-w-5xl w-full aspect-video flex items-center justify-center "
+                onClick={(e) => e.stopPropagation()} // Prevent modal close when clicking image
+              >
+                {/* 2. Floating Attractive Index Badge (1/5) */}
+                <div className="absolute  -bottom-[50px] md:-bottom-[30px] lg:bottom-[20px] left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white/10 border border-white/20 backdrop-blur-xl rounded-full shadow-2xl">
+                  <span className="text-xs font-bold tracking-[0.2em] text-white/90">
+                    {currentIndex + 1}{" "}
+                    <span className="text-white/30 mx-1">|</span>{" "}
+                    {galleryArray.length}
+                  </span>
+                </div>
+                {/* Prev Button */}
+                {currentIndex > 0 && (
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-[-20px] hidden md:hidden lg:block md:left-[-60px] p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all"
+                  >
+                    <ChevronLeft size={40} />
+                  </button>
+                )}
+
+                {/* Slider Image */}
+                <div>
+                  <motion.img
+                    key={currentIndex}
+                    src={`https://img.youtube.com/vi/${getYouTubeID(galleryArray[currentIndex])}/maxresdefault.jpg`}
+                    alt="Gallery"
+                    // Drag Logic
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.7}
+                    onDragEnd={(e, { offset, velocity }) => {
+                      const swipe = Math.abs(offset.x) * velocity.x;
+                      // Swipe Left (Next)
+                      if (
+                        swipe < -1000 &&
+                        currentIndex < galleryArray.length - 1
+                      ) {
+                        setCurrentIndex((prev) => prev + 1);
+                      }
+                      // Swipe Right (Prev)
+                      else if (swipe > 1000 && currentIndex > 0) {
+                        setCurrentIndex((prev) => prev - 1);
+                      }
+                    }}
+                    onDoubleClick={handleDoubleClick}
+                    initial={{ x: 300, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: -300, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="w-full h-auto max-h-[75vh] object-contain select-none cursor-grab active:cursor-grabbing"
+                  />
+                </div>
+
+                {/* Next Button */}
+                {currentIndex < galleryArray.length - 1 && (
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-[-20px] md:right-[-60px] p-2 hidden md:hidden lg:block bg-white/10 hover:bg-white/20 rounded-full transition-all"
+                  >
+                    <ChevronRight size={40} />
+                  </button>
+                )}
+
+                {/* Counter Indicator inside Modal */}
+                {/* <div className="absolute bottom-[-40px] left-1/2 -translate-x-1/2 text-white/60 text-sm tracking-widest">
+                  {currentIndex + 1} / {galleryArray.length}
+                </div> */}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Desktop Sidebar (Only visible on MD up) */}
         {/* <div className="hidden md:flex md:col-span-2 flex-col gap-2">

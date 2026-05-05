@@ -3,124 +3,98 @@ import { FaYoutube, FaInstagram, FaFacebookF, FaTwitter } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="bg-black/90 text-gray-300 pt-12 pb-6 border-t border-white/10">
-      {/* Top Section */}
-      <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-10">
-        {/* Brand Section */}
-        <div>
-          {/* Logo + Brand Name */}
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo3.png"
-              alt="NextShow Logo"
-              className="w-32 h-24 object-contain drop-shadow-lg"
-            />
-            {/* <h2 className="text-2xl font-extrabold tracking-wide">
-              Next<span className="text-orange-400">Show</span>
-            </h2> */}
+    <footer className="bg-black/90 text-gray-300 border-t border-white/10">
+      {/* 🔥 MAIN SECTION */}
+      <div className="flex flex-col  md:flex-row md:items-center px-4 md:px-10 mx-auto md:justify-between py-2 max-w-7xl">
+        <div className=" flex md:flex-row md:items-center md:justify-between py-5 md:py-0 gap-6">
+          {/* LEFT - BRAND */}
+          <div className="flex flex-col gap-2 md:max-w-sm">
+            <div className="flex items-center gap-2">
+              <img
+                src="/logo3.png"
+                alt="NextShow Logo"
+                className="w-20 h-14 object-contain"
+              />
+            </div>
+
+            <p className="text-gray-400 text-[12px] md:text-[13px] leading-snug">
+              Your trusted source for movie reviews, trailers & cinema updates.
+            </p>
+
+            {/* SOCIAL */}
+            <div className="flex gap-3 mt-2">
+              {[FaYoutube, FaInstagram, FaFacebookF, FaTwitter].map(
+                (Icon, i) => (
+                  <a
+                    key={i}
+                    href="#"
+                    className="p-2 bg-white/10 rounded-full hover:bg-white/20 hover:scale-105 transition"
+                  >
+                    <Icon className="text-[14px]" />
+                  </a>
+                ),
+              )}
+            </div>
           </div>
 
-          <p className="text-gray-400 mt-3 text-sm leading-relaxed">
-            Your trusted source for authentic movie reviews, latest trailers,
-            teasers, and cinema updates.
-          </p>
+          {/* 🔥 CENTER - EXPLORE SECTION */}
+          <div className="flex flex-col items-center  md:items-start gap-3">
+            <h3 className="text-white text-sm  font-semibold tracking-wide">
+              Explore
+            </h3>
 
-          {/* Social Icons */}
-          <div className="flex gap-4 mt-4">
-            <a
-              href="#"
-              className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition"
-            >
-              <FaYoutube className="text-xl" />
-            </a>
-            <a
-              href="#"
-              className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition"
-            >
-              <FaInstagram className="text-xl" />
-            </a>
-            <a
-              href="#"
-              className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition"
-            >
-              <FaFacebookF className="text-xl" />
-            </a>
-            <a
-              href="#"
-              className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition"
-            >
-              <FaTwitter className="text-xl" />
-            </a>
+            {/* TAG LINKS */}
+            <div className="flex flex-wrap justify-center md:justify-start gap-1 text-[11px]">
+              {[
+                { label: "Movies", to: "/movies" },
+                { label: "News", to: "/news" },
+                { label: "OTT", to: "/ott" },
+                { label: "Trailers", to: "/trailers" },
+                { label: "Top Rated", to: "/top-rated" },
+                { label: "Upcoming", to: "/upcoming" },
+              ].map((item, i) => (
+                <Link
+                  key={i}
+                  to={item.to}
+                  className="px-1 md:px-3 py-1 text-[11px] md:text-[12px] rounded-full md:bg-white/5  md:border md:border-white/10 hover:bg-white/10 hover:text-white hover:shadow-[0_0_10px_rgba(255,255,255,0.1)] transition"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* MINI TEXT */}
+            <p className="text-[12px] md:text-[13px] text-gray-500 max-w-[320px] text-center md:text-left">
+              Discover trending movies, latest news, and OTT updates all in one
+              place.
+            </p>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-white text-lg font-semibold mb-3">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link to="/" className="hover:text-white">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link to="/trailer" className="hover:text-white">
-                Latest Trailers
-              </Link>
-            </li>
-            <li>
-              <Link to="/new" className="hover:text-white">
-                New Releases
-              </Link>
-            </li>
-            <li>
-              <Link to="/stream" className="hover:text-white">
-                Upcoming Movies
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Movie Categories */}
-        <div>
-          <h3 className="text-white text-lg font-semibold mb-3">Categories</h3>
-          <ul className="space-y-2 text-sm">
-            <li className="hover:text-white cursor-pointer">Action</li>
-            <li className="hover:text-white cursor-pointer">Thriller</li>
-            <li className="hover:text-white cursor-pointer">Drama</li>
-            <li className="hover:text-white cursor-pointer">Romance</li>
-            {/* <li className="hover:text-white cursor-pointer">Sci-Fi</li> */}
-          </ul>
-        </div>
-
-        {/* Contact */}
-        <div>
-          <h3 className="text-white text-lg font-semibold mb-3">Contact</h3>
-          <p className="text-sm text-gray-400">
-            Have suggestions? Want your trailer reviewed?
-          </p>
-          <p className="mt-2 text-sm">
+        {/* RIGHT - CONTACT */}
+        <div className="flex flex-col gap-1 text-[12px] text-gray-400 text-center md:text-right">
+          <h3 className="text-white text-sm font-semibold">Contact</h3>
+          <p>Have suggestions or feedback?</p>
+          <p>
             Email: <span className="text-orange-400">contact@nextshow.com</span>
           </p>
         </div>
       </div>
 
-      {/* Bottom Copy */}
+      {/* 🔥 BOTTOM BAR */}
+      <div className="border-t border-white/10 text-[11px] text-gray-500 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-2">
+        <span>© {new Date().getFullYear()} NextShow. All Rights Reserved.</span>
 
-      <div className="text-xs text-gray-500 mt-10 border-t flex flex-col items-center gap-2 md:flex-row md:justify-between md:px-5 border-white/10 pt-4">
-        <h1>© {new Date().getFullYear()} NextShow. All Rights Reserved.</h1>
-
-        <div className="text-xs">
-          {" "}
-          <span> developed by </span>
+        <span>
+          Developed by{" "}
           <a
             target="_blank"
             href="https://amigowebster.com/"
-            className="text-orange-400 underline"
+            className="text-orange-400 underline hover:text-orange-300 transition"
           >
-            amigowebster
+            Nextshow Team
           </a>
-        </div>
+        </span>
       </div>
     </footer>
   );

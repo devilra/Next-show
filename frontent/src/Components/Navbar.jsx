@@ -29,7 +29,7 @@ const Navbar = () => {
       className="
       fixed top-0 left-0 w-full 
       backdrop-blur-md bg-black/30 
-      z-50 border-b border-white/10
+      z-[9999] 
     "
     >
       <nav className="flex justify-between items-center px-6 md:px-10 h-[80px]">

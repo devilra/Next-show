@@ -40,12 +40,6 @@ const MovieReviewCard = ({ review }) => {
             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
           />
 
-          {/* ⭐ Rating Sticker - Image-ku mela top right corner-la irukkum */}
-          {/* <div className="absolute -top-1 -right-1  backdrop-blur-md  gap-0.5 flex items-center bg-black px-1.5 py-0.5 rounded border border-gray-800 flex-shrink-0">
-            <FaStar className="text-orange-400 text-[10px] " />
-            <span className="text-white text-[12px] ml-0.5">4.5</span>
-          </div> */}
-
           {/* 🔥 Date Overlay: Image kulla bottom-la absolute-ah set pannirukaen */}
           {review.theatreReleaseDate && (
             <div className="absolute bottom-0 left-0 right-0 bg-black/90 p-1 flex justify-center items-center backdrop-blur-[1px]">

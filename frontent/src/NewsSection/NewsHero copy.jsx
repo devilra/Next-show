@@ -16,7 +16,6 @@ import {
 import { HiSparkles } from "react-icons/hi2";
 import { MdVerified, MdOpenInNew } from "react-icons/md";
 import { BsBookmark, BsBookmarkFill, BsPlayCircleFill } from "react-icons/bs";
-import { Link } from "react-router-dom";
 
 // ─────────────────────────────────────────────────────────
 // DUMMY DATA
@@ -597,8 +596,7 @@ const NewsHero = ({ news: externalNews }) => {
             {/* Action Buttons */}
             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
               {/* READ MORE */}
-              <Link
-                to={`/news/${news.relatedMovie?.slug || "default-news"} `}
+              <button
                 className="flex items-center gap-1.5 md:gap-2 cursor-pointer text-white font-bold rounded-xl transition-all duration-200"
                 style={{
                   // background: `linear-gradient(135deg, ${news.categoryColor}, ${news.categoryColor}bb)`,
@@ -613,7 +611,7 @@ const NewsHero = ({ news: externalNews }) => {
               >
                 <FaPlay style={{ fontSize: isMobile ? 9 : 10 }} />
                 READ MORE
-              </Link>
+              </button>
 
               {/* SAVE */}
               <button
@@ -724,68 +722,132 @@ const NewsHero = ({ news: externalNews }) => {
         </div>
 
         {/* ── THUMBNAIL STRIP + DOTS ── */}
-        {data.length > 1 && (
-          <div className="flex items-center gap-2 px-1">
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              {data.map((item, i) => (
+        {data.length > 1 &&
+          (() => {
+            const scrollRef = useRef(null);
+
+            const scrollBy = (dir) => {
+              if (scrollRef.current) {
+                scrollRef.current.scrollBy({
+                  left: dir * 120,
+                  behavior: "smooth",
+                });
+              }
+            };
+
+            return (
+              <div className="flex items-center gap-2 px-1">
+                {/* LEFT ARROW */}
                 <button
-                  key={item.id}
                   onClick={() => {
-                    goTo(i);
-                    startTimer();
+                    scrollBy(-1);
+                    nav(() => goTo((current - 1 + data.length) % data.length));
                   }}
-                  className="relative overflow-hidden rounded-lg border-2 border-zinc-500 shrink-0 transition-all duration-300"
+                  className="shrink-0 flex items-center justify-center rounded-full text-white transition-all"
                   style={{
-                    width:
-                      i === current ? (isMobile ? 64 : 80) : isMobile ? 40 : 52,
-                    height: isMobile ? 34 : 40,
-                    // border:
-                    //   i === current
-                    //     ? `1.5px solid ${data[i].categoryColor}`
-                    //     : "0.5px solid rgba(255,255,255,0.1)",
-                    opacity: i === current ? 1 : 0.45,
+                    width: 22,
+                    height: 22,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "0.5px solid rgba(255,255,255,0.15)",
+                    display: isMobile
+                      ? "flex"
+                      : data.length > 6
+                        ? "flex"
+                        : "none",
                   }}
                 >
-                  <img
-                    src={item.mobileThumbnail}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                  {i === current && (
-                    <>
-                      <div
-                        className="absolute inset-0"
-                        style={{ background: "rgba(0,0,0,0.25)" }}
-                      />
-                      <div
-                        className="absolute bottom-0 left-0 bg-black right-0 h-[2px]"
-                        // style={{ background: item.categoryColor }}
-                      />
-                    </>
-                  )}
+                  <FaChevronLeft size={8} />
                 </button>
-              ))}
-            </div>
-            <div className="flex-1" />
-            <div className="flex items-center gap-1.5 shrink-0">
-              {data.map((item, i) => (
+
+                {/* THUMBNAILS */}
+                <div
+                  ref={scrollRef}
+                  className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1"
+                >
+                  {data.map((item, i) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        goTo(i);
+                        startTimer();
+                      }}
+                      className="relative overflow-hidden rounded-lg border-2 border-zinc-500 shrink-0 transition-all duration-300"
+                      style={{
+                        width:
+                          i === current
+                            ? isMobile
+                              ? 64
+                              : 80
+                            : isMobile
+                              ? 40
+                              : 52,
+                        height: isMobile ? 34 : 40,
+                        opacity: i === current ? 1 : 0.45,
+                      }}
+                    >
+                      <img
+                        src={item.mobileThumbnail}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      {i === current && (
+                        <>
+                          <div
+                            className="absolute inset-0"
+                            style={{ background: "rgba(0,0,0,0.25)" }}
+                          />
+                          <div className="absolute bottom-0 left-0 bg-black right-0 h-[2px]" />
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                {/* RIGHT ARROW */}
                 <button
-                  key={i}
                   onClick={() => {
-                    goTo(i);
-                    startTimer();
+                    scrollBy(1);
+                    nav(() => goTo((current + 1) % data.length));
                   }}
-                  className="rounded-full transition-all duration-300"
+                  className="shrink-0 flex items-center justify-center rounded-full text-white transition-all"
                   style={{
-                    width: i === current ? 18 : 5,
-                    height: 5,
-                    background: "rgba(255,255,255,0.5)",
+                    width: 22,
+                    height: 22,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "0.5px solid rgba(255,255,255,0.15)",
+                    display: isMobile
+                      ? "flex"
+                      : data.length > 6
+                        ? "flex"
+                        : "none",
                   }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+                >
+                  <FaChevronRight size={8} />
+                </button>
+
+                <div className="flex-1" />
+
+                {/* DOTS */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {data.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        goTo(i);
+                        startTimer();
+                      }}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: i === current ? 18 : 5,
+                        height: 5,
+                        background: "rgba(255,255,255,0.5)",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
       </div>
 
       {shareOpen && (

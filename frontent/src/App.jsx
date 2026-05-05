@@ -26,6 +26,8 @@ import AddNews from "./ADMIN/Dashboard/News/AddNews";
 import EditNews from "./ADMIN/Dashboard/News/EditNews";
 import TrashMovie from "./ADMIN/Dashboard/TrashMovie/TrashMovie";
 import { useWebsiteTracking } from "./hooks/useWebsiteTracking";
+import NewsPage from "./NewsSection/NewsPage";
+import NewsDetails from "./NewsSection/NewsDetailsSection/NewsDetails";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -103,7 +105,8 @@ const App = () => {
         <Route path="/stream" element={<StreamingNow />} />
 
         <Route path="/trailer" element={<Trailer />} />
-        <Route path="/news" element={<News />} />
+        <Route path="/news" element={<NewsPage />} />
+        <Route path="/news/:slug" element={<NewsDetails />} />
         <Route path="/about" element={<About />} />
         <Route path="/auth/login" element={<Login />} />
         <Route path="/movie/:slug" element={<MovieDetailsPage />} />
