@@ -91,6 +91,22 @@ const MovieDetailsPage = () => {
     }
   }, [slug]);
 
+  useEffect(() => {
+    const releaseDate =
+      movieData?.theattheatreReleaseDate || movieData?.ottReleaseDate;
+
+    let releaseYear = "";
+    if (releaseDate) {
+      releaseYear = releaseDate.match(/\d{4}/)?.[0] || "";
+    }
+
+    if (movieData?.title) {
+      document.title = releaseYear
+        ? `NextShow | ${movieData.title} (${releaseYear})`
+        : `NextShow | ${movieData.title}`;
+    }
+  }, [movieData]);
+
   // Loading Screen
   if (isPageLoading) {
     return <LoadingComponents />;

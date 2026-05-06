@@ -126,7 +126,7 @@ const NewsTrending = () => {
         <div className="flex items-center gap-2">
           {/* <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> */}
           <h3 className="text-gray-400 uppercase text-[11px] font-bold tracking-[1px]">
-            Trending Movies
+            Trending News
           </h3>
         </div>
         {/* <Link
