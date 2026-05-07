@@ -713,7 +713,7 @@ const NewsHero = ({ news: externalNews }) => {
             >
               <div
                 key={current}
-                className="h-full bg-zinc-700"
+                className="h-full bg-orange-500"
                 style={{
                   // background: news.categoryColor,
                   animation: "nsProgress 6.5s linear forwards",
@@ -734,7 +734,7 @@ const NewsHero = ({ news: externalNews }) => {
                     goTo(i);
                     startTimer();
                   }}
-                  className="relative overflow-hidden rounded-lg border-2 border-zinc-500 shrink-0 transition-all duration-300"
+                  className="relative overflow-hidden rounded-lg border-2 border-orange-500 shrink-0 transition-all duration-300"
                   style={{
                     width:
                       i === current ? (isMobile ? 64 : 80) : isMobile ? 40 : 52,
@@ -758,7 +758,7 @@ const NewsHero = ({ news: externalNews }) => {
                         style={{ background: "rgba(0,0,0,0.25)" }}
                       />
                       <div
-                        className="absolute bottom-0 left-0 bg-black right-0 h-[2px]"
+                        className="absolute bottom-0 left-0 bg-orange-500 right-0 h-[2px]"
                         // style={{ background: item.categoryColor }}
                       />
                     </>
@@ -779,7 +779,8 @@ const NewsHero = ({ news: externalNews }) => {
                   style={{
                     width: i === current ? 18 : 5,
                     height: 5,
-                    background: "rgba(255,255,255,0.5)",
+                    background:
+                      i === current ? "#f97316" : "rgba(255,255,255,0.3)",
                   }}
                 />
               ))}

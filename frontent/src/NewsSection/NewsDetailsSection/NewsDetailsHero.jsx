@@ -516,8 +516,59 @@ function VideoCarousel({ videos }) {
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────
 const NewsDetailHero = () => {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const pageRef = useRef(null);
+  useEffect(() => {
+    let ticking = false;
+
+    const updateScrollProgress = () => {
+      if (!pageRef.current) return;
+
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const element = pageRef.current;
+
+          const rect = element.getBoundingClientRect();
+
+          const elementTop = window.scrollY + rect.top;
+          const elementHeight = element.scrollHeight;
+
+          const scrollTop = window.scrollY;
+          const windowHeight = window.innerHeight;
+
+          const totalScrollable = elementHeight - windowHeight;
+
+          const currentScroll = scrollTop - elementTop;
+
+          const progress = (currentScroll / totalScrollable) * 100;
+
+          const clampedProgress = Math.min(Math.max(progress, 0), 100);
+
+          setScrollProgress(clampedProgress);
+
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", updateScrollProgress, { passive: true });
+
+    updateScrollProgress();
+
+    return () => window.removeEventListener("scroll", updateScrollProgress);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-zinc-300">
+    <div className="min-h-screen bg-[#0a0a0a] text-zinc-300" ref={pageRef}>
+      <div
+        className="fixed bottom-0 left-0 h-[3px] z-[9999] "
+        style={{
+          width: `${scrollProgress}%`,
+          background: "linear-gradient(to right, #f97316, #fb923c, #fdba74)",
+        }}
+      />
       <style>{`
         @keyframes imgProgress { from { width: 0% } to { width: 100% } }
       `}</style>
@@ -731,13 +782,15 @@ const NewsDetailHero = () => {
             <div className="sticky top-24 space-y-6">
               {/* Highlights */}
               <section
-                className="p-5 rounded-2xl"
+                className="p-5 rounded-2xl flex flex-col overflow-hidden "
                 style={{
                   background: "rgba(255,255,255,0.025)",
                   border: "0.5px solid rgba(255,255,255,0.07)",
+                  minHeight: "40vh",
+                  maxHeight: "74vh",
                 }}
               >
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-3 px-5 py-3 shrink-0  mb-5">
                   <div
                     style={{
                       width: 3,
@@ -751,7 +804,7 @@ const NewsDetailHero = () => {
                   </h2>
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-5 flex-1 overflow-y-auto no-scrollbar ">
                   {highlights.map((item, idx) => (
                     <div
                       key={idx}
@@ -780,15 +833,15 @@ const NewsDetailHero = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4
-                          className="text-[12px] font-semibold leading-snug line-clamp-2 transition-colors"
-                          style={{ color: "rgba(255,255,255,0.75)" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.color = "#f97316")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.color =
-                              "rgba(255,255,255,0.75)")
-                          }
+                          className="text-[12px] text-white/70 font-semibold leading-snug line-clamp-2 group-hover:text-white/90 transition-all "
+
+                          // onMouseEnter={(e) =>
+                          //   (e.currentTarget.style.color = "#f97316")
+                          // }
+                          // onMouseLeave={(e) =>
+                          //   (e.currentTarget.style.color =
+                          //     "rgba(255,255,255,0.75)")
+                          // }
                         >
                           {item.title}
                         </h4>
@@ -799,122 +852,6 @@ const NewsDetailHero = () => {
                           <Clock size={9} /> {item.time}
                         </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Newsletter */}
-              <section
-                className="p-6 rounded-2xl text-center"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(109,40,217,0.6), rgba(29,78,216,0.6))",
-                  border: "0.5px solid rgba(139,92,246,0.3)",
-                }}
-              >
-                <h3 className="text-[15px] font-black text-white mb-1">
-                  Join the Club
-                </h3>
-                <p className="text-white/60 text-xs mb-5 leading-relaxed">
-                  Get the latest movie updates directly in your inbox.
-                </p>
-                <div className="flex flex-col gap-2.5">
-                  <input
-                    type="email"
-                    placeholder="Your email address"
-                    className="px-4 py-2.5 rounded-xl text-xs text-white outline-none transition-all"
-                    style={{
-                      background: "rgba(255,255,255,0.1)",
-                      border: "0.5px solid rgba(255,255,255,0.2)",
-                    }}
-                    onFocus={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.18)")
-                    }
-                    onBlur={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.1)")
-                    }
-                  />
-                  <button
-                    className="py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
-                    style={{ background: "#fff", color: "#1a1a2e" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#f97316";
-                      e.currentTarget.style.color = "#fff";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.color = "#1a1a2e";
-                    }}
-                  >
-                    Subscribe
-                  </button>
-                </div>
-              </section>
-
-              {/* Quick Navigation */}
-              <section
-                className="p-5 rounded-2xl"
-                style={{
-                  background: "rgba(255,255,255,0.025)",
-                  border: "0.5px solid rgba(255,255,255,0.07)",
-                }}
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <div
-                    style={{
-                      width: 3,
-                      height: 16,
-                      background: "#f97316",
-                      borderRadius: 99,
-                    }}
-                  />
-                  <p className="text-[11px] font-black text-white uppercase tracking-widest">
-                    Quick Navigation
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  {[
-                    "Celebrity Gossip",
-                    "Box Office Report",
-                    "Coming Soon",
-                    "VFX Masterclass",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex justify-between items-center px-3 py-2.5 rounded-xl cursor-pointer transition-all group"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "0.5px solid transparent",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background =
-                          "rgba(255,255,255,0.07)";
-                        e.currentTarget.style.borderColor =
-                          "rgba(255,255,255,0.08)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background =
-                          "rgba(255,255,255,0.03)";
-                        e.currentTarget.style.borderColor = "transparent";
-                      }}
-                    >
-                      <span
-                        className="text-[12px] font-medium"
-                        style={{ color: "rgba(255,255,255,0.5)" }}
-                      >
-                        {item}
-                      </span>
-                      <ChevronRight
-                        size={14}
-                        style={{
-                          color: "rgba(255,255,255,0.2)",
-                          transition: "all 0.2s",
-                        }}
-                        className="group-hover:text-orange-500 group-hover:translate-x-0.5"
-                      />
                     </div>
                   ))}
                 </div>

@@ -120,7 +120,7 @@ const MovieGallery = ({ movie }) => {
       <div className="flex justify-between items-center mb-6 px-2">
         <div className="flex items-center gap-2 group cursor-pointer">
           <h2 className="text-2xl md:text-3xl font-black flex items-center uppercase tracking-wider">
-            Reviews & Clips
+            Videos
             <ChevronRight
               className="ml-2 group-hover:text-orange-500 transition-colors"
               size={28}
