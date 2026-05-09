@@ -1262,7 +1262,13 @@ const AdminMovieEditor = ({
                               <Select
                                 multiple
                                 open={openSelect === field.id}
-                                value={currentJsonData[field.id] || []}
+                                value={
+                                  Array.isArray(currentJsonData[field.id])
+                                    ? currentJsonData[field.id]
+                                    : currentJsonData[field.id]
+                                      ? [currentJsonData[field.id]]
+                                      : []
+                                }
                                 onOpen={() => setOpenSelect(field.id)}
                                 onClose={() => setOpenSelect(null)}
                                 onChange={(e) => {
@@ -1285,7 +1291,12 @@ const AdminMovieEditor = ({
                                       padding: "6px 0",
                                     }}
                                   >
-                                    {selected.map((val) => {
+                                    {(Array.isArray(selected)
+                                      ? selected
+                                      : selected
+                                        ? [selected]
+                                        : []
+                                    ).map((val) => {
                                       const option =
                                         field.options.find(
                                           (opt) =>
