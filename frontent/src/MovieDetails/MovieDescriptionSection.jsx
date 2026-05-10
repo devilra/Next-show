@@ -20,6 +20,7 @@ const MovieDescriptionSection = ({
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   // console.log("Hover", hover);
   // console.log("Rating", rating);
@@ -293,9 +294,105 @@ const MovieDescriptionSection = ({
           {/* ✨ Description Section with unique accent */}
           <div className="relative group">
             <div className="absolute left-1 top-0 w-1 md:w-1.5 h-full bg-gradient-to-b from-orange-500 to-yellow-500 rounded-tr-2xl rounded-br-2xl shadow-[0_0_15px_rgba(249,115,22,0.4)]" />
-            <p className="text-[13px] md:text-[15px] lg:text-[17px]  leading-relaxed text-gray-200  pl-6 transition-colors group-hover:text-white">
-              {movie.longDescription}
-            </p>
+            <div className="relative pl-6">
+              <p
+                className={`
+        text-[13px] md:text-[15px] lg:text-[17px]
+        leading-relaxed text-gray-200 transition-all duration-300
+        group-hover:text-white
+        ${showFullDescription ? "" : "line-clamp-2 md:line-clamp-2"}
+      `}
+              >
+                {movie.longDescription}
+              </p>
+            </div>
+            {/* Desktop Hover Tooltip */}
+            <div
+              className="
+    hidden md:block
+    absolute left-6 top-full mt-4
+    w-[500px]
+
+    opacity-0 invisible
+    group-hover:opacity-100
+    group-hover:visible
+
+    translate-y-2
+    group-hover:translate-y-0
+
+    transition-all duration-300
+
+    z-50
+    pointer-events-none
+  "
+            >
+              <div
+                className="
+      relative overflow-hidden
+
+      rounded-[26px]
+
+      border border-white/[0.10]
+
+      bg-gradient-to-br
+      from-zinc-950
+      via-neutral-900
+      to-neutral-950
+
+      backdrop-blur-3xl
+
+      px-6 py-5
+
+      shadow-[0_10px_45px_rgba(0,0,0,0.45)]
+
+      before:absolute
+      before:inset-0
+      before:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_38%)]
+
+      after:absolute
+      after:inset-0
+      after:bg-[linear-gradient(to_bottom_right,rgba(255,255,255,0.015),transparent)]
+
+      before:pointer-events-none
+      after:pointer-events-none
+    "
+              >
+                {/* Subtle Orange Glow */}
+                <div className="absolute -top-10 -right-10 w-28 h-28 bg-orange-500/10 blur-[70px] rounded-full" />
+
+                <p
+                  className="
+        relative z-10
+
+        text-[14px]
+        leading-8
+        tracking-[0.01em]
+
+        text-zinc-200
+      "
+                >
+                  {movie.longDescription}
+                </p>
+              </div>
+            </div>
+            {/* Mobile Read More */}
+            {movie.longDescription?.length > 120 && (
+              <button
+                onClick={() => setShowFullDescription(!showFullDescription)}
+                className="
+          md:hidden
+          mt-1 pl-6
+          text-orange-400
+          text-[12px]
+          font-semibold
+          tracking-wide
+          active:scale-95
+          transition-all
+        "
+              >
+                {showFullDescription ? "Read Less" : "Read More"}
+              </button>
+            )}
           </div>
 
           {/* 📋 Modern Credits Card */}

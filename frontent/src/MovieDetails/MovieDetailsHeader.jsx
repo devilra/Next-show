@@ -23,6 +23,7 @@ import VideoPlayer from "../Components/VideoPlayer";
 import MovieDescriptionSection from "./MovieDescriptionSection";
 import { CiStreamOn } from "react-icons/ci";
 import { motion, AnimatePresence } from "framer-motion"; // Framer Motion Import
+import ExpandableTooltip from "../Components/ExpandableTooltip";
 
 const MovieDetailsHeader = ({ movie }) => {
   console.log("Movie Details Header", movie);
@@ -45,6 +46,7 @@ const MovieDetailsHeader = ({ movie }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const trailerUrl = "https://youtu.be/zdu0YzzJ10o?si=tEbfZkJtD4F5ELlk";
   const [activeModal, setActiveModal] = useState(null); // 'boxOffice', 'theater', 'ott'
+  const [showFullTitle, setShowFullTitle] = useState(false);
 
   const boxOfficeData = movie?.boxOffice || {};
   const overAllBoxOffice = boxOfficeData?.overAllBoxOffice;
@@ -468,13 +470,122 @@ const MovieDetailsHeader = ({ movie }) => {
         {/* Left Side: Title & Info */}
         <div className="flex flex-col md:flex-col lg:flex-1  space-y-2 md:space-y-3 lg:space-y-4 ">
           <div className="flex flex-wrap items-center gap-4">
-            {/* Cinematic Title */}
-            <h1
-              title={`Movie: ${movie.title}`}
-              className="text-4xl truncate max-w-[300px]   text-white tracking-[1px] drop-shadow-2xl"
-            >
-              {movie.title}
-            </h1>
+            {/* 
+            <ExpandableTooltip
+  text={movie.longDescription}
+  lines={2}
+  mobileLimit={120}
+  position="center"
+  tooltipWidth="w-[500px]"
+  textClassName="
+    text-4xl    text-white tracking-[1px] drop-shadow-2xl transition-all duration-300
+  "
+/> */}
+            <div className="relative group/title max-w-[220px]">
+              {/* Cinematic Title */}
+              <h1
+                // title={`Movie: ${movie.title}`}
+                className={`text-4xl    text-white tracking-[1px] drop-shadow-2xl transition-all duration-300   ${
+                  showFullTitle ? "" : "line-clamp-1 md:line-clamp-1"
+                }`}
+              >
+                {movie.title}
+              </h1>
+
+              {/* Desktop Hover Full Title */}
+              <div
+                className="
+    hidden md:block
+
+    absolute left-0 top-full mt-4
+
+    opacity-0 invisible
+    group-hover/title:opacity-100
+    group-hover/title:visible
+
+    translate-y-2
+    group-hover/title:translate-y-0
+
+    transition-all duration-300
+
+    z-50
+    pointer-events-none
+
+    min-w-[280px]
+    max-w-[520px]
+  "
+              >
+                <div
+                  className="
+      relative overflow-hidden
+
+      rounded-[24px]
+
+     border border-white/[0.10]
+
+      bg-gradient-to-br
+      from-zinc-950
+      via-neutral-900
+      to-neutral-950
+
+      backdrop-blur-3xl
+
+      px-5 py-4
+
+      shadow-[0_10px_45px_rgba(0,0,0,0.45)]
+
+      before:absolute
+      before:inset-0
+      before:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_38%)]
+
+      after:absolute
+      after:inset-0
+      after:bg-[linear-gradient(to_bottom_right,rgba(255,255,255,0.015),transparent)]
+
+      before:pointer-events-none
+      after:pointer-events-none
+    "
+                >
+                  {/* Subtle Glow */}
+                  <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-500/10 blur-[65px] rounded-full" />
+
+                  <p
+                    className="
+        relative z-10
+
+        text-[15px]
+        leading-7
+        tracking-[0.01em]
+
+        font-semibold
+
+        text-zinc-100
+      "
+                  >
+                    {movie.title}
+                  </p>
+                </div>
+              </div>
+
+              {/* Mobile Expand Button */}
+              {movie.title?.length > 25 && (
+                <button
+                  onClick={() => setShowFullTitle(!showFullTitle)}
+                  className="
+        md:hidden
+        mt-1
+        text-orange-400
+        text-[11px]
+        font-medium
+        tracking-wide
+        active:scale-95
+        transition-all
+      "
+                >
+                  {showFullTitle ? "Show Less" : "Show Full"}
+                </button>
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               {/* Certification Badge with Glow */}
