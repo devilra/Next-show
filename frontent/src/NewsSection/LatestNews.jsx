@@ -469,6 +469,30 @@ const LatestNews = ({
 
       {/* ── CAROUSEL ── */}
       <div className="relative">
+        {/* ====================================================== */}
+        {/* ✅ EMPTY STATE */}
+        {/* ====================================================== */}
+
+        {!isLoading && !isError && latestNews?.length === 0 && (
+          <div className="w-full min-h-[400px] flex flex-col items-center justify-center text-center">
+            {/* ICON */}
+
+            <div className="text-5xl mb-5">📰</div>
+
+            {/* TITLE */}
+
+            <h2 className="text-white text-2xl font-black mb-3 uppercase tracking-wide">
+              No Latest News
+            </h2>
+
+            {/* DESCRIPTION */}
+
+            <p className="text-white/35 text-sm md:text-base max-w-md leading-relaxed">
+              Latest news articles are not available right now. Please check
+              again later.
+            </p>
+          </div>
+        )}
         {/* Left edge fade */}
         <div
           className="absolute left-0 top-0 bottom-0 w-14 z-10 pointer-events-none"

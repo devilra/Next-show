@@ -190,6 +190,27 @@ const NewsTrending = ({
     );
   }
 
+  {
+    !isLoading && !isError && trendingNews?.length === 0 && (
+      <div className="flex flex-col items-center justify-center min-h-[400px] px-6 text-center">
+        {/* ICON */}
+
+        <div className="text-4xl mb-4">🔥</div>
+
+        {/* TITLE */}
+
+        <h3 className="text-white text-lg font-bold mb-2">No Trending News</h3>
+
+        {/* DESCRIPTION */}
+
+        <p className="text-white/35 text-sm leading-relaxed max-w-[240px]">
+          Trending stories are not available right now. Please check again
+          later.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-auto md:h-[74vh] mt-5 md:mt-20 bg-[#0d1017] flex flex-col border-t md:border-t-0 md:border-l border-gray-800/50">
       {/* ── HEADER ── */}
@@ -227,6 +248,28 @@ const NewsTrending = ({
 
       {/* ── NEWS LIST ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
+        {/* ====================================================== */}
+        {/* ✅ EMPTY STATE */}
+        {/* ====================================================== */}
+
+        {!isLoading && !isError && trendingNews?.length === 0 && (
+          <div className="flex flex-col items-center justify-center min-h-[400px] px-6 text-center">
+            {/* ICON */}
+
+            {/* TITLE */}
+
+            <h3 className="text-white text-lg font-bold mb-2">
+              No Trending News
+            </h3>
+
+            {/* DESCRIPTION */}
+
+            <p className="text-white/35 text-sm leading-relaxed max-w-[240px]">
+              Trending stories are not available right now. Please check again
+              later.
+            </p>
+          </div>
+        )}
         {trendingNews?.map((news, index) => {
           const category = news?.categories?.[0] || "NEWS";
           const hasVideo = news?.videoUrl?.length > 0;

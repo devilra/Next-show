@@ -504,6 +504,39 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
     );
   }
 
+  if (!isLoading && !isError && heroNews?.length === 0) {
+    return (
+      <div className="w-full space-y-2.5 mt-20 md:space-y-3">
+        <div
+          className="relative w-full overflow-hidden  bg-zinc-950 border border-red-500/20 flex flex-col items-center justify-center px-6 text-center"
+          style={{
+            height: isMobile ? "45vh" : "74vh",
+            minHeight: isMobile ? 280 : 420,
+          }}
+        >
+          <div className="text-center px-6">
+            {/* ICON */}
+
+            <div className="text-5xl mb-5">📰</div>
+
+            {/* TITLE */}
+
+            <h2 className="text-white text-2xl font-bold mb-3">
+              No News Available
+            </h2>
+
+            {/* DESCRIPTION */}
+
+            <p className="text-white/40 text-sm max-w-md leading-relaxed">
+              There are currently no featured news updates available. Please
+              check back later for the latest stories.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-full space-y-2.5 mt-20 md:space-y-3">

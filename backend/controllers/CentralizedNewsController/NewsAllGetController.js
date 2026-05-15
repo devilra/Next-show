@@ -82,8 +82,8 @@ exports.getLatestNews = async (req, res) => {
     // ======================================================
 
     if (!latestNews || latestNews.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No latest news found.",
         totalNews: 0,
         data: [],
@@ -207,8 +207,8 @@ exports.getHeroTrendingNews = async (req, res) => {
     // ✅ EMPTY CHECK
     // ======================================================
     if (!heroNews || heroNews.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No news found.",
         totalNews: 0,
         data: [],
@@ -339,8 +339,8 @@ exports.getTrendingNews = async (req, res) => {
     // ✅ EMPTY CHECK
     // ======================================================
     if (!trendingNews || trendingNews.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No trending news found.",
         totalNews: 0,
         data: [],
