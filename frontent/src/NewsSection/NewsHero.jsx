@@ -17,6 +17,8 @@ import { HiSparkles } from "react-icons/hi2";
 import { MdVerified, MdOpenInNew } from "react-icons/md";
 import { BsBookmark, BsBookmarkFill, BsPlayCircleFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import moment from "moment";
+import { ImSpinner9 } from "react-icons/im";
 
 // ─────────────────────────────────────────────────────────
 // DUMMY DATA
@@ -302,8 +304,8 @@ function ReactionRow({ initial }) {
 // MAIN HERO COMPONENT
 // ─────────────────────────────────────────────────────────
 
-const NewsHero = ({ news: externalNews }) => {
-  const data = externalNews ? [externalNews] : heroNews;
+const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
+  const data = heroNews || [];
 
   const [current, setCurrent] = useState(0);
   const [saved, setSaved] = useState({});
@@ -315,6 +317,80 @@ const NewsHero = ({ news: externalNews }) => {
   const touchStart = useRef(null);
 
   const news = data[current];
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+
+  // ======================================================
+  // ✅ HANDLE IMAGE URL
+  // ======================================================
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return "/placeholder.jpg";
+    }
+    // ======================================================
+    // ✅ GOOGLE / CLOUD / FULL URL
+    // ======================================================
+
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+
+    // ======================================================
+    // ✅ LOCAL UPLOAD IMAGE
+    // ======================================================
+    return `${IMAGE_BASE_URL}${imagePath}`;
+  };
+
+  // ======================================================
+  // ✅ HANDLE YOUTUBE EMBED URL
+  // ======================================================
+
+  const getYoutubeEmbedUrl = (url) => {
+    if (!url) {
+      return null;
+    }
+
+    try {
+      // ======================================================
+      // ✅ SHORT URL
+      // https://youtu.be/xxxx
+      // ======================================================
+
+      if (url.includes("youtu.be")) {
+        const videoId = url.split("/").pop().split("?")[0];
+
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+
+      // ======================================================
+      // ✅ NORMAL URL
+      // https://youtube.com/watch?v=xxxx
+      // ======================================================
+
+      if (url.includes("watch?v=")) {
+        const urlObj = new URL(url);
+
+        const videoId = urlObj.searchParams.get("v");
+
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+
+      // ======================================================
+      // ✅ ALREADY EMBED URL
+      // ======================================================
+
+      if (url.includes("/embed/")) {
+        return url;
+      }
+
+      return null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const firstVideoUrl = news?.videoUrl?.[0] || null;
+  const embedVideoUrl = getYoutubeEmbedUrl(firstVideoUrl);
+  const hasVideo = !!embedVideoUrl;
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -370,6 +446,64 @@ const NewsHero = ({ news: externalNews }) => {
     touchStart.current = null;
   };
 
+  // ======================================================
+  // ✅ RELATIVE TIME FORMAT
+  // ======================================================
+  const getRelativeTime = (date) => {
+    return moment(date).fromNow();
+  };
+
+  // ======================================================
+  // ✅ LOADING UI
+  // ======================================================
+
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-2.5 mt-20 md:space-y-3">
+        <div
+          className="relative w-full overflow-hidden rounded-2xl bg-zinc-950 border border-white/5 flex items-center justify-center"
+          style={{
+            height: isMobile ? "45vh" : "74vh",
+            minHeight: isMobile ? 280 : 420,
+          }}
+        >
+          <ImSpinner9 className="text-orange-500 text-4xl animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // ======================================================
+  // ✅ ERROR UI
+  // ======================================================
+
+  if (isError) {
+    return (
+      <div className="w-full space-y-2.5 mt-20 md:space-y-3">
+        <div
+          className="relative w-full overflow-hidden  bg-zinc-950 border border-red-500/20 flex flex-col items-center justify-center px-6 text-center"
+          style={{
+            height: isMobile ? "45vh" : "74vh",
+            minHeight: isMobile ? 280 : 420,
+          }}
+        >
+          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+            <span className="text-red-500 text-2xl">!</span>
+          </div>
+
+          <h2 className="text-white text-xl  mb-2">Failed to load hero news</h2>
+          {/* RETRY BUTTON */}
+          <button
+            onClick={() => refetch()}
+            className="px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition text-white text-sm font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="w-full space-y-2.5 mt-20 md:space-y-3">
@@ -385,9 +519,9 @@ const NewsHero = ({ news: externalNews }) => {
         >
           {/* BG IMAGE */}
           <img
-            key={news.id}
-            src={isMobile ? news.mobileThumbnail : news.thumbnail}
-            alt="hero"
+            // key={news.id}
+            src={getImageUrl(news?.newsImages?.[0])}
+            alt={news?.title}
             className="absolute inset-0 w-full h-full object-cover"
             style={{
               transition: "opacity 0.45s ease",
@@ -440,7 +574,7 @@ const NewsHero = ({ news: externalNews }) => {
 
             {/* Right: mute btn + slide counter */}
             <div className="flex items-center gap-2">
-              {news.hasVideo && (
+              {hasVideo && (
                 <button
                   onClick={() => setMuted((m) => !m)}
                   className="p-2 rounded-full text-white transition"
@@ -496,7 +630,7 @@ const NewsHero = ({ news: externalNews }) => {
                 maxWidth: 700,
               }}
             >
-              {news.title}
+              {news?.title}
             </h1>
 
             {/* Summary */}
@@ -504,42 +638,47 @@ const NewsHero = ({ news: externalNews }) => {
               className="hidden sm:block text-zinc-300/90 leading-relaxed mb-3 md:mb-4"
               style={{ fontSize: isMobile ? 12 : 14, maxWidth: 620 }}
             >
-              {news.summary}
+              {news?.shortDescription}
             </p>
 
             {/* Meta */}
             <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-3">
-              <RatingStars value={news.rating} />
-              <span className="text-white/15">|</span>
+              {/* <RatingStars value={news.rating} /> */}
+              {/* <span className="text-white/15">|</span> */}
 
               {/* Author */}
               <div className="flex items-center gap-1.5">
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"
-                  style={{ background: news.categoryColor }}
+                  // style={{ background: news.categoryColor }}
                 >
-                  {news.authorAvatar}
+                  {news?.authorName[0]}
                 </span>
                 <span className="text-[10px] md:text-[11px] text-zinc-400">
-                  {news.author}
+                  {news?.authorName}
                 </span>
-                {news.isVerified && (
-                  <MdVerified
-                    className="text-blue-400"
-                    style={{ fontSize: 11 }}
-                  />
-                )}
               </div>
 
-              <span className="text-white/15">·</span>
-              <span className="text-[10px] md:text-[11px] text-zinc-500">
-                {news.date}
-              </span>
+              <span className="w-1 h-1 rounded-full bg-zinc-600" />
+              <div className="flex items-center gap-2">
+                {/* FORMATTED DATE */}
+                <span className="text-[10px] md:text-[11px] text-zinc-500">
+                  {news?.formattedDate}
+                </span>
+
+                {/* DOT */}
+                <span className="w-1 h-1 rounded-full bg-zinc-600" />
+
+                {/* RELATIVE TIME */}
+                <span className="text-[10px] md:text-[11px] text-zinc-500">
+                  {getRelativeTime(news?.publishedAt)}
+                </span>
+              </div>
 
               {/* Desktop extras */}
               <span className="text-white/15 hidden md:inline">|</span>
               <span className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400">
-                <FaEye style={{ fontSize: 10 }} /> {news.viewCount}
+                {/* <FaEye style={{ fontSize: 10 }} /> {news.viewCount} */}
               </span>
               <span className="text-white/15 hidden md:inline">|</span>
               <span className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400">
@@ -547,7 +686,7 @@ const NewsHero = ({ news: externalNews }) => {
                   className="text-amber-400"
                   style={{ fontSize: 12 }}
                 />
-                {news.readTime}
+                {news?.readTime}
               </span>
               <span className="text-white/15 hidden md:inline">|</span>
               {/* <span className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400">
@@ -591,14 +730,20 @@ const NewsHero = ({ news: externalNews }) => {
 
             {/* Reactions */}
             <div className="mb-3 md:mb-5">
-              <ReactionRow initial={news.reactions} />
+              <ReactionRow
+                initial={{
+                  fire: 0,
+                  wow: 0,
+                  heart: 0,
+                }}
+              />
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
               {/* READ MORE */}
               <Link
-                to={`/news/${news.relatedMovie?.slug || "default-news"} `}
+                to={`/news/${news?.slug}`}
                 className="flex items-center gap-1.5 md:gap-2 cursor-pointer text-white font-bold rounded-xl transition-all duration-200"
                 style={{
                   // background: `linear-gradient(135deg, ${news.categoryColor}, ${news.categoryColor}bb)`,
@@ -616,7 +761,7 @@ const NewsHero = ({ news: externalNews }) => {
               </Link>
 
               {/* SAVE */}
-              <button
+              {/* <button
                 onClick={() =>
                   setSaved((s) => ({ ...s, [news.id]: !s[news.id] }))
                 }
@@ -641,7 +786,7 @@ const NewsHero = ({ news: externalNews }) => {
                 <span className="hidden sm:inline">
                   {saved[news.id] ? "SAVED" : "SAVE"}
                 </span>
-              </button>
+              </button> */}
 
               {/* SHARE */}
               <button
@@ -747,8 +892,8 @@ const NewsHero = ({ news: externalNews }) => {
                   }}
                 >
                   <img
-                    src={item.mobileThumbnail}
-                    alt=""
+                    src={getImageUrl(item?.newsImages?.[0])}
+                    alt={item?.title || "news-thumbnail"}
                     className="w-full h-full object-cover"
                   />
                   {i === current && (

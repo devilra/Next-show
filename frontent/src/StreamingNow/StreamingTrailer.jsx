@@ -94,15 +94,14 @@ const MovieCard = ({ movie }) => {
   return (
     <Link
       to={`/movie/${movie.slug}`}
-      className="block p-3 outline-none" // Width konjam increase panna p-3
+      className="block p-1.5 outline-none md:p-3" // Width konjam increase panna p-3
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       <div
-        className="relative overflow-hidden w-full max-w-[400px]" // Card width increased
+        className="relative h-[245px] w-full max-w-[400px] overflow-hidden sm:h-[300px] md:h-[320px]" // Card width increased
         style={{
-          borderRadius: 24,
-          height: 320, // Height increased to match width
+          borderRadius: 18,
           transition:
             "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease",
           transform: hovered ? "scale(1.05)" : "scale(1)",
@@ -156,13 +155,13 @@ const MovieCard = ({ movie }) => {
 
         {/* ── BOTTOM INFO (Hides on hover) ── */}
         <div
-          className="absolute -bottom-4 left-0 right-0 z-10 px-5 pb-6 transition-all duration-300"
+          className="absolute -bottom-3 left-0 right-0 z-10 px-4 pb-5 transition-all duration-300 md:-bottom-4 md:px-5 md:pb-6"
           style={{
             opacity: hovered ? 0 : 1,
             transform: hovered ? "translateY(10px)" : "translateY(0)",
           }}
         >
-          <h3 className="text-white  text-[30px] md:text-[32px] lg:text-[33px] truncate leading-tight mb-2 drop-shadow-lg">
+          <h3 className="mb-1.5 truncate text-[23px] leading-tight text-white drop-shadow-lg md:mb-2 md:text-[32px] lg:text-[33px]">
             {movie.title}
           </h3>
           <div className="flex items-center gap-2 flex-wrap text-[11px]  text-white/60">
@@ -289,14 +288,14 @@ const StreamingTrailer = ({ newReleases, trendingStream = [] }) => {
   const mobileSettings = {
     ...settings,
     slidesToShow: 1,
-    centerPadding: "48px",
+    centerPadding: "24px",
     arrows: false,
   };
 
   // if (!newMovies || newMovies.length === 0) return null;
 
   return (
-    <div className="bg-[#0f0f0f] pb-5 pt-1 px-0 md:px-4">
+    <div className="bg-[#0f0f0f] px-0 pb-3 pt-0 md:px-4 md:pb-5 md:pt-1">
       {/* Desktop / Tablet */}
       {trendingStream && trendingStream.length > 0 ? (
         <>

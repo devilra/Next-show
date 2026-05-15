@@ -4,31 +4,20 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // backend root-la irunthu public/uploads/casts folder-ku path set pandrom
-    const uploadPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "public",
-      "uploads",
-      "casts",
-    );
+    // Standard Path: Root -> public -> uploads -> casts
+    const uploadPath = path.join(__dirname, "..", "public", "uploads", "casts");
 
-    // Folder illana create pannuvom
+    // Folder illana mattum create pannum, irundha thodava thoduadhu (No deletion)
     if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, {
-        recursive: true,
-      });
+      fs.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    // Example: cast-1713800000-123456789.jpg
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() + 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
-    );
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    // e.g., cast-1715264321000.jpg
+    cb(null, `cast-${uniqueSuffix}${ext}`);
   },
 });
 
@@ -36,16 +25,16 @@ const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
-    cb(new Error("Images are allowed!"), false);
+    cb(new Error("Only images are allowed!"), false);
   }
 };
 
-const upload = multer({
+const uploadCasts = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024, // 5MB limit for casts
   },
 });
 
-module.exports = upload;
+module.exports = uploadCasts;

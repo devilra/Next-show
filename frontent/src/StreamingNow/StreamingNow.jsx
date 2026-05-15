@@ -33,7 +33,7 @@ const StreamingNow = () => {
   //console.log(streamingData);
 
   const tabs = [
-    { key: "newRelease", label: "New Release" },
+    { key: "newRelease", label: "New Releases" },
     { key: "upcoming", label: "Upcoming" },
     { key: "trending", label: "Trending" },
   ];
@@ -70,18 +70,18 @@ const StreamingNow = () => {
   }
 
   return (
-    <div className="mt-16">
-      <div className="rounded-[28px] border border-white/10 shadow-2xl shadow-black/30 overflow-hidden">
-        <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-zinc-950 px-5 py-6 md:px-8 md:py-8">
-          <div className="flex flex-wrap items-center gap-3">
+    <div className="mt-20 md:mt-16">
+      <div className="overflow-hidden rounded-[18px] border border-white/10 shadow-2xl shadow-black/30 md:rounded-[28px]">
+        <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-zinc-950 px-3 py-3 md:px-8 md:py-8">
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-3">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`rounded-full px-5 py-3 text-sm font-semibold transition cursor-pointer select-auto duration-200 ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-xs font-semibold transition cursor-pointer select-auto duration-200 sm:text-sm md:px-5 md:py-3 ${
                   activeTab === tab.key
-                    ? "bg-orange-500 shadow-lg shadow-orange-500/30 "
+                    ? "bg-orange-500 shadow-md shadow-orange-500/25 md:shadow-lg md:shadow-orange-500/30 "
                     : "bg-white/5 text-slate-300 hover:bg-white/10"
                 }`}
               >
@@ -91,7 +91,7 @@ const StreamingNow = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/10 px-0 py-2 md:px-2">
+        <div className="border-t border-white/10 px-0 py-0 md:px-2 md:py-2">
           {activeTab === "newRelease" && (
             <StreamingNewRelease
               newReleases={streamingData.newReleases}

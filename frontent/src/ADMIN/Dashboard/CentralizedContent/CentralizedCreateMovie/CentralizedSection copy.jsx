@@ -30,10 +30,6 @@ import UploadMovies from "./UploadMovies";
 import CentralizedJsonMovie from "./CentralizedJsonMovie";
 import CentralizedJsonMovieDetails from "./CentralizedJsonMovieDetails";
 import { MdNewspaper } from "react-icons/md";
-import CentralizedNews from "../CentralizedNewsSection/CentralizedNews";
-import UploadNews from "../CentralizedNewsSection/UploadNews";
-import CentralizedNewsDetails from "../CentralizedNewsSection/CentralizedNewsDetails";
-import NewsJsonEditor from "../CentralizedNewsSection/NewsJsonEditor";
 
 const centralizedTabs = [
   {
@@ -61,7 +57,6 @@ const CentralizedSection = () => {
   const [currentContent, setCurrentContent] = useState(null);
   const [snack, setSnack] = useState({ open: false, msg: "", type: "info" });
   const [bulkData, setBulkData] = useState([]);
-  const [bulkNewsData, setBulkNewsData] = useState([]);
   const [activeTab, setActiveTab] = useState("json"); // "json" or "centralized"
   const [selectedJsonMovie, setSelectedJsonMovie] = useState(null);
 
@@ -69,10 +64,7 @@ const CentralizedSection = () => {
 
   // 🔄 UI Switching State
   const [showBulkUpload, setShowBulkUpload] = useState(false);
-  const [selectedNews, setSelectedNews] = useState(null);
-  const [showNewsUpload, setShowNewsUpload] = useState(false);
   const [isEditorActive, setIsEditorActive] = useState(false); // New state to switch between Upload UI and Editor UI
-  const [isNewsEditorActive, setIsNewsEditorActive] = useState(false); // New state to switch between Upload UI and Editor UI
 
   const { movies, isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.centralizedMovies,
@@ -191,47 +183,10 @@ const CentralizedSection = () => {
     reader.readAsText(file);
   };
 
-  const handleNewsFileProcessing = (file) => {
-    NProgress.start();
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-
-        if (Array.isArray(jsonData)) {
-          // ✅ News validation later add pannalam
-          const validatedNewsData = jsonData.map((news) => ({
-            ...news,
-            __errors: [],
-          }));
-
-          setBulkNewsData(validatedNewsData);
-
-          setIsNewsEditorActive(true);
-
-          setAlert(
-            "success",
-            `${validatedNewsData.length} news loaded successfully`,
-          );
-        } else {
-          setAlert("error", "Invalid News JSON! Must be array");
-        }
-      } catch {
-        setAlert("error", "Invalid News JSON format");
-      } finally {
-        NProgress.done();
-      }
-    };
-
-    reader.readAsText(file);
-  };
-
   return (
     <div className="p-2 md:p-2 bg-gray-50 min-h-screen overflow-hidden relative">
       <AnimatePresence>
-        {!showBulkUpload && !showNewsUpload && (
+        {!showBulkUpload ? (
           <motion.div
             key="table-ui"
             initial={{ x: 0, opacity: 1 }}
@@ -252,14 +207,14 @@ const CentralizedSection = () => {
               </div>
               <div className="flex gap-3">
                 {/* 🆕 UPLOAD MOVIE BUTTON */}
-                {/* <Button
+                <Button
                   variant="outlined"
                   onClick={() => setShowBulkUpload(true)}
                   className="border-indigo-600 text-indigo-600 hover:bg-indigo-50 normal-case px-5 py-2 rounded-xl font-bold"
                   startIcon={<FaCloudArrowUp />}
                 >
                   Upload Movies
-                </Button> */}
+                </Button>
                 <Button
                   variant="contained"
                   onClick={() => {
@@ -312,9 +267,9 @@ const CentralizedSection = () => {
 
             {/* 🔄 CONDITIONAL CONTENT RENDERING */}
 
-            {activeTab === "json" &&
+            {activeTab === "json" ? (
               // Logic: Details state irundha Details Component, illana List Component
-              (selectedJsonMovie ? (
+              selectedJsonMovie ? (
                 <motion.div
                   initial={{ x: 50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -327,12 +282,10 @@ const CentralizedSection = () => {
               ) : (
                 <CentralizedJsonMovie
                   setAlert={setAlert}
-                  setShowBulkUpload={setShowBulkUpload}
                   onMovieSelect={(movie) => setSelectedJsonMovie(movie)}
                 />
-              ))}
-
-            {activeTab === "centralized" && (
+              )
+            ) : (
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {isLoading && movies.length === 0 ? (
                   <div className="flex flex-col justify-center items-center h-64">
@@ -474,28 +427,8 @@ const CentralizedSection = () => {
                 )}
               </div>
             )}
-
-            {activeTab === "news" &&
-              (selectedNews ? (
-                <motion.div
-                  initial={{ x: 50, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                >
-                  <CentralizedNewsDetails
-                    news={selectedNews}
-                    onClose={() => setSelectedNews(null)}
-                  />
-                </motion.div>
-              ) : (
-                <CentralizedNews
-                  setAlert={setAlert}
-                  setShowNewsUpload={setShowNewsUpload}
-                  onNewsSelect={(news) => setSelectedNews(news)}
-                />
-              ))}
           </motion.div>
-        )}
-        {showBulkUpload && (
+        ) : (
           <motion.div
             key="editor-ui"
             initial={{ x: "100%", opacity: 0 }} // Start from right
@@ -536,58 +469,6 @@ const CentralizedSection = () => {
                     setBulkData={setBulkData}
                     setAlert={setAlert}
                     modalOpen={setIsModalOpen}
-                  />
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ------------------News Upload Component------------------------------ */}
-        {showNewsUpload && (
-          <motion.div
-            key="editor-ui"
-            initial={{ x: "100%", opacity: 0 }} // Start from right
-            animate={{ x: 0, opacity: 1 }} // Slide to center
-            exit={{ x: "100%", opacity: 0 }} // Slide back to right
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 min-h-[85vh] flex flex-col">
-              <header className="p-5 border-b border-gray-100 flex justify-between items-center bg-indigo-50/50 rounded-t-2xl">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setShowNewsUpload(false)}
-                    className="p-2 hover:bg-white rounded-full text-indigo-600 transition-all shadow-sm"
-                  >
-                    <FaArrowLeft size={18} />
-                  </button>
-                  <div>
-                    <h2 className="text-lg  text-gray-800">Bulk News Upload</h2>
-                    {/* <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">
-                      Editor Mode
-                    </p> */}
-                  </div>
-                </div>
-              </header>
-              <div className="flex-grow  flex items-center justify-center ">
-                {/* CONDITIONAL SWITCH: Upload UI or Editor UI */}
-                {!isNewsEditorActive ? (
-                  <UploadNews
-                    onBack={() => setShowNewsUpload(false)}
-                    onFileSelect={handleNewsFileProcessing}
-                    setAlert={setAlert}
-                  />
-                ) : (
-                  <NewsJsonEditor
-                    initialData={bulkNewsData} // 🆕 Parsed data-va anuprom
-                    onBack={() => setIsEditorActive(false)}
-                    validateMovie={validateMovie}
-                    setBulkNewsData={setBulkNewsData}
-                    setAlert={setAlert}
-                    modalOpen={setIsModalOpen}
-                    setActiveTab={setActiveTab}
-                    setShowNewsUpload={setShowNewsUpload}
-                    setIsNewsEditorActive={setIsNewsEditorActive}
                   />
                 )}
               </div>

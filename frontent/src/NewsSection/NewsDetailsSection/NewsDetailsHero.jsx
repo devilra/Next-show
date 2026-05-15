@@ -13,54 +13,8 @@ import {
   VolumeX,
 } from "lucide-react";
 import { motion } from "framer-motion";
-
-// ─────────────────────────────────────────────────────────
-// DUMMY DATA
-// ─────────────────────────────────────────────────────────
-const articleImages = [
-  "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1200&q=80",
-  "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=1200&q=80",
-  "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&q=80",
-  "https://images.unsplash.com/photo-1616530940355-351fabd9524b?w=1200&q=80",
-];
-
-const articleVideos = [
-  {
-    id: 1,
-    thumb:
-      "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1200&q=80",
-    label: "Official Teaser — Kaaviya Kaadhal",
-    duration: "1:42",
-  },
-  {
-    id: 2,
-    thumb:
-      "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=1200&q=80",
-    label: "Behind the Scenes — Day 1 Shoot",
-    duration: "3:18",
-  },
-  {
-    id: 3,
-    thumb:
-      "https://images.unsplash.com/photo-1512070679279-8988d32161be?w=1200&q=80",
-    label: "Director Interview — Hariharasuthan",
-    duration: "5:05",
-  },
-  // {
-  //   id: 3,
-  //   thumb:
-  //     "https://images.unsplash.com/photo-1512070679279-8988d32161be?w=1200&q=80",
-  //   label: "Director Interview — Hariharasuthan",
-  //   duration: "5:05",
-  // },
-  // {
-  //   id: 3,
-  //   thumb:
-  //     "https://images.unsplash.com/photo-1512070679279-8988d32161be?w=1200&q=80",
-  //   label: "Director Interview — Hariharasuthan",
-  //   duration: "5:05",
-  // },
-];
+import moment from "moment";
+import { ImSpinner9 } from "react-icons/im";
 
 const highlights = [
   {
@@ -84,6 +38,78 @@ const highlights = [
     img: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&q=80",
   },
 ];
+
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+
+const getImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return "/placeholder.jpg";
+  }
+
+  // ======================================================
+  // ✅ GOOGLE / CLOUD / FULL URL
+  // ======================================================
+
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  // ======================================================
+  // ✅ LOCAL UPLOAD IMAGE
+  // ======================================================
+
+  return `${IMAGE_BASE_URL}${imagePath}`;
+};
+
+// ======================================================
+// ✅ YOUTUBE EMBED URL
+// ======================================================
+
+const getYoutubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  try {
+    // ======================================================
+    // ✅ SHORT URL
+    // ======================================================
+
+    if (url.includes("youtu.be")) {
+      const videoId = url.split("youtu.be/")[1]?.split("?")[0];
+
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // ======================================================
+    // ✅ NORMAL URL
+    // ======================================================
+
+    if (url.includes("youtube.com/watch")) {
+      const urlObj = new URL(url);
+
+      const videoId = urlObj.searchParams.get("v");
+
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+
+    // ======================================================
+    // ✅ ALREADY EMBED
+    // ======================================================
+
+    if (url.includes("youtube.com/embed")) {
+      return url;
+    }
+
+    return url;
+  } catch (error) {
+    return "";
+  }
+};
+
+const getRelativeTime = (date) => {
+  if (!date) return "";
+
+  return moment(date).fromNow();
+};
 
 // ─────────────────────────────────────────────────────────
 // GENERIC AUTO-SCROLL CAROUSEL HOOK
@@ -151,15 +177,15 @@ function ImageCarousel({ images }) {
       }}
     >
       {/* Images */}
-      {images.map((src, i) => (
+      {images.map((image, index) => (
         <img
-          key={i}
-          src={src}
+          key={index}
+          src={getImageUrl(image)}
           alt=""
           className="absolute inset-0 w-full h-full object-cover transition-all duration-500"
           style={{
-            opacity: i === current ? 1 : 0,
-            transform: i === current ? "scale(1)" : "scale(1.03)",
+            opacity: index === current ? 1 : 0,
+            transform: index === current ? "scale(1)" : "scale(1.03)",
           }}
         />
       ))}
@@ -281,228 +307,251 @@ function ImageCarousel({ images }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// VIDEO CAROUSEL
-// ─────────────────────────────────────────────────────────
-function VideoCarousel({ videos }) {
+// ======================================================
+// ✅ VIDEO CAROUSEL
+// ======================================================
+
+function VideoCarousel({ videos = [] }) {
+  // ======================================================
+  // ✅ CURRENT VIDEO KEY
+  // IFRAME FORCE RE-MOUNT
+  // ======================================================
+  const [videoKey, setVideoKey] = useState(0);
+
+  // ======================================================
+  // ✅ YOUTUBE VIDEO ID
+  // ======================================================
+
+  const getYoutubeVideoId = (url) => {
+    if (!url) return "";
+
+    try {
+      // ======================================================
+      // ✅ SHORT URL
+      // ======================================================
+
+      if (url.includes("youtu.be/")) {
+        return url.split("youtu.be/")[1]?.split("?")[0];
+      }
+
+      // ======================================================
+      // ✅ WATCH URL
+      // ======================================================
+
+      if (url.includes("youtube.com/watch")) {
+        const urlObj = new URL(url);
+
+        return urlObj.searchParams.get("v");
+      }
+
+      // ======================================================
+      // ✅ EMBED URL
+      // ======================================================
+
+      if (url.includes("youtube.com/embed/")) {
+        return url.split("embed/")[1]?.split("?")[0];
+      }
+
+      return "";
+    } catch (error) {
+      return "";
+    }
+  };
+
+  // ======================================================
+  // ✅ YOUTUBE EMBED URL
+  // ======================================================
+
+  const getYoutubeEmbedUrl = (url) => {
+    const videoId = getYoutubeVideoId(url);
+
+    if (!videoId) return "";
+
+    return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+  };
+
+  // ======================================================
+  // ✅ YOUTUBE THUMBNAIL
+  // ======================================================
+
+  const getYoutubeThumbnail = (url) => {
+    const videoId = getYoutubeVideoId(url);
+
+    if (!videoId) {
+      return "/placeholder.jpg";
+    }
+
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  };
+
+  // ======================================================
+  // ✅ EMPTY CHECK
+  // ======================================================
+
+  if (!videos || videos.length === 0) {
+    return null;
+  }
+
   const { current, prev, next, go, setPaused } = useCarousel(
     videos.length,
     5000,
   );
-  const [playing, setPlaying] = useState(null);
-  const touchStart = useRef(null);
 
-  if (!videos || videos.length === 0) return null;
+  // ======================================================
+  // ✅ RESET IFRAME WHEN VIDEO CHANGES
+  // PREVIOUS VIDEO STOP AAGUM
+  // ======================================================
+  useEffect(() => {
+    setVideoKey((prevKey) => prevKey + 1);
+  }, [current]);
+
+  // ======================================================
+  // ✅ CUSTOM NEXT
+  // ======================================================
+
+  const handleNext = () => {
+    next();
+  };
+
+  // ======================================================
+  // ✅ CUSTOM PREV
+  // ======================================================
+
+  const handlePrev = () => {
+    prev();
+  };
+
+  // ======================================================
+  // ✅ CUSTOM THUMB CLICK
+  // ======================================================
+
+  const handleThumbClick = (index) => {
+    go(index);
+  };
 
   return (
-    <div className="space-y-3">
-      {/* Label */}
+    <div className="space-y-4">
+      {/* ====================================================== */}
+      {/* ✅ LABEL */}
+      {/* ====================================================== */}
+
       <div className="flex items-center gap-2">
-        <div
-          style={{
-            width: 3,
-            height: 18,
-            background: "#f97316",
-            borderRadius: 99,
-          }}
-        />
+        <div className="w-[3px] h-5 rounded-full bg-orange-500" />
+
         <p className="text-sm font-semibold text-white/70">Video Coverage</p>
       </div>
 
-      {/* ── MAIN VIDEO PLAYER ── */}
+      {/* ====================================================== */}
+      {/* ✅ MAIN VIDEO */}
+      {/* ====================================================== */}
+
       <div
-        className="relative rounded-2xl overflow-hidden border border-white/10"
-        style={{ aspectRatio: "16/9", background: "#111" }}
+        className="relative rounded-2xl overflow-hidden border border-white/10 bg-black"
+        style={{ aspectRatio: "16/9" }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        onTouchStart={(e) => {
-          touchStart.current = e.touches[0].clientX;
-        }}
-        onTouchEnd={(e) => {
-          if (!touchStart.current) return;
-          const diff = touchStart.current - e.changedTouches[0].clientX;
-          if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
-          touchStart.current = null;
-        }}
       >
-        {/* Slides */}
-        {videos.map((video, i) => (
+        {/* ====================================================== */}
+        {/* ✅ VIDEO SLIDES */}
+        {/* ====================================================== */}
+
+        {videos.map((video, index) => (
           <div
-            key={video.id}
+            key={index}
             className="absolute inset-0 transition-opacity duration-500"
             style={{
-              opacity: i === current ? 1 : 0,
-              pointerEvents: i === current ? "auto" : "none",
+              opacity: current === index ? 1 : 0,
+              pointerEvents: current === index ? "auto" : "none",
             }}
           >
-            <img
-              src={video.thumb}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{ filter: "brightness(0.45)" }}
+            {/* ====================================================== */}
+            {/* ✅ IFRAME */}
+            {/* ====================================================== */}
+
+            <iframe
+              key={`${videoKey}-${current}`}
+              src={getYoutubeEmbedUrl(video)}
+              title={`video-${current}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
             />
-
-            {/* Play button */}
-            {playing !== video.id ? (
-              <button
-                onClick={() => setPlaying(video.id)}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10"
-              >
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center transition-transform hover:scale-110"
-                  style={{
-                    background: "#f97316",
-                    boxShadow: "0 0 32px rgba(249,115,22,0.5)",
-                  }}
-                >
-                  <Play size={22} className="text-white ml-1" />
-                </div>
-                <span className="text-white/70 text-xs font-medium">
-                  {video.label}
-                </span>
-              </button>
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <div
-                  className="text-white/60 text-sm font-medium px-6 py-3 rounded-xl"
-                  style={{
-                    background: "rgba(0,0,0,0.6)",
-                    border: "0.5px solid rgba(255,255,255,0.1)",
-                  }}
-                >
-                  ▶ Playing: {video.label}
-                </div>
-              </div>
-            )}
-
-            {/* Duration badge */}
-            <div
-              className="absolute bottom-3 right-4 text-[10px] font-bold px-2 py-1 rounded"
-              style={{
-                background: "rgba(0,0,0,0.7)",
-                color: "rgba(255,255,255,0.7)",
-              }}
-            >
-              {video.duration}
-            </div>
           </div>
         ))}
 
-        {/* Arrows — only when multiple */}
-        {videos.length > 1 && (
-          <div className="absolute inset-0 group z-20 pointer-events-none">
-            <button
-              onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full items-center justify-center hidden group-hover:flex pointer-events-auto transition-all"
-              style={{
-                background: "rgba(0,0,0,0.55)",
-                border: "0.5px solid rgba(255,255,255,0.15)",
-                color: "#fff",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full items-center justify-center hidden group-hover:flex pointer-events-auto transition-all"
-              style={{
-                background: "rgba(0,0,0,0.55)",
-                border: "0.5px solid rgba(255,255,255,0.15)",
-                color: "#fff",
-                backdropFilter: "blur(8px)",
-              }}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        )}
+        {/* ====================================================== */}
+        {/* ✅ NAVIGATION */}
+        {/* ====================================================== */}
 
-        {/* Progress bar */}
         {videos.length > 1 && (
-          <div
-            className="absolute bottom-0 left-0 right-0 h-[2px]"
-            style={{ background: "rgba(255,255,255,0.08)", zIndex: 30 }}
-          >
-            <div
-              key={current}
-              className="h-full bg-orange-500"
-              style={{ animation: "imgProgress 5s linear forwards" }}
-            />
-          </div>
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white backdrop-blur-md"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            <button
+              onClick={handleNext}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-black/60 border border-white/10 flex items-center justify-center text-white backdrop-blur-md"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </>
         )}
       </div>
 
-      {/* ── THUMBNAIL STRIP — fixed 120px width, flex-wrap ── */}
+      {/* ====================================================== */}
+      {/* ✅ THUMBNAILS */}
+      {/* ====================================================== */}
+
       {videos.length > 1 && (
-        <div className="flex flex-wrap gap-2">
-          {videos.map((v, i) => (
+        <div className="flex flex-wrap gap-3">
+          {videos.map((video, index) => (
             <button
-              key={v.id}
-              onClick={() => {
-                go(i);
-                setPlaying(null);
-              }}
-              className="relative overflow-hidden rounded-xl flex-shrink-0 transition-all duration-200"
+              key={index}
+              onClick={() => handleThumbClick(index)}
+              className={`relative overflow-hidden rounded-xl border transition-all duration-300 ${
+                current === index
+                  ? "border-orange-500 opacity-100"
+                  : "border-white/10 opacity-50"
+              }`}
               style={{
-                width: 120,
-                height: 70,
-                border: `1px solid ${i === current ? "#f97316" : "rgba(255,255,255,0.08)"}`,
-                opacity: i === current ? 1 : 0.45,
-                boxShadow:
-                  i === current ? "0 0 10px rgba(249,115,22,0.3)" : "none",
+                width: 130,
+                height: 78,
               }}
             >
-              {/* Thumbnail image */}
+              {/* ====================================================== */}
+              {/* ✅ THUMBNAIL */}
+              {/* ====================================================== */}
+
               <img
-                src={v.thumb}
+                src={getYoutubeThumbnail(video)}
                 alt=""
-                className="w-full h-full object-cover transition-transform duration-500"
-                style={{
-                  transform: i === current ? "scale(1.05)" : "scale(1)",
-                }}
+                className="w-full h-full object-cover"
               />
 
-              {/* Overlay + play icon */}
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{
-                  background:
-                    i === current ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.52)",
-                }}
-              >
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{
-                    background:
-                      i === current ? "#f97316" : "rgba(255,255,255,0.2)",
-                  }}
-                >
-                  <Play size={9} className="text-white ml-0.5" />
+              {/* ====================================================== */}
+              {/* ✅ OVERLAY */}
+              {/* ====================================================== */}
+
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
+                  <Play
+                    size={14}
+                    className="text-white ml-[2px]"
+                    fill="white"
+                  />
                 </div>
               </div>
 
-              {/* Label */}
-              <div
-                className="absolute bottom-0 left-0 right-0 px-1.5 py-1"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(0,0,0,0.85), transparent)",
-                }}
-              >
-                <p
-                  className="text-[8px] font-medium line-clamp-1 text-left"
-                  style={{
-                    color: i === current ? "#fff" : "rgba(255,255,255,0.45)",
-                  }}
-                >
-                  {v.label}
-                </p>
-              </div>
+              {/* ====================================================== */}
+              {/* ✅ ACTIVE BAR */}
+              {/* ====================================================== */}
 
-              {/* Active bottom bar */}
-              {i === current && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-orange-500" />
+              {current === index && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-orange-500" />
               )}
             </button>
           ))}
@@ -515,9 +564,33 @@ function VideoCarousel({ videos }) {
 // ─────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────
-const NewsDetailHero = () => {
+const NewsDetailHero = ({
+  newsDetails,
+  relatedNews,
+  relatedLoading,
+  relatedError,
+  relatedErrorData,
+  relatedRefetch,
+}) => {
+  // ======================================================
+  // ✅ CONTENT BLOCKS
+  // ======================================================
+
+  const contentBlocks = newsDetails?.additionalFields?.contentBlocks || [];
+
   const [scrollProgress, setScrollProgress] = useState(0);
   const pageRef = useRef(null);
+
+  // ======================================================
+  // ✅ STRIP HTML
+  // ======================================================
+
+  const stripHtml = (html) => {
+    if (!html) return "";
+
+    return html.replace(/<[^>]*>?/gm, "");
+  };
+
   useEffect(() => {
     let ticking = false;
 
@@ -597,8 +670,7 @@ const NewsDetailHero = () => {
               className="text-3xl md:text-[42px]  text-white leading-tight"
               style={{ letterSpacing: "-0.02em" }}
             >
-              Kaaviya Kaadhal: A New Era of Romantic Cinema Begins with Shanthi
-              Talkies
+              {newsDetails?.title}
             </motion.h1>
 
             {/* Short Summary Section */}
@@ -608,9 +680,7 @@ const NewsDetailHero = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-zinc-400 text-lg md:text-xl leading-relaxed mt-4 font-medium"
             >
-              A nostalgic trip back to 90s romance, reimagined for the Gen-Z
-              era. Discover how Bharath and Saanve Megghana bring this poetic
-              vision to life.
+              {newsDetails?.shortDescription}
             </motion.p>
 
             {/* ── TAGS ── */}
@@ -618,15 +688,9 @@ const NewsDetailHero = () => {
               className="flex flex-wrap gap-2 pt-6"
               style={{ borderTop: "0.5px solid rgba(255,255,255,0.07)" }}
             >
-              {[
-                "Cinema",
-                "Bharath",
-                "New Release",
-                "Tamil Cinema",
-                "Kollywood",
-              ].map((tag) => (
+              {newsDetails?.tags?.map((tag, index) => (
                 <span
-                  key={tag}
+                  key={index}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs cursor-pointer transition-all"
                   style={{
                     background: "rgba(255,255,255,0.04)",
@@ -658,16 +722,23 @@ const NewsDetailHero = () => {
             >
               <div className="flex items-center gap-1.5">
                 <User size={13} className="text-orange-500" />
-                <span className="text-zinc-400 text-xs">By Admin</span>
+                <span className="text-zinc-400 text-xs">
+                  {newsDetails?.authorName}
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Calendar size={13} className="text-zinc-600" />
-                <span className="text-xs">May 06, 2026</span>
+                <span className="text-xs">{newsDetails?.formattedDate}</span>
+                {/* <div>
+                  <span>{getRelativeTime(newsDetails?.publishedAt)}</span>
+                </div> */}
               </div>
+
               <div className="flex items-center gap-1.5">
                 <Clock size={13} className="text-zinc-600" />
-                <span className="text-xs">4 min read</span>
+                <span className="text-xs">{newsDetails?.readTime}</span>
               </div>
+
               <div className="flex items-center gap-2 ml-auto">
                 <button
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
@@ -695,7 +766,7 @@ const NewsDetailHero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
             >
-              <ImageCarousel images={articleImages} />
+              <ImageCarousel images={newsDetails?.newsImages || []} />
             </motion.div>
 
             {/* ── ARTICLE BODY ── */}
@@ -706,38 +777,126 @@ const NewsDetailHero = () => {
               className="space-y-5 text-[15px] leading-[1.85]"
               style={{ color: "rgba(161,161,170,0.9)" }}
             >
-              <p>
-                <span
-                  className="float-left text-6xl font-black mr-3 leading-none"
-                  style={{
-                    color: "#f97316",
-                    fontFamily: "Georgia, serif",
-                    lineHeight: "0.8",
-                  }}
-                >
-                  T
-                </span>
-                he upcoming project from Shanthi Talkies has officially been
-                titled{" "}
-                <span className="text-white font-semibold">
-                  Kaaviya Kaadhal
-                </span>
-                , marking the banner's fourth production venture. Featuring
-                Bharath and Saanve Megghana, the film promises a fresh
-                combination under a romantic premise.
-              </p>
+              {/* ====================================================== */}
+              {/* ✅ LONG DESCRIPTION DROP CAP */}
+              {/* ====================================================== */}
 
-              <p>
+              {newsDetails?.longDescription && (
+                <div>
+                  <p>
+                    <span
+                      className="float-left text-6xl font-black mr-3 leading-none"
+                      style={{
+                        color: "#f97316",
+                        fontFamily: "Georgia, serif",
+                        lineHeight: "0.8",
+                      }}
+                    >
+                      {stripHtml(newsDetails.longDescription)
+                        ?.charAt(0)
+                        ?.toUpperCase()}
+                    </span>
+
+                    {stripHtml(newsDetails.longDescription)?.slice(1)}
+                  </p>
+                </div>
+              )}
+
+              {/* ====================================================== */}
+              {/* ✅ DYNAMIC CONTENT BLOCKS */}
+              {/* ====================================================== */}
+
+              {contentBlocks.map((block, index) => {
+                // ======================================================
+                // ✅ PARAGRAPH
+                // ======================================================
+                if (block.type === "paragraph") {
+                  return (
+                    <div key={index} className="space-y-4">
+                      {/* ============================================= */}
+                      {/* ✅ PARAGRAPH TEXT */}
+                      {/* ============================================= */}
+
+                      {block?.text && <p>{block.text}</p>}
+
+                      {/* ============================================= */}
+                      {/* ✅ NESTED LIST */}
+                      {/* ============================================= */}
+
+                      {block?.nestedList?.items?.length > 0 && (
+                        <ul className="space-y-3 pl-5">
+                          {block.nestedList.items.map((item, itemIndex) => (
+                            <li
+                              key={itemIndex}
+                              className="flex items-start gap-3 text-zinc-300"
+                            >
+                              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2.5 shrink-0" />
+
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                }
+
+                // ======================================================
+                // ✅ QUOTE BLOCK
+                // ======================================================
+                if (block.type === "quote") {
+                  return (
+                    <blockquote
+                      key={index}
+                      className="my-6 pl-5 py-1"
+                      style={{ borderLeft: "3px solid #f97316" }}
+                    >
+                      <p
+                        className="text-[16px] font-medium italic"
+                        style={{ color: "rgba(255,255,255,0.65)" }}
+                      >
+                        "{block?.text}"
+                      </p>
+
+                      <cite
+                        className="text-xs mt-3 block not-italic"
+                        style={{ color: "rgba(255,255,255,0.3)" }}
+                      >
+                        — {block?.person}
+                        {block?.role ? `, ${block.role}` : ""}
+                      </cite>
+                    </blockquote>
+                  );
+                }
+                // ======================================================
+                // ✅ VIDEO BLOCK
+                // ======================================================
+
+                if (block.type === "video") {
+                  return (
+                    <div key={index}>
+                      <VideoCarousel videos={block?.url || []} />
+                    </div>
+                  );
+                }
+                // ======================================================
+                // ✅ DEFAULT
+                // ======================================================
+
+                return null;
+              })}
+
+              {/* <p>
                 Director Hariharasuthan, known for his unique storytelling, has
                 envisioned this project as a tribute to classic 90s romance but
                 with a modern twist that appeals to the Gen-Z audience. The
                 music by{" "}
                 <span className="text-white font-medium">Nivas K Prasanna</span>{" "}
                 is already creating waves in industry circles.
-              </p>
+              </p> */}
 
               {/* Pull quote */}
-              <blockquote
+              {/* <blockquote
                 className="my-6 pl-5 py-1"
                 style={{ borderLeft: "3px solid #f97316" }}
               >
@@ -754,9 +913,9 @@ const NewsDetailHero = () => {
                 >
                   — Hariharasuthan, Director
                 </cite>
-              </blockquote>
+              </blockquote> */}
 
-              <p>
+              {/* <p>
                 Technically, the film is backed by strong names like{" "}
                 <span className="text-white font-medium">Theni Eswar</span> for
                 cinematography and{" "}
@@ -764,7 +923,7 @@ const NewsDetailHero = () => {
                 editing. The first look poster, featuring the leads in a vibrant
                 setting, has already garnered millions of impressions on social
                 media.
-              </p>
+              </p> */}
             </motion.article>
 
             {/* ── VIDEO CAROUSEL ── */}
@@ -773,7 +932,7 @@ const NewsDetailHero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <VideoCarousel videos={articleVideos} />
+              <VideoCarousel videos={newsDetails?.videoUrl} />
             </motion.div>
           </div>
 
@@ -800,60 +959,131 @@ const NewsDetailHero = () => {
                     }}
                   />
                   <h2 className="text-[13px] font-black text-white uppercase tracking-widest">
-                    Highlights
+                    Related News
                   </h2>
                 </div>
 
                 <div className="space-y-5 flex-1 overflow-y-auto no-scrollbar ">
-                  {highlights.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex gap-3 cursor-pointer group"
-                      style={{
-                        paddingBottom: idx < highlights.length - 1 ? 16 : 0,
-                        borderBottom:
-                          idx < highlights.length - 1
-                            ? "0.5px solid rgba(255,255,255,0.05)"
-                            : "none",
-                      }}
-                    >
-                      <div
-                        className="shrink-0 overflow-hidden rounded-xl"
-                        style={{
-                          width: 76,
-                          height: 58,
-                          border: "0.5px solid rgba(255,255,255,0.08)",
-                        }}
-                      >
-                        <img
-                          src={item.img}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          alt=""
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4
-                          className="text-[12px] text-white/70 font-semibold leading-snug line-clamp-2 group-hover:text-white/90 transition-all "
+                  {/* ====================================================== */}
+                  {/* ✅ LOADING */}
+                  {/* ====================================================== */}
 
-                          // onMouseEnter={(e) =>
-                          //   (e.currentTarget.style.color = "#f97316")
-                          // }
-                          // onMouseLeave={(e) =>
-                          //   (e.currentTarget.style.color =
-                          //     "rgba(255,255,255,0.75)")
-                          // }
-                        >
-                          {item.title}
-                        </h4>
-                        <p
-                          className="text-[10px] mt-1.5 flex items-center gap-1"
-                          style={{ color: "rgba(255,255,255,0.25)" }}
-                        >
-                          <Clock size={9} /> {item.time}
+                  {relatedLoading && (
+                    <div className="flex items-center justify-center min-h-[300px]">
+                      <ImSpinner9 className="text-orange-500 text-2xl animate-spin" />
+                    </div>
+                  )}
+                  {/* ====================================================== */}
+                  {/* ✅ ERROR */}
+                  {/* ====================================================== */}
+
+                  {relatedError && (
+                    <div className="flex flex-col items-center justify-center min-h-[300px] text-center px-4">
+                      <p className="text-white/70 text-sm mb-4">
+                        Failed to load related news
+                      </p>
+
+                      <button
+                        onClick={relatedRefetch}
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-orange-500 text-white"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ====================================================== */}
+                  {/* ✅ EMPTY STATE */}
+                  {/* ====================================================== */}
+
+                  {!relatedLoading &&
+                    !relatedError &&
+                    relatedNews?.length === 0 && (
+                      <div className="flex items-center justify-center min-h-[250px]">
+                        <p className="text-white/40 text-sm">
+                          No related news available
                         </p>
                       </div>
-                    </div>
-                  ))}
+                    )}
+
+                  {/* ====================================================== */}
+                  {/* ✅ RELATED NEWS */}
+                  {/* ====================================================== */}
+
+                  {!relatedLoading &&
+                    !relatedError &&
+                    relatedNews?.map((item, idx) => (
+                      <Link
+                        to={`/news/${item?.slug}`}
+                        key={item?.id}
+                        className="flex gap-3 cursor-pointer group"
+                        style={{
+                          paddingBottom: idx < relatedNews.length - 1 ? 16 : 0,
+
+                          borderBottom:
+                            idx < relatedNews.length - 1
+                              ? "0.5px solid rgba(255,255,255,0.05)"
+                              : "none",
+                        }}
+                      >
+                        {/* ============================================== */}
+                        {/* ✅ IMAGE */}
+                        {/* ============================================== */}
+
+                        <div
+                          className="shrink-0 overflow-hidden rounded-xl"
+                          style={{
+                            width: 76,
+                            height: 58,
+                            border: "0.5px solid rgba(255,255,255,0.08)",
+                          }}
+                        >
+                          <img
+                            src={getImageUrl(item?.newsImages?.[0])}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            alt={item?.title}
+                          />
+                        </div>
+
+                        {/* ============================================== */}
+                        {/* ✅ CONTENT */}
+                        {/* ============================================== */}
+
+                        <div className="flex-1 min-w-0">
+                          {/* CATEGORY */}
+
+                          <p className="text-[10px] uppercase tracking-widest text-orange-500 font-semibold mb-1">
+                            {item?.categories?.[0]}
+                          </p>
+
+                          {/* TITLE */}
+
+                          <h4 className="text-[12px] text-white/70 font-semibold leading-snug line-clamp-2 group-hover:text-white transition-all">
+                            {item?.title}
+                          </h4>
+
+                          {/* META */}
+
+                          <div
+                            className="text-[10px] mt-2 flex items-center gap-1.5 flex-wrap"
+                            style={{ color: "rgba(255,255,255,0.25)" }}
+                          >
+                            <span>{item?.formattedDate}</span>
+
+                            <div className="w-1 h-1 rounded-full bg-white/20" />
+
+                            <span>{getRelativeTime(item?.publishedAt)}</span>
+
+                            <div className="w-1 h-1 rounded-full bg-white/20" />
+
+                            <span className="flex items-center gap-1">
+                              <Eye size={10} />
+                              {item?.viewCount || 0}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                 </div>
               </section>
             </div>

@@ -13,6 +13,7 @@ dist-ssr
 *.local
 logic.md
 NewsPageIdeas.md
+NewsCreateJsonStructure
 
 # Editor directories and files
 .vscode/*

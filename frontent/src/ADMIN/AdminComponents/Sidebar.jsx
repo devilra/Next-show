@@ -1,7 +1,7 @@
 // src/components/Sidebar.js (அல்லது உங்கள் பாதைக்கு ஏற்ப)
 
 import React, { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaTachometerAlt, FaSignOutAlt } from "react-icons/fa"; // Icons-க்காக react-icons பயன்படுத்துகிறேன்
 import { IoHomeSharp } from "react-icons/io5";
 import { MdLocalMovies, MdOutlineMiscellaneousServices } from "react-icons/md";
@@ -95,12 +95,13 @@ const Sidebar = () => {
     // Tailwind CSS-ல் 'fixed' பயன்படுத்தி இடது பக்கத்தில் நிலையாக வைக்கப்பட்டுள்ளது
     <div className="fixed top-0 left-0 h-screen w-64 bg-[#0a0a0a] text-white p-4 z-20 shadow-2xl flex flex-col justify-between">
       <div>
-        <h2
+        <Link
+          to="/"
           style={{ fontFamily: '"Nosifer", cursive' }}
-          className="text-2xl font-extrabold mb-8 text-white border-b border-gray-700 pb-3"
+          className="text-2xl font-extrabold mb-8 inline-block text-white border-b border-gray-700 pb-3"
         >
           NEXT SHOW
-        </h2>
+        </Link>
 
         <ul className="space-y-3">
           {/* <li>

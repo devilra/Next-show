@@ -32,7 +32,6 @@ const Cast = sequelize.define(
     slug: {
       type: DataTypes.STRING(180),
       allowNull: false,
-      unique: true, // URL-friendly: rajinikanth, vijay-sethupathi
       comment: "URL slug for actor profile page",
     },
     gender: {

@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { FaArrowRight, FaArrowLeft, FaEye, FaRegClock } from "react-icons/fa";
 import { HiSparkles } from "react-icons/hi2";
 import { BsPlayCircleFill } from "react-icons/bs";
+import moment from "moment";
+import { ImSpinner9 } from "react-icons/im";
+import { Link } from "react-router-dom";
 
 // ── ACCENT ──────────────────────────────────────
 const ACCENT = "#e85d26";
@@ -123,6 +126,26 @@ const newsData = [
   },
 ];
 
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+
+const getImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return "/placeholder.jpg";
+  }
+
+  // GOOGLE / CDN IMAGE
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  // LOCAL IMAGE
+  return `${IMAGE_BASE_URL}${imagePath}`;
+};
+
+const getRelativeTime = (date) => {
+  return moment(date).fromNow();
+};
+
 // ── CARD ─────────────────────────────────────────
 function NewsCard({ item }) {
   const [hovered, setHovered] = useState(false);
@@ -146,7 +169,7 @@ function NewsCard({ item }) {
     >
       {/* Image */}
       <img
-        src={item.image}
+        src={getImageUrl(item?.newsImages?.[0])}
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         style={{
@@ -180,7 +203,7 @@ function NewsCard({ item }) {
       />
 
       {/* Video badge */}
-      {item.hasVideo && (
+      {item?.videoUrl?.length && (
         <div className="absolute top-4 right-4">
           <BsPlayCircleFill
             size={28}
@@ -198,13 +221,13 @@ function NewsCard({ item }) {
       <div className="absolute inset-0 flex flex-col justify-end p-5">
         {/* Tags */}
         <div className="flex items-center gap-2 mb-3">
-          <span
+          {/* <span
             className="text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-sm text-white"
             style={{ background: ACCENT, letterSpacing: "0.1em" }}
           >
             {item.tag}
-          </span>
-          <span
+          </span> */}
+          {/* <span
             className="text-[9px] font-bold uppercase tracking-wide px-2 py-1 rounded-sm"
             style={{
               color: ACCENT,
@@ -213,7 +236,7 @@ function NewsCard({ item }) {
             }}
           >
             {item.category}
-          </span>
+          </span> */}
         </div>
 
         {/* Title */}
@@ -226,7 +249,7 @@ function NewsCard({ item }) {
             lineHeight: 1.35,
           }}
         >
-          {item.title}
+          {item?.title}
         </h3>
 
         {/* Summary */}
@@ -234,7 +257,7 @@ function NewsCard({ item }) {
           className="text-[11px] leading-relaxed mb-3 line-clamp-2"
           style={{ color: "rgba(255,255,255,0.42)" }}
         >
-          {item.summary}
+          {item?.shortDescription}
         </p>
 
         {/* Meta */}
@@ -246,13 +269,15 @@ function NewsCard({ item }) {
             <FaRegClock size={9} style={{ color: ACCENT, opacity: 0.75 }} />
             {item.readTime}
           </span>
-          <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
-          <span className="flex items-center gap-1">
+
+          {/* <span className="flex items-center gap-1">
             <FaEye size={9} style={{ color: ACCENT, opacity: 0.75 }} />
             {item.views}
-          </span>
-          <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>
-          <span>{item.date}</span>
+          </span> */}
+          <span className="w-1 h-1 rounded-full bg-zinc-600" />
+          <span>{item?.formattedDate}</span>
+          <span className="w-1 h-1 rounded-full bg-zinc-600" />
+          <span>{getRelativeTime(item?.publishedAt)}</span>
         </div>
 
         {/* Read more reveal on hover */}
@@ -273,7 +298,13 @@ function NewsCard({ item }) {
 }
 
 // ── MAIN COMPONENT ───────────────────────────────
-const LatestNews = () => {
+const LatestNews = ({
+  latestNews = [],
+  isLoading,
+  isError,
+  error,
+  refetch,
+}) => {
   const scrollRef = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -301,6 +332,33 @@ const LatestNews = () => {
     scrollRef.current?.scrollBy({ left: dir * CARD_W * 2, behavior: "smooth" });
   const goTo = (i) =>
     scrollRef.current?.scrollTo({ left: i * CARD_W, behavior: "smooth" });
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-[400px] flex items-center justify-center">
+        <ImSpinner9 className="text-orange-500 text-4xl animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full min-h-[400px] flex flex-col items-center justify-center text-center">
+        <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <span className="text-red-500 text-xl">!</span>
+        </div>
+
+        <h2 className="text-white text-lg mb-3">Failed to load latest news</h2>
+
+        <button
+          onClick={() => refetch()}
+          className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition text-white text-sm"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <section
@@ -439,8 +497,10 @@ const LatestNews = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          {newsData.map((item) => (
-            <NewsCard key={item.id} item={item} />
+          {latestNews.map((item) => (
+            <Link key={item?.id} to={`/news/${item?.slug}`} className="block">
+              <NewsCard key={item.id} item={item} />
+            </Link>
           ))}
           {/* Spacer so last card scrolls fully into view */}
           <div style={{ flexShrink: 0, width: 16 }} />

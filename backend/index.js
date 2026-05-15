@@ -10,6 +10,8 @@ const path = require("path");
 // require("./models/Cast/Cast");
 // require("./models/CentralizedMoviesCreateModels/MovieCast");
 // require("./models/WebsiteTracking/AnalyticsEvents");
+// require('./models/CentralizedNewsModels/TagsModel')
+// require('./models/CentralizedNewsModels/CentralizedNewsModel')
 const adminAuthRoutes = require("./routes/AdminAuthRoutes/AdminRoutes");
 const VideoSectionRoutes = require("./routes/HomePageRoutes/videoRoutes");
 const BlogSectionRoutes = require("./routes/HomePageRoutes/blogRoutes");
@@ -24,14 +26,21 @@ const CentralizedJsonMovieRoute = require("./routes/CentralizedMovieRoute/Centra
 const CastRoutes = require("./routes/CastRoutes/CastRoutes");
 const TmdbRoutes = require("./routes/TMDB-Routes/tmdbRoutes");
 const WebsiteVisitCountTracking = require("./routes/WebsiteTrackingRoutes/WebsiteVisitCount");
+const TagsRoutes = require("./routes/TagsRoutes/TagsRoutes");
+const NewsRoutes = require("./routes/NewsRoutes/NewsRoutes");
 
 const app = express();
 
 app.use(express.json({ limit: "100mb" }));
-app.use(
-  "/uploads/casts",
-  express.static(path.join(__dirname, "public/uploads/casts")),
-);
+app.use(express.static(path.join(__dirname, "public")));
+
+// console.log(path.join(__dirname, "public"));
+
+//important notes
+//CPanel File Manager-la poyi public/uploads folder-ku permission
+//  755 illa 775 irukkuradha confirm pannikonga.
+//  Appo dhaan Multer-ala folder create panni file-ah ulla poda mudiyum.
+
 app.use(
   cors({
     origin: [
@@ -84,6 +93,8 @@ app.use("/api/admin", TmdbRoutes);
 
 //Website Tracking Routes
 app.use("/api/admin", WebsiteVisitCountTracking);
+app.use("/api/admin", TagsRoutes);
+app.use("/api/admin", NewsRoutes);
 
 // Simple root route for testing
 app.get("/", (req, res) => {

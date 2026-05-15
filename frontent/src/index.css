@@ -142,3 +142,27 @@ body {
   background-color: #fb923c;
   color: #000000;
 }
+
+.news-marquee {
+  display: inline-flex;
+  align-items: center;
+  min-width: max-content;
+
+  animation: marqueeMove 14s linear infinite;
+}
+
+@keyframes marqueeMove {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+.news-marquee:hover {
+  animation-play-state: paused;
+}
+.news-marquee {
+  will-change: transform;
+}

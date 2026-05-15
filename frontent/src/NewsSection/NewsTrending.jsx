@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaAngleRight, FaEye, FaPlay } from "react-icons/fa";
+import moment from "moment";
+import { ImSpinner9 } from "react-icons/im";
 
 const TABS = ["All", "Movies", "Web Series", "OTT", "Box Office"];
 
@@ -111,13 +113,82 @@ const activeBlogs = [
   },
 ];
 
-const NewsTrending = () => {
+const NewsTrending = ({
+  trendingNews = [],
+  isLoading,
+  isError,
+  error,
+  refetch,
+}) => {
   const [activeTab, setActiveTab] = useState("All");
+
+  // console.log("NewsTrending", trendingNews);
+
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return "/placeholder.jpg";
+    }
+    // ======================================================
+    // ✅ GOOGLE / CLOUD / FULL URL
+    // ======================================================
+
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+
+    // ======================================================
+    // ✅ LOCAL UPLOAD IMAGE
+    // ======================================================
+    return `${IMAGE_BASE_URL}${imagePath}`;
+  };
+
+  // ======================================================
+  // ✅ RELATIVE TIME
+  // ======================================================
+
+  const getRelativeTime = (date) => {
+    return moment(date).fromNow();
+  };
 
   const filtered =
     activeTab === "All"
       ? activeBlogs
       : activeBlogs.filter((b) => b.category === activeTab);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-auto md:h-[74vh] mt-5 md:mt-20 bg-[#0d1017] flex items-center justify-center border-t md:border-t-0 md:border-l border-gray-800/50">
+        <ImSpinner9 className="text-orange-500 text-4xl animate-spin" />
+      </div>
+    );
+  }
+
+  // ======================================================
+  // ✅ ERROR UI
+  // ======================================================
+
+  if (isError) {
+    return (
+      <div className="w-full h-auto md:h-[74vh] mt-5 md:mt-20 bg-[#0d1017] flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-red-500/20 px-6 text-center">
+        <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <span className="text-red-500 text-xl">!</span>
+        </div>
+
+        <h2 className="text-white text-lg mb-2">
+          Failed to load trending news
+        </h2>
+
+        <button
+          onClick={() => refetch()}
+          className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition text-white text-sm"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-auto md:h-[74vh] mt-5 md:mt-20 bg-[#0d1017] flex flex-col border-t md:border-t-0 md:border-l border-gray-800/50">
@@ -156,62 +227,69 @@ const NewsTrending = () => {
 
       {/* ── NEWS LIST ── */}
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        {filtered.map((blog) => (
-          <div
-            key={blog.id}
-            className="flex gap-3 px-5 py-3 cursor-pointer hover:bg-white/[0.05] border-b border-white/[0.04] last:border-b-0 group items-start transition-colors"
-          >
-            {/* Rank */}
-            <span
-              className={`text-[11px] text-white/50  pt-0.5 min-w-[18px]
+        {trendingNews?.map((news, index) => {
+          const category = news?.categories?.[0] || "NEWS";
+          const hasVideo = news?.videoUrl?.length > 0;
+
+          return (
+            <Link
+              to={`/news/${news?.slug}`}
+              key={news?.id}
+              className="flex gap-3 px-5 py-3 cursor-pointer hover:bg-white/[0.05] border-b border-white/[0.04] last:border-b-0 group items-start transition-colors"
+            >
+              {/* Rank */}
+              <span
+                className={`text-[11px] text-white/50  pt-0.5 min-w-[18px]
             
               `}
-            >
-              {String(blog.rank).padStart(2, "0")}
-            </span>
+              >
+                {String(index + 1).padStart(2, "0")}
+              </span>
 
-            {/* Body */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span
-                  className="text-[12px]  uppercase tracking-wide px-1.5 py-0.5 rounded-full"
-                  //   style={{ color: blog.catColor, background: blog.catBg }}
-                >
-                  {blog.category}
-                </span>
-              </div>
-              <h4 className="text-[11px] pl-1  text-white/50 leading-snug mb-1 line-clamp-2 transition-colors">
-                {blog.title}
-              </h4>
-              <div className="flex items-center pl-1 gap-2 text-[10px] text-white/25">
-                <span>{blog.newsDate}</span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <FaEye
-                    size={9}
-                    style={{ color: blog.catColor, opacity: 0.7 }}
-                  />
-                  {blog.views}
-                </span>
-              </div>
-            </div>
-
-            {/* Thumbnail */}
-            <div className="relative shrink-0 w-[64px] h-[46px] rounded-lg overflow-hidden border border-white/[0.07]">
-              <img
-                src={blog.bannerImage}
-                alt=""
-                className="w-full h-full object-cover transition-all duration-500 grayscale-[0.3] group-hover:scale-110 group-hover:grayscale-0"
-                loading="lazy"
-              />
-              {blog.hasVideo && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <FaPlay size={8} className="text-white ml-0.5" />
+              {/* Body */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span
+                    className="text-[12px]  uppercase tracking-wide px-1.5 py-0.5 rounded-full"
+                    //   style={{ color: blog.catColor, background: blog.catBg }}
+                  >
+                    {category}
+                  </span>
                 </div>
-              )}
-            </div>
-          </div>
-        ))}
+                <h4 className="text-[11px] pl-1 text-white/50 leading-snug mb-1 line-clamp-2 break-words overflow-hidden">
+                  {news?.title}
+                </h4>
+                <div className="flex items-center pl-1 gap-2 text-[10px] text-white/30">
+                  <span>{getRelativeTime(news?.publishedAt)}</span>
+                  {/* DOT */}
+
+                  <span className="w-1 h-1 rounded-full bg-zinc-600" />
+                  {/* VIEWS */}
+
+                  <span className="flex items-center gap-1">
+                    <FaEye size={9} />
+                    {news?.viewCount || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Thumbnail */}
+              <div className="relative shrink-0 w-[64px] h-[46px] rounded-lg overflow-hidden border border-white/[0.07]">
+                <img
+                  src={getImageUrl(news?.newsImages?.[0])}
+                  alt={news?.title}
+                  className="w-full h-full object-cover transition-all duration-500 grayscale-[0.3] group-hover:scale-110 group-hover:grayscale-0"
+                  loading="lazy"
+                />
+                {hasVideo && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <FaPlay size={8} className="text-white ml-0.5" />
+                  </div>
+                )}
+              </div>
+            </Link>
+          );
+        })}
       </div>
 
       {/* ── FOOTER ── */}
