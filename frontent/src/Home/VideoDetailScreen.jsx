@@ -6,14 +6,45 @@ import {
   HiVolumeUp,
 } from "react-icons/hi";
 import { Link } from "react-router-dom";
-import { FaAngleRight, FaPlay, FaPlus } from "react-icons/fa";
+import { FaAngleRight, FaEye, FaPlay, FaPlus } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import moment from "moment";
+import { ImSpinner9 } from "react-icons/im";
 
 // Slick CSS imports
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-export default function VideoDetailScreen({ activeVideos, activeBlogs = [] }) {
+const getRelativeTime = (date) => {
+  if (!date) return "";
+
+  return moment(date).fromNow();
+};
+
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+
+const getImageUrl = (imagePath) => {
+  if (!imagePath) {
+    return "/placeholder.jpg";
+  }
+
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  return `${IMAGE_BASE_URL}${imagePath}`;
+};
+
+export default function VideoDetailScreen({
+  activeVideos,
+  activeBlogs = [],
+  trendingNews,
+  trendingLoading,
+  trendingError,
+  trendingRefetch,
+}) {
+  console.log("VideoDetails", trendingNews);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isWatchingFull, setIsWatchingFull] = useState(false);
   const [isBgMuted, setIsBgMuted] = useState(true); // Background video mute state
@@ -420,40 +451,166 @@ export default function VideoDetailScreen({ activeVideos, activeBlogs = [] }) {
 
       {/* RIGHT SIDE: NEWS LIST */}
       <div className="w-full md:w-[32%] bg-[#0d1017] flex flex-col border-l mt-20 md:mt-0 border-gray-800/50">
-        <div className="p-5 border-b border-gray-800/50 flex justify-between items-center">
-          <h3 className="text-gray-400 uppercase text-[11px] font-black tracking-[0.25em]">
-            Trending News
-          </h3>
-          <Link
-            to="/news"
-            className="text-gray-400 uppercase text-[10px] font-bold tracking-[0.1em] flex items-center gap-1.5 hover:text-white transition-colors"
-          >
-            See All <FaAngleRight />
-          </Link>
-        </div>
+        <div className="p-5 flex flex-col h-full overflow-hidden">
+          {/* ====================================================== */}
+          {/* ✅ HEADER */}
+          {/* ====================================================== */}
 
-        <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-6">
-          {activeBlogs.map((blog) => (
-            <div key={blog.id} className="flex gap-4 group cursor-pointer">
-              <div className="flex-1">
-                <h4 className="text-[14px] font-bold text-white/80 group-hover:text-blue-400 leading-snug mb-1 transition-colors line-clamp-2">
-                  {blog.title}
-                </h4>
-                <p className="text-gray-500 text-[11px] line-clamp-1 font-medium">
-                  {blog.newsDate}
-                </p>
-              </div>
-              <div className="shrink-0">
-                <div className="w-20 h-14 rounded-md overflow-hidden shadow-md grayscale group-hover:grayscale-0 transition-all duration-500 border border-white/5">
-                  <img
-                    src={blog.bannerImage}
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-              </div>
+          <div className="flex items-center justify-between mb-5 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 rounded-full bg-orange-500" />
+
+              <h2 className="text-white text-[13px] font-black uppercase tracking-widest">
+                Trending Now
+              </h2>
             </div>
-          ))}
+
+            <Link
+              to="/news"
+              className="flex items-center gap-1 text-[10px] uppercase tracking-widest text-orange-500 font-bold hover:text-orange-400 transition-all"
+            >
+              View All
+              <FaAngleRight size={10} />
+            </Link>
+          </div>
+
+          {/* ====================================================== */}
+          {/* ✅ SCROLL AREA */}
+          {/* ====================================================== */}
+
+          <div className="flex-1 overflow-y-auto no-scrollbar pr-1">
+            {/* ====================================================== */}
+            {/* ✅ LOADING */}
+            {/* ====================================================== */}
+
+            {trendingLoading && (
+              <div className="flex items-center justify-center min-h-[400px]">
+                <ImSpinner9 className="text-orange-500 text-3xl animate-spin" />
+              </div>
+            )}
+
+            {/* ====================================================== */}
+            {/* ✅ ERROR */}
+            {/* ====================================================== */}
+
+            {!trendingLoading && trendingError && (
+              <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+                <p className="text-white/60 text-sm mb-4">
+                  Failed to load trending news
+                </p>
+
+                <button
+                  onClick={trendingRefetch}
+                  className="px-4 py-2 rounded-xl bg-orange-500 text-white text-xs font-semibold hover:bg-orange-600 transition-all"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* ====================================================== */}
+            {/* ✅ EMPTY */}
+            {/* ====================================================== */}
+
+            {!trendingLoading &&
+              !trendingError &&
+              trendingNews?.length === 0 && (
+                <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-4">
+                  <div className="text-4xl mb-4">📰</div>
+
+                  <h3 className="text-white text-lg font-bold mb-2">
+                    No Trending News
+                  </h3>
+
+                  <p className="text-white/35 text-sm leading-relaxed">
+                    Trending news is not available right now.
+                  </p>
+                </div>
+              )}
+
+            {/* ====================================================== */}
+            {/* ✅ TRENDING NEWS LIST */}
+            {/* ====================================================== */}
+
+            {!trendingLoading && !trendingError && trendingNews?.length > 0 && (
+              <div className="space-y-4">
+                {trendingNews?.map((news, index) => (
+                  <Link
+                    key={news?.id}
+                    to={`/news/${news?.slug}`}
+                    className="group flex gap-3 pb-4 transition-all"
+                    style={{
+                      borderBottom:
+                        index !== trendingNews.length - 1
+                          ? "0.5px solid rgba(255,255,255,0.08)"
+                          : "none",
+                    }}
+                  >
+                    {/* ====================================================== */}
+                    {/* ✅ IMAGE */}
+                    {/* ====================================================== */}
+
+                    <div className="relative w-[64px] h-[46px] rounded-lg overflow-hidden shrink-0">
+                      <img
+                        src={getImageUrl(news?.newsImages?.[0])}
+                        alt={news?.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+
+                      {/* VIDEO ICON */}
+
+                      {/* {news?.videoUrl?.length > 0 && (
+                        <div
+                          className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center"
+                          style={{
+                            background: "rgba(0,0,0,0.7)",
+                            backdropFilter: "blur(8px)",
+                          }}
+                        >
+                          <FaPlay size={9} className="text-white ml-[1px]" />
+                        </div>
+                      )} */}
+                    </div>
+
+                    {/* ====================================================== */}
+                    {/* ✅ CONTENT */}
+                    {/* ====================================================== */}
+
+                    <div className="flex-1 min-w-0">
+                      {/* CATEGORY */}
+
+                      <p className="text-[9px] uppercase tracking-[2px] text-orange-500 font-bold mb-1">
+                        {news?.categories?.[0] || "News"}
+                      </p>
+
+                      {/* TITLE */}
+
+                      <h3 className="text-[12px] leading-[1.45] text-white/80 font-semibold line-clamp-2 group-hover:text-white transition-all">
+                        {news?.title}
+                      </h3>
+
+                      {/* META */}
+
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10px] text-white/30">
+                        <span>{news?.formattedDate}</span>
+
+                        <div className="w-1 h-1 rounded-full bg-white/20" />
+
+                        <span>{getRelativeTime(news?.publishedAt)}</span>
+
+                        <div className="w-1 h-1 rounded-full bg-white/20" />
+
+                        <span className="flex items-center gap-1">
+                          <FaEye size={9} />
+                          {news?.viewCount || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

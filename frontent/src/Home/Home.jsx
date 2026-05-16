@@ -52,6 +52,23 @@ const Home = () => {
     },
   });
 
+  const {
+    data: trendingNewsResponse,
+    isLoading: trendingLoading,
+    isError: trendingError,
+    refetch: trendingRefetch,
+  } = useQuery({
+    queryKey: ["trending-news"],
+    queryFn: async () => {
+      const response = await api.get("/admin/trending-news");
+      console.log("trending news", response.data.data);
+      return response.data.data;
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+
   // console.log(homePageData);
 
   const hasData = activeVideos.length > 0 && activeBlogs.length > 0;
@@ -108,6 +125,10 @@ const Home = () => {
       <VideoDetailScreen
         activeVideos={homeMoviesData}
         activeBlogs={activeBlogs}
+        trendingNews={trendingNewsResponse || []}
+        trendingLoading={trendingLoading}
+        trendingError={trendingError}
+        trendingRefetch={trendingRefetch}
       />
       {/* <UpcomingMoviesCarousel />
       <NewReleaseMoviesCarousel /> */}

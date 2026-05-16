@@ -291,15 +291,10 @@ const NewsTrending = ({
 
               {/* Body */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <span
-                    className="text-[12px]  uppercase tracking-wide px-1.5 py-0.5 rounded-full"
-                    //   style={{ color: blog.catColor, background: blog.catBg }}
-                  >
-                    {category}
-                  </span>
-                </div>
-                <h4 className="text-[11px] pl-1 text-white/50 leading-snug mb-1 line-clamp-2 break-words overflow-hidden">
+                <p className="text-[9px] uppercase tracking-[2px] text-orange-500 font-bold mb-1">
+                  {news?.categories?.[0] || "News"}
+                </p>
+                <h4 className="text-[11px]  text-white/50 leading-snug mb-1 line-clamp-2 break-words overflow-hidden">
                   {news?.title}
                 </h4>
                 <div className="flex items-center pl-1 gap-2 text-[10px] text-white/30">
