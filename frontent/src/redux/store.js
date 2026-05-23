@@ -9,6 +9,7 @@ import HomeTrailerSection from "../redux/HomeContentSlice/HomeTrailerSlice";
 import CentralizedMovieCreate from "../redux/CentralizedMovieSlice/CentralizedMovieSlice";
 import NewTrailers from "../redux/HomeContentSlice/NewTrailerSlice";
 import CentralizedJsonCreate from "../redux/CentralizedMovieSlice/CentralizedJsonCreateSlice";
+import userAuth from "../redux/userAuthSlice/UserAuthSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     centralizedMovies: CentralizedMovieCreate,
     newTrailers: NewTrailers,
     centralizedJsonMovies: CentralizedJsonCreate,
+    userAuth: userAuth,
   },
 });

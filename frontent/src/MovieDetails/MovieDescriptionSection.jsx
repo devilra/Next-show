@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Eye, Edit2, Users, Music, Star, X, Send } from "lucide-react";
+import {
+  Plus,
+  Eye,
+  Edit2,
+  Users,
+  Music,
+  Star,
+  X,
+  Send,
+  CheckCircle2,
+  Stars,
+} from "lucide-react";
 import { CiShare2 } from "react-icons/ci";
 import { OTT_PLATFORMS } from "../ADMIN/Dashboard/CentralizedContent/CentralizedCreateMovie/OttplatFormData";
 import { LuClapperboard } from "react-icons/lu";
@@ -13,6 +24,25 @@ const MovieDescriptionSection = ({
   movie,
   isRatingModalOpen,
   setIsRatingModalOpen,
+  watchedData,
+  watchedLoading,
+  watchedError,
+  toggleMarkWatchedMutation,
+  // ============================================
+  // ✅ USER RATING
+  // ============================================
+  userRatingData,
+  userRatingLoading,
+  userRatingError,
+  addMovieRatingMutation,
+  // ============================================
+  // ✅ WatchList
+  // ============================================
+  isInWatchlist,
+  watchlistLoading,
+  watchlistError,
+  toggleWatchlistMutation,
+  refetchWatchlist,
 }) => {
   // console.log(movie);
 
@@ -21,6 +51,11 @@ const MovieDescriptionSection = ({
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+
+  console.log("Selected Rating", selectedRating);
+
+  const [reviewText, setReviewText] = useState("");
 
   // console.log("Hover", hover);
   // console.log("Rating", rating);
@@ -182,6 +217,52 @@ const MovieDescriptionSection = ({
     },
   ];
 
+  // ======================================================
+  // ✅ SUBMIT MOVIE RATING
+  // ======================================================
+
+  const handleSubmitMovieRating = () => {
+    // ============================================
+    // ✅ PREVENT DOUBLE CLICK
+    // ============================================
+    if (addMovieRatingMutation?.isPending) {
+      return;
+    }
+    // ============================================
+    // ✅ VALIDATION
+    // ============================================
+    if (!selectedRating) {
+      return;
+    }
+    // ============================================
+    // ✅ SUBMIT
+    // ============================================
+    addMovieRatingMutation.mutate(
+      {
+        movieId: movie?.id,
+        rating: selectedRating,
+        review: reviewText,
+      },
+      {
+        onSuccess: () => {
+          // ====================================
+          // ✅ CLOSE MODAL
+          // ====================================
+          setIsRatingModalOpen(false);
+          // ====================================
+          // ✅ RESET
+          // ====================================
+          setSelectedRating(0);
+
+          setReviewText("");
+        },
+      },
+    );
+  };
+
+  const isWatched = watchedData?.watched;
+  const alreadyRated = userRatingData?.rated;
+
   return (
     <div className="py-6 bg-[#121212] space-y-4 mb-8 text-white">
       {/* --- New Release Dates Section --- */}
@@ -214,14 +295,310 @@ const MovieDescriptionSection = ({
                 </button>
               )}
 
-              {/* WATCHLIST */}
-              <button className="group cursor-pointer relative flex items-center justify-center gap-2 px-4 py-2.5 md:py-4 md:px-10 rounded-lg md:rounded-xl text-white text-[10px] md:text-[13px] bg-gradient-to-br from-zinc-800 via-zinc-900 to-black/40 border border-white/10 shadow-2xl transition-all duration-500 hover:shadow-[0_0_30px_5px_rgba(255,255,255,0.15)] hover:border-white/30 hover:-translate-y-0.5 active:scale-95">
-                <span className="absolute inset-0 rounded-lg md:rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <IoMdHeartEmpty className="relative z-10 text-[15px] md:text-[20px] text-zinc-400 group-hover:text-red-500 transition-all duration-300 group-hover:scale-110" />
-                <span className="relative z-10 tracking-widest transition-colors duration-300 group-hover:text-white">
-                  WATCHLIST
-                </span>
-              </button>
+              {/* ====================================================== */}
+              {/* ✅ WATCHLIST BUTTON */}
+              {/* ====================================================== */}
+
+              {watchlistLoading ? (
+                <div
+                  className="
+      flex-1
+
+      h-[52px]
+
+      rounded-lg md:rounded-xl
+
+      border border-white/10
+
+      bg-gradient-to-br
+      from-zinc-800
+      via-zinc-900
+      to-black/40
+
+      overflow-hidden
+px-20
+      relative
+    "
+                >
+                  {/* ================================================ */}
+                  {/* ✅ SHIMMER */}
+                  {/* ================================================ */}
+
+                  <div
+                    className="
+        absolute inset-0
+
+        animate-pulse
+
+        bg-gradient-to-r
+        from-transparent
+        via-white/[0.04]
+        to-transparent
+      "
+                  />
+
+                  {/* ================================================ */}
+                  {/* ✅ CONTENT */}
+                  {/* ================================================ */}
+
+                  <div
+                    className="
+        relative z-10
+
+        h-full
+
+        flex items-center justify-center gap-3
+      "
+                  >
+                    {/* HEART */}
+
+                    {/* TEXT */}
+
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex items-center justify-center">
+                        {/* ============================================ */}
+                        {/* ✅ OUTER GLOW */}
+                        {/* ============================================ */}
+
+                        <div
+                          className="
+        absolute
+
+        w-5 h-5
+
+        rounded-full
+
+        bg-red-500/20
+
+        blur-[6px]
+
+        animate-pulse
+      "
+                        />
+
+                        {/* ============================================ */}
+                        {/* ✅ JELLY SPINNER */}
+                        {/* ============================================ */}
+
+                        <div
+                          className="
+        w-5 h-5
+
+        rounded-full
+
+        border-[2px]
+        border-white/10
+        border-t-red-500
+        border-r-red-400
+
+        animate-spin
+
+        motion-safe:animate-[spin_0.7s_linear_infinite]
+
+        shadow-[0_0_12px_rgba(239,68,68,0.45)]
+      "
+                          style={{
+                            animation:
+                              "spin 0.7s linear infinite, jelly 1.2s ease-in-out infinite",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <motion.button
+                  layout
+                  disabled={toggleWatchlistMutation?.isPending}
+                  onClick={() => {
+                    // ================================================
+                    // ✅ PREVENT DOUBLE CLICK
+                    // ================================================
+
+                    if (toggleWatchlistMutation?.isPending) {
+                      return;
+                    }
+
+                    // ================================================
+                    // ✅ TOGGLE WATCHLIST
+                    // ================================================
+
+                    toggleWatchlistMutation.mutate();
+                  }}
+                  className={`
+      group
+
+      cursor-pointer
+
+      relative
+
+      flex-1
+
+      flex items-center justify-center gap-2
+
+      px-4 py-2.5
+      md:py-4 md:px-10
+
+      rounded-lg md:rounded-xl
+
+      text-white
+      text-[10px] md:text-[13px]
+
+      border
+
+      shadow-2xl
+
+      transition-all duration-500
+
+      hover:-translate-y-0.5
+
+      active:scale-95
+
+      overflow-hidden
+
+      ${
+        isInWatchlist
+          ? `
+            bg-gradient-to-br
+            from-red-500/15
+            via-zinc-900
+            to-black/40
+
+            border-red-500/20
+
+            shadow-[0_0_25px_rgba(239,68,68,0.12)]
+          `
+          : `
+            bg-gradient-to-br
+            from-zinc-800
+            via-zinc-900
+            to-black/40
+
+            border-white/10
+
+            hover:border-white/30
+
+            hover:shadow-[0_0_30px_5px_rgba(255,255,255,0.15)]
+          `
+      }
+
+      ${
+        toggleWatchlistMutation?.isPending
+          ? "opacity-70 cursor-not-allowed"
+          : ""
+      }
+    `}
+                >
+                  {/* ================================================ */}
+                  {/* ✅ HOVER LAYER */}
+                  {/* ================================================ */}
+
+                  <span
+                    className="
+        absolute inset-0
+
+        rounded-lg md:rounded-xl
+
+        bg-white/5
+
+        opacity-0
+
+        group-hover:opacity-100
+
+        transition-opacity duration-300
+      "
+                  />
+
+                  {/* ================================================ */}
+                  {/* ✅ ICON */}
+                  {/* ================================================ */}
+
+                  <motion.div
+                    key={isInWatchlist ? "added" : "default"}
+                    initial={{
+                      scale: 0.8,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      scale: 1,
+                      opacity: 1,
+                    }}
+                    transition={{
+                      duration: 0.35,
+                    }}
+                  >
+                    <IoMdHeartEmpty
+                      className={`
+          relative z-10
+
+          text-[15px] md:text-[20px]
+
+          transition-all duration-300
+
+          ${
+            isInWatchlist
+              ? `
+                text-red-500
+
+                drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]
+              `
+              : `
+                text-zinc-400
+
+                group-hover:text-red-500
+              `
+          }
+        `}
+                    />
+                  </motion.div>
+
+                  {/* ================================================ */}
+                  {/* ✅ TEXT */}
+                  {/* ================================================ */}
+
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={
+                        toggleWatchlistMutation?.isPending
+                          ? "updating"
+                          : isInWatchlist
+                            ? "remove"
+                            : "watchlist"
+                      }
+                      initial={{
+                        y: 10,
+                        opacity: 0,
+                      }}
+                      animate={{
+                        y: 0,
+                        opacity: 1,
+                      }}
+                      exit={{
+                        y: -10,
+                        opacity: 0,
+                      }}
+                      transition={{
+                        duration: 0.25,
+                      }}
+                      className={`
+          relative z-10
+
+          tracking-widest
+          text-[12px]
+          transition-colors duration-300
+
+          ${isInWatchlist ? "text-red-400" : "text-white"}
+        `}
+                    >
+                      {toggleWatchlistMutation?.isPending
+                        ? "UPDATING..."
+                        : isInWatchlist
+                          ? "REMOVE WATCHLIST"
+                          : "WATCHLIST"}
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
+              )}
 
               {/* SHARE */}
               <button
@@ -491,7 +868,7 @@ const MovieDescriptionSection = ({
           <div className="sticky top-24 space-y-6">
             {/* 🚀 Watchlist Premium Card */}
             <div className="bg-gradient-to-br from-zinc-800/80 to-zinc-900 rounded-[2rem] p-6 border border-white/10 shadow-xl">
-              <button
+              {/* <button
                 onClick={() => setIsRatingModalOpen(true)}
                 className="w-full cursor-pointer bg-yellow-400 hover:bg-yellow-500 text-neutral-950  py-4  rounded-2xl flex items-center justify-center gap-[7px] transition-all active:scale-95 shadow-lg shadow-yellow-500/20"
               >
@@ -499,15 +876,249 @@ const MovieDescriptionSection = ({
                 <span className="text-[14px] text-black/90 font-bold  uppercase">
                   Rate Now
                 </span>
-              </button>
+              </button> */}
+
+              {userRatingLoading ? (
+                <div
+                  className="
+      flex-1
+
+      h-[56px]
+
+      rounded-xl
+
+      border border-white/5
+
+      bg-zinc-800/70
+
+      overflow-hidden
+
+      relative
+    "
+                >
+                  {/* SHIMMER */}
+
+                  <div
+                    className="
+        absolute inset-0
+
+        animate-pulse
+
+        bg-gradient-to-r
+        from-transparent
+        via-white/[0.04]
+        to-transparent
+      "
+                  />
+
+                  {/* CONTENT */}
+
+                  <div className="h-full flex items-center justify-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-white/10 animate-pulse" />
+
+                    <div className="h-3 w-28 rounded-full bg-white/10 animate-pulse" />
+                  </div>
+                </div>
+              ) : (
+                <button
+                  disabled={alreadyRated || addMovieRatingMutation?.isPending}
+                  onClick={() => {
+                    if (alreadyRated || addMovieRatingMutation?.isPending)
+                      return;
+                    setIsRatingModalOpen(true);
+                  }}
+                  className={`
+    flex-1 py-4 w-full rounded-xl
+    flex items-center justify-center gap-2
+    border
+    transition-all duration-300
+    active:scale-95
+
+    ${
+      alreadyRated
+        ? `
+        bg-yellow-500/10
+        border-yellow-400/18
+        text-yellow-200
+        cursor-not-allowed
+        pointer-events-none
+      `
+        : `
+        bg-zinc-800
+        hover:bg-zinc-800/45
+        border-white/5
+        text-white
+        cursor-pointer
+      `
+    }
+
+    ${addMovieRatingMutation?.isPending ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}
+  `}
+                >
+                  {addMovieRatingMutation?.isPending ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+                      <span className="text-xs font-bold uppercase tracking-wide">
+                        Submitting...
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {alreadyRated ? (
+                        <FaStar size={18} className="text-yellow-400" />
+                      ) : (
+                        <Star size={18} className="text-yellow-400" />
+                      )}
+                      <span className="text-xs  uppercase font-bold text-white tracking-wide">
+                        {alreadyRated ? "Already Rated" : "Rate Now"}
+                      </span>
+                    </>
+                  )}
+                </button>
+              )}
 
               <div className="mt-4 flex items-center justify-center gap-4">
-                <button className="flex-1 bg-zinc-800 active:scale-95 hover:bg-zinc-800/45 text-white py-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer border transition-all border-white/5">
-                  <Eye size={18} className="text-blue-400" />
-                  <span className="text-xs font-bold uppercase">
-                    Mark Watched
-                  </span>
-                </button>
+                {/* ====================================================== */}
+                {/* ✅ LOADING SKELETON */}
+                {/* ====================================================== */}
+
+                {watchedLoading ? (
+                  <div
+                    className="
+        flex-1
+
+        h-[56px]
+
+        rounded-xl
+
+        border border-white/5
+
+        bg-zinc-800/70
+
+        overflow-hidden
+
+        relative
+      "
+                  >
+                    {/* SHIMMER */}
+
+                    <div
+                      className="
+          absolute inset-0
+
+          animate-pulse
+
+          bg-gradient-to-r
+          from-transparent
+          via-white/[0.04]
+          to-transparent
+        "
+                    />
+
+                    {/* CONTENT */}
+
+                    <div className="h-full flex items-center justify-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-white/10 animate-pulse" />
+
+                      <div className="h-3 w-28 rounded-full bg-white/10 animate-pulse" />
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    disabled={toggleMarkWatchedMutation?.isPending}
+                    onClick={() => {
+                      // ============================================
+                      // ✅ PREVENT DOUBLE CLICK
+                      // ============================================
+
+                      if (toggleMarkWatchedMutation?.isPending) {
+                        return;
+                      }
+
+                      // ============================================
+                      // ✅ TOGGLE WATCHED
+                      // ============================================
+
+                      toggleMarkWatchedMutation.mutate();
+                    }}
+                    className={`
+        flex-1
+
+        py-4
+
+        rounded-xl
+
+        flex items-center justify-center gap-2
+
+        cursor-pointer
+
+        border
+
+        transition-all duration-300
+
+        active:scale-95
+
+        ${
+          isWatched
+            ? `
+              bg-emerald-500/12
+              hover:bg-emerald-500/18
+
+              border-emerald-400/20
+
+              text-emerald-300
+
+              shadow-[0_0_20px_rgba(16,185,129,0.12)]
+            `
+            : `
+              bg-zinc-800
+
+              hover:bg-zinc-800/45
+
+              border-white/5
+
+              text-white
+            `
+        }
+
+        ${
+          toggleMarkWatchedMutation?.isPending
+            ? "opacity-70 cursor-not-allowed"
+            : ""
+        }
+      `}
+                  >
+                    {/* ============================================ */}
+                    {/* ✅ PENDING UI */}
+                    {/* ============================================ */}
+
+                    {toggleMarkWatchedMutation?.isPending ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+
+                        <span className="text-xs font-bold uppercase tracking-wide">
+                          Updating...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {/* ======================================== */}
+                        {/* ✅ WATCHED TRUE */}
+                        {/* ======================================== */}
+
+                        {isWatched ? (
+                          <Eye size={18} className="text-emerald-400" />
+                        ) : (
+                          <Eye size={18} className="text-blue-400" />
+                        )}
+
+                        <span className="text-xs font-bold uppercase tracking-wide">
+                          {isWatched ? "Watched" : "Mark Watched"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -623,13 +1234,19 @@ const MovieDescriptionSection = ({
                               key={index}
                               onMouseEnter={() => setHover(starValue)}
                               onMouseLeave={() => setHover(0)}
-                              onClick={() => setRating(starValue)}
+                              onClick={() => {
+                                if (addMovieRatingMutation?.isPending) {
+                                  return;
+                                }
+
+                                setSelectedRating(starValue);
+                              }}
                               className="group relative transition-transform active:scale-3d duration-200 cursor-pointer "
                             >
                               <FaStar
                                 className={`transition-all duration-500 ease-out group-hover:rotate-[180deg] group-hover:scale-150 text-[22px] md:text-[25px]
                                   ${
-                                    starValue <= (hover || rating)
+                                    starValue <= (hover || selectedRating)
                                       ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]"
                                       : "text-zinc-700"
                                   }`}
@@ -640,16 +1257,17 @@ const MovieDescriptionSection = ({
                       </div>
                       {/* Comment box added if rating selected */}
                       <AnimatePresence>
-                        {rating > 0 && (
+                        {selectedRating > 0 && (
                           <motion.div>
                             <textarea
-                              value={comment}
-                              onChange={(e) => setComment(e.target.value)}
+                              disabled={addMovieRatingMutation?.isPending}
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
                               placeholder="Write your experience..."
                               className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-yellow-500/50 transition-colors resize-none h-24"
                             />
 
-                            <button
+                            {/* <button
                               disabled={!comment.trim()}
                               // onClick={handleSubmitRating}
                               className={`w-full py-4 rounded-2xl text-[14px] md:text-[16px] font-bold flex items-center justify-center gap-2 transition-all ${
@@ -660,6 +1278,57 @@ const MovieDescriptionSection = ({
                             >
                               <Send size={18} />
                               SUBMIT REVIEW
+                            </button> */}
+                            <button
+                              disabled={
+                                !selectedRating ||
+                                addMovieRatingMutation?.isPending
+                              }
+                              onClick={handleSubmitMovieRating}
+                              className={`
+                                w-full
+
+                                h-[52px]
+
+                                rounded-2xl
+
+                                font-semibold
+
+                                transition-all duration-300
+
+                                flex items-center justify-center gap-2
+
+    ${
+      addMovieRatingMutation?.isPending
+        ? `
+          bg-yellow-500/60
+          cursor-not-allowed
+        `
+        : `
+          bg-yellow-500
+          hover:bg-yellow-400
+          text-black
+        `
+    }
+  `}
+                            >
+                              {/* ======================================== */}
+                              {/* ✅ LOADING */}
+                              {/* ======================================== */}
+
+                              {addMovieRatingMutation?.isPending ? (
+                                <>
+                                  <div className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+
+                                  <span>Submitting Rating...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Send size={18} />
+
+                                  <span>Submit Rating</span>
+                                </>
+                              )}
                             </button>
                           </motion.div>
                         )}

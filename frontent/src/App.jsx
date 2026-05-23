@@ -28,6 +28,13 @@ import TrashMovie from "./ADMIN/Dashboard/TrashMovie/TrashMovie";
 import { useWebsiteTracking } from "./hooks/useWebsiteTracking";
 import NewsPage from "./NewsSection/NewsPage";
 import NewsDetails from "./NewsSection/NewsDetailsSection/NewsDetails";
+import { useQuery } from "@tanstack/react-query";
+import {
+  authFail,
+  authStart,
+  authSuccess,
+} from "./redux/userAuthSlice/UserAuthSlice";
+import api from "./api";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -38,6 +45,44 @@ const App = () => {
 
   NProgress.configure({
     showSpinner: false,
+  });
+
+  const {
+    data: currentUserData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["current-user"],
+    queryFn: async () => {
+      try {
+        // ======================================================
+        // ✅ AUTH START
+        // ======================================================
+        dispatch(authStart());
+        // ======================================================
+        // ✅ API CALL
+        // ======================================================
+
+        const response = await api.get("/auth/user/current-user");
+        // ======================================================
+        // ✅ STORE USER
+        // ======================================================
+        dispatch(authSuccess(response.data.user));
+        return response.data.user;
+      } catch (error) {
+        // ======================================================
+        // ✅ AUTH FAIL
+        // ======================================================
+        dispatch(
+          authFail(error?.response?.data?.message || "Authentication failed"),
+        );
+        throw error;
+      }
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
   // Intha oru line unga moththa tracking-aiyum paathukkum

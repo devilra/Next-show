@@ -28,6 +28,8 @@ const TmdbRoutes = require("./routes/TMDB-Routes/tmdbRoutes");
 const WebsiteVisitCountTracking = require("./routes/WebsiteTrackingRoutes/WebsiteVisitCount");
 const TagsRoutes = require("./routes/TagsRoutes/TagsRoutes");
 const NewsRoutes = require("./routes/NewsRoutes/NewsRoutes");
+const UserAuthRoutes = require("./routes/UserAuthRoutes/UserAuthRoutes");
+const UserRateLikeMarkRoutes = require("./routes/UserRateLikeMarkRoutes/UserRateLikeMarkRoutes");
 
 const app = express();
 
@@ -95,6 +97,10 @@ app.use("/api/admin", TmdbRoutes);
 app.use("/api/admin", WebsiteVisitCountTracking);
 app.use("/api/admin", TagsRoutes);
 app.use("/api/admin", NewsRoutes);
+
+//UserAuthRoutes
+app.use("/api/auth/user", UserAuthRoutes);
+app.use("/api/auth/user", UserRateLikeMarkRoutes);
 
 // Simple root route for testing
 app.get("/", (req, res) => {

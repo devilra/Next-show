@@ -1,6 +1,8 @@
 const Movie = require("./CentralizedMoviesCreateModels/CentralizedJsonBulkCreate");
 const MovieCast = require("./CentralizedMoviesCreateModels/MovieCast");
 const Cast = require("./Cast/Cast");
+const UserAuthModel = require("./UserAuth/UserAuth");
+const UserWatchlistModel = require("./UserAuth/UserWatchlistModel");
 
 // 1. Oru movie-la neraiya cast irupanga
 Movie.belongsToMany(Cast, {
@@ -24,5 +26,35 @@ MovieCast.belongsTo(Movie, { foreignKey: "movieId" });
 
 Cast.hasMany(MovieCast, { foreignKey: "castId", as: "movieRoles" });
 MovieCast.belongsTo(Cast, { foreignKey: "castId" });
+
+// ============================================
+// USER ↔ WATCHLIST
+// ============================================
+UserAuthModel.hasMany(UserWatchlistModel, {
+  foreignKey: "userId",
+  as: "watchlists",
+});
+
+UserWatchlistModel.belongsTo(UserAuthModel, {
+  foreignKey: "userId",
+
+  as: "user",
+});
+
+// ============================================
+// MOVIE ↔ WATCHLIST
+// ============================================
+
+Movie.hasMany(UserWatchlistModel, {
+  foreignKey: "movieId",
+
+  as: "movieWatchlists",
+});
+
+UserWatchlistModel.belongsTo(Movie, {
+  foreignKey: "movieId",
+
+  as: "movie",
+});
 
 module.exports = { Movie, Cast, MovieCast };

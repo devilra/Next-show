@@ -19,7 +19,7 @@ const Login = () => {
   const [snackMsg, setSnackMsg] = useState("");
   const [snackType, setSnackType] = useState("success");
   const { admin, isLoading, isError, isSuccess, message } = useSelector(
-    (state) => state.admin
+    (state) => state.admin,
   );
 
   const togglePassword = () => setShowPass(!showPass);
