@@ -7,6 +7,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const UserAuthModel = require("../../models/UserAuth/UserAuth");
+const fs = require("fs");
+const path = require("path");
+const sequelize = require("../../config/db");
 
 // ======================================================
 // ✅ GOOGLE CLIENT
@@ -46,11 +49,16 @@ const cookieOptions = {
 exports.manualSignup = async (req, res) => {
   try {
     const { fullName, email, password } = req.body;
+
+    const cleanFullName = fullName?.trim();
+    const cleanEmail = email?.trim()?.toLowerCase();
+    const cleanPassword = password?.trim();
+
     // ======================================================
     // ✅ VALIDATION
     // ======================================================
 
-    if (!fullName.trim() || !email.trim() || !password.trim()) {
+    if (!cleanFullName || !cleanEmail || !cleanPassword) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
@@ -60,7 +68,7 @@ exports.manualSignup = async (req, res) => {
     // ======================================================
     // ✅ PASSWORD LENGTH
     // ======================================================
-    if (password.length < 6) {
+    if (cleanPassword.length < 6) {
       return res.status(400).json({
         success: false,
         message: "Password must be at least 6 characters",
@@ -72,7 +80,7 @@ exports.manualSignup = async (req, res) => {
     // ======================================================
     const existingUser = await UserAuthModel.findOne({
       where: {
-        email: email.toLowerCase(),
+        email: cleanEmail,
       },
     });
 
@@ -90,13 +98,13 @@ exports.manualSignup = async (req, res) => {
     // ======================================================
     // ✅ HASH PASSWORD
     // ======================================================
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(cleanPassword, 10);
     // ======================================================
     // ✅ CREATE USER
     // ======================================================
     const newUser = await UserAuthModel.create({
-      fullName,
-      email: email.toLowerCase(),
+      fullName: cleanFullName,
+      email: cleanEmail,
       password: hashedPassword,
       authProvider: "manual",
       isEmailVerified: false,
@@ -157,10 +165,14 @@ exports.manualLogin = async (req, res) => {
   console.log("manual login", req.body);
   try {
     const { email, password } = req.body;
+
+    const cleanEmail = email?.trim()?.toLowerCase();
+    const cleanPassword = password?.trim();
+
     // ======================================================
     // ✅ VALIDATION
     // ======================================================
-    if (!email || !password) {
+    if (!cleanEmail || !cleanPassword) {
       return res.status(400).json({
         success: false,
         message: "Email and password required",
@@ -171,7 +183,7 @@ exports.manualLogin = async (req, res) => {
     // ======================================================
     const user = await UserAuthModel.findOne({
       where: {
-        email: email.toLowerCase(),
+        email: cleanEmail,
       },
     });
     // ======================================================
@@ -206,7 +218,7 @@ exports.manualLogin = async (req, res) => {
     // ======================================================
     // ✅ PASSWORD CHECK
     // ======================================================
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    const isPasswordMatch = await bcrypt.compare(cleanPassword, user.password);
 
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -260,6 +272,7 @@ exports.manualLogin = async (req, res) => {
 exports.googleLogin = async (req, res) => {
   try {
     const { credential } = req.body;
+    // console.log("Credential", credential);
     // ======================================================
     // ✅ TOKEN REQUIRED
     // ======================================================
@@ -425,6 +438,10 @@ exports.getCurrentUser = async (req, res) => {
         "profileImage",
         "role",
         "isEmailVerified",
+        "accountStatus",
+        "lastLoginAt",
+        "lastActiveAt",
+        "dateOfBirth",
       ],
     });
     if (!user) {
@@ -442,6 +459,264 @@ exports.getCurrentUser = async (req, res) => {
       success: false,
       message: "Failed to fetch user",
       error: "Failed to fetch user",
+    });
+  }
+};
+
+exports.updateProfileImage = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    // ======================================================
+    // ✅ CURRENT USER ID
+    // ======================================================
+    const userId = req.user.id;
+    // ======================================================
+    // ✅ FILE CHECK
+    // ======================================================
+    if (!req.file) {
+      await transaction.rollback();
+
+      return res.status(400).json({
+        success: false,
+        message: "Profile image is required",
+      });
+    }
+    // ======================================================
+    // ✅ FIND USER
+    // ======================================================
+    const user = await UserAuthModel.findByPk(userId, {
+      transaction,
+    });
+    if (!user) {
+      await transaction.rollback();
+
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    // ======================================================
+    // ✅ IMAGE PATH
+    // ======================================================
+    const profileImagePath = `/uploads/profile/${userId}/${req.file.filename}`;
+    // ======================================================
+    // ✅ UPDATE USER DATA
+    // ======================================================
+    user.profileFolderId = String(userId);
+    user.profileImage = profileImagePath;
+    // ======================================================
+    // ✅ SAVE USER
+    // ======================================================
+    await user.save({ transaction });
+    // ======================================================
+    // ✅ COMMIT TRANSACTION
+    // ======================================================
+    await transaction.commit();
+    // ======================================================
+    // ✅ SUCCESS RESPONSE
+    // ======================================================
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile image updated successfully",
+      profileImage: profileImagePath,
+      // user: {
+      //   id: user.id,
+      //   fullName: user.fullName,
+      //   email: user.email,
+      //   profileFolderId: user.profileFolderId,
+      //   profileImage: user.profileImage,
+      // },
+    });
+  } catch (error) {
+    console.log("PROFILE IMAGE UPDATE ERROR", error);
+
+    // ======================================================
+    // ✅ ROLLBACK TRANSACTION
+    // ======================================================
+
+    await transaction.rollback();
+
+    // ======================================================
+    // ✅ DELETE NEWLY UPLOADED FILE IF DB FAILED
+    // ======================================================
+
+    if (req.file) {
+      const uploadedFilePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "public",
+        "uploads",
+        "profile",
+        String(req.user.id),
+        req.file.filename,
+      );
+
+      if (fs.existsSync(uploadedFilePath)) {
+        fs.unlinkSync(uploadedFilePath);
+      }
+    }
+
+    // ======================================================
+    // ✅ ERROR RESPONSE
+    // ======================================================
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update profile image",
+      error: error.message,
+    });
+  }
+};
+
+exports.updateUserAccountDetails = async (req, res) => {
+  // ======================================================
+  // ✅ START TRANSACTION
+  // ======================================================
+
+  const transaction = await sequelize.transaction();
+  try {
+    // ======================================================
+    // ✅ CURRENT USER ID
+    // ======================================================
+    const userId = req.user.id;
+
+    const updateData = req.body;
+    const user = await UserAuthModel.findByPk(userId, {
+      transaction,
+    });
+    if (!user) {
+      await transaction.rollback();
+
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    // ======================================================
+    // ✅ ALLOWED FIELDS
+    // ======================================================
+    const allowedFields = [
+      "fullName",
+      "email",
+      "username",
+      "gender",
+      "dateOfBirth",
+    ];
+    // ======================================================
+    // ✅ EMAIL DUPLICATE CHECK
+    // ======================================================
+    if (updateData.email !== undefined) {
+      const existingEmail = await UserAuthModel.findOne({
+        where: {
+          email: updateData.email.trim().toLowerCase(),
+        },
+        transaction,
+      });
+      // ======================================================
+      // ✅ EMAIL ALREADY EXISTS
+      // ======================================================
+      if (existingEmail && String(existingEmail.id) !== String(userId)) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists",
+        });
+      }
+    }
+    // ======================================================
+    // ✅ USERNAME DUPLICATE CHECK
+    // ======================================================
+    if (updateData.username !== undefined) {
+      const existingUsername = await UserAuthModel.findOne({
+        where: {
+          username: updateData.username.trim(),
+        },
+        transaction,
+      });
+
+      // ======================================================
+      // ✅ USERNAME ALREADY EXISTS
+      // ======================================================
+
+      if (existingUsername && String(existingUsername.id) !== String(userId)) {
+        await transaction.rollback();
+
+        return res.status(400).json({
+          success: false,
+          message: "Username already taken",
+        });
+      }
+    }
+    // ======================================================
+    // ✅ DYNAMIC UPDATE
+    // ======================================================
+    Object.keys(updateData).forEach((key) => {
+      // ============================================
+      // ✅ ONLY ALLOWED FIELDS
+      // ============================================
+      if (allowedFields.includes(key)) {
+        // ============================================
+        // ✅ EMAIL LOWERCASE
+        // ============================================
+        if (key === "email") {
+          user[key] = updateData[key]?.trim()?.toLowerCase();
+        }
+        // ============================================
+        // ✅ STRING TRIM
+        // ============================================
+        else if (typeof updateData[key] === "string") {
+          user[key] = updateData[key]?.trim();
+        }
+        // ============================================
+        // ✅ NORMAL VALUE
+        // ============================================
+        else {
+          user[key] = updateData[key];
+        }
+      }
+    });
+    // ======================================================
+    // ✅ SAVE USER
+    // ======================================================
+
+    await user.save({
+      transaction,
+    });
+    // ======================================================
+    // ✅ COMMIT TRANSACTION
+    // ======================================================
+
+    await transaction.commit();
+    // ======================================================
+    // ✅ SUCCESS RESPONSE
+    // ======================================================
+    return res.status(200).json({
+      success: true,
+      message: "Account details updated successfully",
+
+      // user: {
+      //   id: user.id,
+      //   fullName: user.fullName,
+      //   email: user.email,
+      //   username: user.username,
+      //   gender: user.gender,
+      //   dateOfBirth: user.dateOfBirth,
+      // },
+    });
+  } catch (error) {
+    console.log("UPDATE USER ACCOUNT DETAILS ERROR", error);
+    // ======================================================
+    // ✅ ROLLBACK
+    // ======================================================
+
+    await transaction.rollback();
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update account details",
+      error: error.message,
     });
   }
 };

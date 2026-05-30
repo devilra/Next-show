@@ -10,7 +10,7 @@ import {
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { HiChevronRight } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const profileDropdownLinks = [
   {
@@ -19,29 +19,29 @@ const profileDropdownLinks = [
     path: "/profile",
   },
 
-  {
-    label: "Watchlist",
-    icon: FaBookmark,
-    path: "/watchlist",
-  },
+  // {
+  //   label: "Watchlist",
+  //   icon: FaBookmark,
+  //   path: "/watchlist",
+  // },
 
-  {
-    label: "Favorites",
-    icon: FaHeart,
-    path: "/favorites",
-  },
+  // {
+  //   label: "Favorites",
+  //   icon: FaHeart,
+  //   path: "/favorites",
+  // },
 
-  {
-    label: "Watch History",
-    icon: FaHistory,
-    path: "/history",
-  },
+  // {
+  //   label: "Watch History",
+  //   icon: FaHistory,
+  //   path: "/history",
+  // },
 
-  {
-    label: "Settings",
-    icon: FaCog,
-    path: "/settings",
-  },
+  // {
+  //   label: "Settings",
+  //   icon: FaCog,
+  //   path: "/settings",
+  // },
   {
     label: "Logout",
     icon: FaSignOutAlt,
@@ -57,11 +57,28 @@ export default function ProfileDropdown({
 }) {
   const profileRef = useRef(null);
   const { currentUser } = useSelector((state) => state.userAuth);
+  const navigate = useNavigate();
 
-  // ======================================================
-  // ✅ PROFILE IMAGE
-  // ======================================================
-  const profileImage = currentUser?.profileImage;
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return null;
+    }
+
+    // ======================================================
+    // ✅ FULL URL
+    // ======================================================
+
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+
+    // ======================================================
+    // ✅ LOCAL IMAGE
+    // ======================================================
+
+    return `${IMAGE_BASE_URL}${imagePath}`;
+  };
   // ======================================================
   // ✅ FIRST LETTER
   // ======================================================
@@ -102,9 +119,9 @@ export default function ProfileDropdown({
             shadow-[0_0_25px_rgba(249,115,22,0.25)]
           "
         >
-          {profileImage ? (
+          {currentUser?.profileImage ? (
             <img
-              src={profileImage}
+              src={getImageUrl(currentUser?.profileImage)}
               alt="profile"
               className="w-full h-full object-cover"
             />
@@ -236,31 +253,77 @@ export default function ProfileDropdown({
               // ======================================================
 
               return (
-                <Link
+                //           <Link
+                //             key={item.label}
+                //             to={item.path}
+                //             onClick={() => {
+                //               setIsProfileOpen(false);
+                //             }}
+                //             className="
+                //   flex items-center gap-3
+
+                //   px-4 py-3
+
+                //   rounded-xl
+
+                //   text-white/70
+
+                //   hover:text-white
+                //   hover:bg-white/5
+
+                //   transition-all duration-300
+                // "
+                //           >
+                //             <Icon className="text-[15px] shrink-0" />
+
+                //             <span className="text-[14px] font-medium">{item.label}</span>
+                //           </Link>
+                <button
                   key={item.label}
-                  to={item.path}
                   onClick={() => {
+                    // ============================================
+                    // ✅ PROFILE PAGE
+                    // ============================================
+
+                    if (item.path === "/profile") {
+                      navigate("/profile", {
+                        state: {
+                          from: location.pathname,
+                        },
+                      });
+
+                      setIsProfileOpen(false);
+
+                      return;
+                    }
+
+                    // ============================================
+                    // ✅ OTHER PAGES
+                    // ============================================
+
+                    navigate(item.path);
+
                     setIsProfileOpen(false);
                   }}
                   className="
-        flex items-center gap-3
+    flex items-center gap-3
+                  w-full
+    px-4 py-3
 
-        px-4 py-3
+    rounded-xl
 
-        rounded-xl
+    text-white/70
 
-        text-white/70
+    hover:text-white
+    hover:bg-white/5
 
-        hover:text-white
-        hover:bg-white/5
-
-        transition-all duration-300
-      "
+    transition-all duration-300
+  "
                 >
                   <Icon className="text-[15px] shrink-0" />
 
                   <span className="text-[14px] font-medium">{item.label}</span>
-                </Link>
+                </button>
               );
             })}
           </motion.div>

@@ -33,7 +33,7 @@ const StreamingNow = () => {
   //console.log(streamingData);
 
   const tabs = [
-    { key: "newRelease", label: "New Releases" },
+    { key: "newRelease", label: "Streaming" },
     { key: "upcoming", label: "Upcoming" },
     { key: "trending", label: "Trending" },
   ];
@@ -72,14 +72,14 @@ const StreamingNow = () => {
   return (
     <div className="mt-20 md:mt-16">
       <div className="overflow-hidden rounded-[18px] border border-white/10 shadow-2xl shadow-black/30 md:rounded-[28px]">
-        <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-zinc-950 px-3 py-3 md:px-8 md:py-8">
+        <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-zinc-950 px-5 py-6 md:px-8 md:py-8">
           <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:gap-3">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`shrink-0 whitespace-nowrap rounded-full px-4 py-2.5 text-xs font-semibold transition cursor-pointer select-auto duration-200 sm:text-sm md:px-5 md:py-3 ${
+                className={`rounded-full px-5 py-2 text-[12px] md:text-base font-semibold transition cursor-pointer select-auto duration-200 ${
                   activeTab === tab.key
                     ? "bg-orange-500 shadow-md shadow-orange-500/25 md:shadow-lg md:shadow-orange-500/30 "
                     : "bg-white/5 text-slate-300 hover:bg-white/10"

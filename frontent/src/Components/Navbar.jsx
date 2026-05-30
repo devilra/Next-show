@@ -1,4 +1,9 @@
-import { Link, useLocation } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useNavigation,
+} from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import {
   HiChevronRight,
@@ -20,10 +25,11 @@ import ReusableConfirmDialog from "./ReusableConfirmDialog";
 import { useSnackbar } from "../../context/SnackbarContext";
 
 const navLinks = [
-  { to: "/new", label: "New Movies" },
+  { to: "/", label: "Home" },
   { to: "/stream", label: "Streaming Now" },
+  { to: "/new", label: "New Movies" },
   { to: "/news", label: "News" },
-  { to: "/about", label: "About Us" },
+  // { to: "/about", label: "About Us" },
   { to: "/auth/login", label: "Login", isLogin: true },
 ];
 
@@ -42,29 +48,29 @@ const profileDropdownLinks = [
     path: "/profile",
   },
 
-  {
-    label: "Watchlist",
-    icon: FaBookmark,
-    path: "/watchlist",
-  },
+  // {
+  //   label: "Watchlist",
+  //   icon: FaBookmark,
+  //   path: "/watchlist",
+  // },
 
-  {
-    label: "Favorites",
-    icon: FaHeart,
-    path: "/favorites",
-  },
+  // {
+  //   label: "Favorites",
+  //   icon: FaHeart,
+  //   path: "/favorites",
+  // },
 
-  {
-    label: "Watch History",
-    icon: FaHistory,
-    path: "/history",
-  },
+  // {
+  //   label: "Watch History",
+  //   icon: FaHistory,
+  //   path: "/history",
+  // },
 
-  {
-    label: "Settings",
-    icon: FaCog,
-    path: "/settings",
-  },
+  // {
+  //   label: "Settings",
+  //   icon: FaCog,
+  //   path: "/settings",
+  // },
 
   {
     label: "Logout",
@@ -95,6 +101,8 @@ const Navbar = () => {
     useSelector((state) => state.userAuth);
   const navbarRef = useRef(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
   useEffect(() => {
     if (isOpen || isLangOpen || isAuthOpen) {
@@ -160,6 +168,26 @@ const Navbar = () => {
     setIsProfileOpen(!isProfileOpen);
 
     setIsLangOpen(false);
+  };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return null;
+    }
+
+    // ======================================================
+    // ✅ FULL URL
+    // ======================================================
+
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+
+    // ======================================================
+    // ✅ LOCAL IMAGE
+    // ======================================================
+
+    return `${IMAGE_BASE_URL}${imagePath}`;
   };
 
   // ─── HAMBURGER ANIMATION ───
@@ -254,7 +282,7 @@ const Navbar = () => {
           </Link>
 
           {/* 2. CENTER SEARCH BAR */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-5">
+          {/* <div className="hidden md:flex flex-1 max-w-lg mx-5">
             <form
               onSubmit={(e) => e.preventDefault()}
               className="relative w-full group flex items-center"
@@ -278,9 +306,51 @@ const Navbar = () => {
                 </button>
               </div>
             </form>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-6">
+            {/* LANGUAGE ICON DROPDOWN */}
+            <div className="relative hidden lg:block" ref={langRef}>
+              <button
+                disabled
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-1 text-white/70  transition-all text-sm cursor-not-allowed opacity-50 "
+              >
+                <HiOutlineTranslate className="text-xl" />
+                <span>{selectedLang}</span>
+                <motion.div
+                  animate={{ rotate: isLangOpen ? 90 : 0 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <HiChevronRight className="text-white/40 text-xl" />
+                </motion.div>
+              </button>
+
+              <AnimatePresence>
+                {isLangOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 5 }}
+                    exit={{ opacity: 0, y: 15 }}
+                    className="absolute top-[50px] right-4 w-[240px] bg-[#121212]/95 border border-white/10 backdrop-blur-2xl rounded-3xl p-2 shadow-2xl"
+                  >
+                    {languages.map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => {
+                          setSelectedLang(lang);
+                          setIsLangOpen(false);
+                        }}
+                        className={`text-[13px] w-full text-start block my-1 py-3 px-4 rounded-xl transition-all ${selectedLang === lang ? "bg-orange-500 text-white" : "text-white/70 hover:text-white hover:bg-white/5"}`}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* 3. CUSTOM DESKTOP HAMBURGER */}
             <div className="hidden lg:flex items-center relative" ref={menuRef}>
               <button
@@ -328,7 +398,7 @@ const Navbar = () => {
                             <Link
                               to={link.to}
                               onClick={() => setNavMenuOpen(false)}
-                              className={`text-[13px] block py-3 px-4 rounded-xl transition-all ${
+                              className={`text-[13px] block font-bold py-3 px-4 rounded-xl transition-all ${
                                 location.pathname === link.to
                                   ? "bg-orange-500 text-white "
                                   : "text-white/70 hover:text-white hover:bg-white/5"
@@ -344,47 +414,7 @@ const Navbar = () => {
                 )}
               </AnimatePresence>
             </div>
-            {/* LANGUAGE ICON DROPDOWN */}
-            <div className="relative hidden lg:block" ref={langRef}>
-              <button
-                disabled
-                onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-1 text-white/70  transition-all text-sm cursor-not-allowed opacity-50 "
-              >
-                <HiOutlineTranslate className="text-xl" />
-                <span>{selectedLang}</span>
-                <motion.div
-                  animate={{ rotate: isLangOpen ? 90 : 0 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <HiChevronRight className="text-white/40 text-xl" />
-                </motion.div>
-              </button>
 
-              <AnimatePresence>
-                {isLangOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 5 }}
-                    exit={{ opacity: 0, y: 15 }}
-                    className="absolute top-[50px] right-4 w-[240px] bg-[#121212]/95 border border-white/10 backdrop-blur-2xl rounded-3xl p-2 shadow-2xl"
-                  >
-                    {languages.map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => {
-                          setSelectedLang(lang);
-                          setIsLangOpen(false);
-                        }}
-                        className={`text-[13px] w-full text-start block my-1 py-3 px-4 rounded-xl transition-all ${selectedLang === lang ? "bg-orange-500 text-white" : "text-white/70 hover:text-white hover:bg-white/5"}`}
-                      >
-                        {lang}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
             {!authChecked ? (
               <div className="hidden md:hidden lg:block">
                 <div
@@ -781,7 +811,9 @@ const Navbar = () => {
                                 >
                                   {currentUser?.profileImage ? (
                                     <img
-                                      src={currentUser.profileImage}
+                                      src={getImageUrl(
+                                        currentUser?.profileImage,
+                                      )}
                                       alt="profile"
                                       className="w-full h-full object-cover"
                                     />
@@ -899,23 +931,43 @@ const Navbar = () => {
                                     // ======================================================
 
                                     return (
-                                      <Link
+                                      <button
                                         key={item.label}
-                                        to={item.path}
+                                        // to={item.path}
                                         onClick={() => {
-                                          setIsOpen(false);
+                                          // ============================================
+                                          // ✅ PROFILE PAGE
+                                          // ============================================
 
-                                          setIsProfileOpen(false);
+                                          if (item.path === "/profile") {
+                                            navigate("/profile", {
+                                              state: {
+                                                from: location.pathname,
+                                              },
+                                            });
+
+                                            // ==========================================
+                                            // ✅ CLOSE MOBILE MENU
+                                            // ==========================================
+
+                                            setNavMenuOpen(false);
+
+                                            return;
+                                          }
+
+                                          // ============================================
+                                          // ✅ OTHER ROUTES
+                                          // ============================================
+
+                                          navigate(item.path);
+
+                                          setNavMenuOpen(false);
                                         }}
                                         className={`
                                             flex items-center gap-3
-
-                                            px-4 py-3
-
-                                            rounded-xl
-
+                                            px-4 py-3 
+                                           rounded-xl
                                             transition-all duration-300
-
                                             ${
                                               item.danger
                                                 ? `
@@ -935,7 +987,7 @@ const Navbar = () => {
                                         <span className="text-[14px]">
                                           {item.label}
                                         </span>
-                                      </Link>
+                                      </button>
                                     );
                                   })}
                                 </motion.div>

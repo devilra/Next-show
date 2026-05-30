@@ -24,6 +24,10 @@ const {
   getUserWatchLater,
   removeWatchLaterItem,
   clearAllWatchLater,
+  toggleNewsLike,
+  checkNewsLikeStatus,
+  getNewsLikeCount,
+  getUserLikedNews,
 } = require("../../controllers/UserAuthController/UserWatchLaterController");
 
 const router = express.Router();
@@ -58,13 +62,31 @@ router.get("/watch-later", UserProtect, getUserWatchLater);
 
 router.get("/check-watchlist/:movieId", UserProtect, checkWatchlistStatus);
 
-router.get("/watchlist", UserProtect, getUserWatchlist);
+router.get("/get-user-watchlist", UserProtect, getUserWatchlist);
 
 router.get("/recent-views", UserProtect, getRecentViews);
 // ======================================================
 // ✅ GET USER MOVIE RATING
 // ======================================================
 router.get("/get-user-rating/:movieId", UserProtect, getUserMovieRating);
+
+router.post("/toggle-news-like", UserProtect, toggleNewsLike);
+
+// ======================================================
+// ✅ CHECK NEWS LIKE STATUS
+// ======================================================
+router.get("/check-news-like/:newsId", UserProtect, checkNewsLikeStatus);
+
+// ======================================================
+// ✅ GET NEWS LIKE COUNT
+// ======================================================
+router.get("/news-like-count/:newsId", UserProtect, getNewsLikeCount);
+
+// ======================================================
+// ✅ GET USER LIKED NEWS
+// ======================================================
+router.get("/user-liked-news", UserProtect, getUserLikedNews);
+
 // ======================================================
 // ✅ REMOVE SINGLE RECENT VIEW
 // ======================================================

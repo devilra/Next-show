@@ -264,7 +264,7 @@ const MovieDescriptionSection = ({
   const alreadyRated = userRatingData?.rated;
 
   return (
-    <div className="py-6 bg-[#121212] space-y-4 mb-8 text-white">
+    <div className="pt-6 bg-[#121212] space-y-4 mb-8 text-white">
       {/* --- New Release Dates Section --- */}
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl p-6 md:p-8 shadow-2xl">
         {/* Background subtle glow effect */}
@@ -287,11 +287,13 @@ const MovieDescriptionSection = ({
               ) : (
                 <button
                   onClick={() => window.open(movie.watchUrl, "_blank")}
-                  className="group relative flex items-center cursor-pointer justify-center gap-1 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white text-[10px] md:text-[13px] bg-orange-500 transition-all duration-300 hover:shadow-[0_0_10px_5px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95"
+                  className="group relative flex flex-1 md:flex-none items-center cursor-pointer justify-center gap-1 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white  bg-orange-500 transition-all duration-300 hover:shadow-[0_0_10px_5px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95"
                 >
                   <span className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-r from-orange-600 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <FaPlay className="relative z-10 text-[10px] md:text-[15px]" />
-                  <span className="relative z-10 ">WATCH NOW</span>
+                  <FaPlay className="relative z-10 text-[17px] md:text-[15px]" />
+                  <span className="relative z-10 text-[13px] md:text-[15px] ">
+                    WATCH NOW
+                  </span>
                 </button>
               )}
 
@@ -431,8 +433,8 @@ px-20
       cursor-pointer
 
       relative
-
-      flex-1
+      flex-none
+      md:flex-1
 
       flex items-center justify-center gap-2
 
@@ -586,7 +588,7 @@ px-20
           tracking-widest
           text-[12px]
           transition-colors duration-300
-
+          hidden md:inline-block
           ${isInWatchlist ? "text-red-400" : "text-white"}
         `}
                     >
@@ -650,7 +652,7 @@ px-20
                 {availableLanguages.map((lang, idx) => (
                   <div key={idx} className="flex items-center gap-2 md:gap-3">
                     {/* text-[9px] used for better mobile fit */}
-                    <span className="text-[7px] md:text-[11px] tracking-[0.13em] font-medium uppercase text-zinc-300 group-hover:text-white transition-colors">
+                    <span className="text-[10px] md:text-[11px] tracking-[0.13em] font-medium uppercase text-zinc-300 group-hover:text-white transition-colors">
                       {lang}
                     </span>
                     {idx !== availableLanguages.length - 1 && (
@@ -665,7 +667,7 @@ px-20
       </div>
 
       {/* Main Container: Mobile-la flex-col, Desktop-la flex-row (gap-12) */}
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 mt-10">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-6 mt-10">
         {/* Left Side: Description & Info Card */}
         <div className="flex-1 order-1 space-y-8">
           {/* ✨ Description Section with unique accent */}
@@ -677,7 +679,7 @@ px-20
         text-[13px] md:text-[15px] lg:text-[17px]
         leading-relaxed text-gray-200 transition-all duration-300
         group-hover:text-white
-        ${showFullDescription ? "" : "line-clamp-2 md:line-clamp-2"}
+        ${showFullDescription ? "" : "line-clamp-3 md:line-clamp-3"}
       `}
               >
                 {movie.longDescription}
@@ -773,7 +775,7 @@ px-20
           </div>
 
           {/* 📋 Modern Credits Card */}
-          <div className="bg-zinc-900/40 border border-white/5 backdrop-blur-md rounded-[2rem] p-2 shadow-2xl overflow-hidden relative">
+          <div className="bg-zinc-900/40 border border-white/5 backdrop-blur-md rounded-2xl p-2 shadow-2xl overflow-hidden relative">
             {/* Background glow effect */}
             <div className="absolute -right-20 -top-20 w-40 h-40 bg-blue-500/5 blur-[80px] rounded-full" />
 
@@ -784,13 +786,13 @@ px-20
                   <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-orange-500 group-hover:text-black transition-all duration-500">
                     <LuClapperboard size={16} />
                   </div>
-                  <span className="font-bold text-zinc-400 text-[13px] md:text-[15px]  tracking-[1px]">
+                  <span className="font-bold text-zinc-200 text-[13px] md:text-[15px]  tracking-[1px]">
                     Director
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-blue-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
-                    {movie.director}
+                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                    {movie.director || "N/A"}
                   </span>
                 </div>
               </div>
@@ -801,12 +803,12 @@ px-20
                   <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-orange-500 group-hover:text-black transition-all duration-500">
                     <Edit2 size={16} />
                   </div>
-                  <span className="font-bold text-zinc-400 text-[13px] md:text-[14px]  tracking-[1px]">
+                  <span className="font-bold text-zinc-200 text-[13px] md:text-[14px]  tracking-[1px]">
                     Writer
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-blue-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
                     {movie.writer || "N/A"}
                   </span>
                 </div>
@@ -818,21 +820,21 @@ px-20
                   <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-orange-500 group-hover:text-black transition-all duration-500">
                     <Users size={16} />
                   </div>
-                  <span className="font-bold text-zinc-400 text-[13px] md:text-[15px]  tracking-[1px]">
+                  <span className="font-bold text-zinc-200 text-[13px] md:text-[15px]  tracking-[1px]">
                     Casts
                   </span>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center py-2 border-white/5 hover:bg-white/[0.02] transition-all  rounded-2xl">
+                <div className="flex flex-col sm:flex-row sm:items-center py-2 border-white/5  transition-all  rounded-2xl">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1 ml-11 md:ml-0">
                     {movie.cast ? (
                       movie.cast.split(",").map((star, index, array) => (
                         <React.Fragment key={index}>
-                          <span className="text-blue-400 cursor-pointer text-[13px] md:text-[14px]  transition-all">
+                          <span className="px-3 py-1 border border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors">
                             {star.trim()}
                           </span>
-                          {index < array.length - 1 && (
+                          {/* {index < array.length - 1 && (
                             <span className="w-1 h-1 rounded-full bg-zinc-200 shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
-                          )}
+                          )} */}
                         </React.Fragment>
                       ))
                     ) : (
@@ -849,12 +851,12 @@ px-20
                   <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400 group-hover:bg-orange-500 group-hover:text-black transition-all duration-500">
                     <Music size={16} />
                   </div>
-                  <span className="font-bold text-zinc-400 text-[13px] md:text-[15px]  tracking-[1px]">
+                  <span className="font-bold text-zinc-200 text-[13px] md:text-[15px]  tracking-[1px]">
                     Music
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-blue-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
                     {movie.musicDirector || "N/A"}
                   </span>
                 </div>
@@ -1340,17 +1342,17 @@ px-20
             </AnimatePresence>
 
             {/* 📊 Quick Stats (Optional but attractive) */}
-            <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-5 border border-white/10 shadow-2xl relative overflow-hidden group">
-              {/* Subtle Background Glow */}
+            {/* <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-5 border border-white/10 shadow-2xl relative overflow-hidden group">
+              
               <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/10 blur-3xl rounded-full group-hover:bg-blue-500/20 transition-all duration-700" />
 
               <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[2px] mb-6 flex items-center gap-2">
-                {/* <div className="w-1 h-3 bg-blue-500 rounded-full" /> */}
+              
                 Community Impact
               </h4>
 
               <div className="flex items-center justify-around relative z-10">
-                {/* Saves Section */}
+              
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     <span className="block text-2xl  text-white tracking-tight">
@@ -1363,10 +1365,10 @@ px-20
                   </span>
                 </div>
 
-                {/* Stylish Divider */}
+             
                 <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
 
-                {/* Rating Section */}
+            
                 <div className="flex flex-col items-center">
                   <div className="relative">
                     <span className="block text-2xl  text-white tracking-tight">
@@ -1379,7 +1381,7 @@ px-20
                   </span>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

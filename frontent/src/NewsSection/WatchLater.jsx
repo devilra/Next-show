@@ -1,459 +1,194 @@
-import React, { useState, useRef } from "react";
-import {
-  FaArrowRight,
-  FaArrowLeft,
-  FaEye,
-  FaHeart,
-  FaRegHeart,
-  FaCamera,
-} from "react-icons/fa";
-import { BsStars, BsLightningChargeFill } from "react-icons/bs";
-import { MdVerified } from "react-icons/md";
-import { HiSparkles } from "react-icons/hi2";
-import { RiUserStarFill } from "react-icons/ri";
+import React, { useState, useRef, useEffect } from "react";
+import { FaArrowRight, FaArrowLeft, FaRegClock } from "react-icons/fa";
+import { BsPlayCircleFill } from "react-icons/bs";
+import { ImSpinner9 } from "react-icons/im";
+import { Link } from "react-router-dom";
+import { RiBookmarkFill } from "react-icons/ri";
+import moment from "moment";
 
-// ── THEME ─────────────────────────────────────────────────
-const GOLD = "#C9A84C";
-const GOLD2 = "#F0C75E";
-const BG = "#080a0f";
-const CARD = "#0e1118";
+// ── ACCENT ──────────────────────────────────────
+const ACCENT = "#e85d26";
 
-// ── CELEBRITY DATA ────────────────────────────────────────
-const celebrities = [
-  {
-    id: 1,
-    name: "Vijay",
-    handle: "@actorvijay",
-    verified: true,
-    role: "Actor · Director",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=900&q=80",
-    newsCount: 24,
-    latestTag: "🔴 Breaking",
-    latestTagColor: "#EF4444",
-    headline:
-      "Thalapathy 69 title revealed — fans break the internet within minutes",
-    subline: "Pan-India release confirmed. European schedule begins Q3.",
-    views: "84K",
-    likes: 4200,
-    timeAgo: "2 hrs ago",
-    specialty: "Tamil Cinema",
-    buzz: 98,
-  },
-  {
-    id: 2,
-    name: "Rajinikanth",
-    handle: "@superstarrajini",
-    verified: true,
-    role: "Actor · Icon",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1594909122845-11baa439b7bf?w=900&q=80",
-    newsCount: 18,
-    latestTag: "💥 Record",
-    latestTagColor: "#F59E0B",
-    headline:
-      "Coolie crosses ₹500 Cr — the legend rewrites box office history once again",
-    subline: "Fastest Tamil film ever. Lokesh's universe keeps winning.",
-    views: "175K",
-    likes: 9800,
-    timeAgo: "3 days ago",
-    specialty: "Box Office",
-    buzz: 95,
-  },
-  {
-    id: 3,
-    name: "Suriya",
-    handle: "@actorsuriya",
-    verified: true,
-    role: "Actor · Producer",
-    avatar:
-      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=900&q=80",
-    newsCount: 11,
-    latestTag: "⭐ Review",
-    latestTagColor: "#10B981",
-    headline:
-      "Retro opens to massive ovation — critics call it his finest performance yet",
-    subline:
-      "Period drama delivers on every front. Audiences give standing ovation.",
-    views: "52K",
-    likes: 3100,
-    timeAgo: "1 day ago",
-    specialty: "Drama",
-    buzz: 87,
-  },
-  {
-    id: 4,
-    name: "Dhanush",
-    handle: "@dhanushkraja",
-    verified: true,
-    role: "Actor · Director · Singer",
-    avatar:
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1616530940355-351fabd9524b?w=900&q=80",
-    newsCount: 9,
-    latestTag: "📢 Official",
-    latestTagColor: "#6366F1",
-    headline:
-      "Dhanush announces directorial venture — self-written script confirmed",
-    subline: "Multi-lingual project. Shooting begins by end of 2026.",
-    views: "38K",
-    likes: 1900,
-    timeAgo: "4 days ago",
-    specialty: "Pan India",
-    buzz: 82,
-  },
-  {
-    id: 5,
-    name: "Kamal Haasan",
-    handle: "@ikamalhaasan",
-    verified: true,
-    role: "Actor · Auteur",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1512070679279-8988d32161be?w=900&q=80",
-    newsCount: 15,
-    latestTag: "🎬 Release",
-    latestTagColor: "#8B5CF6",
-    headline:
-      "Indian 3 release date locked — Kamal promises the most ambitious chapter",
-    subline: "OTT date also confirmed. Shankar's magnum opus lands in 15 days.",
-    views: "61K",
-    likes: 2700,
-    timeAgo: "5 hrs ago",
-    specialty: "Iconic Cinema",
-    buzz: 91,
-  },
-  {
-    id: 6,
-    name: "Nayanthara",
-    handle: "@nayantharaofficial",
-    verified: true,
-    role: "Actress · Producer",
-    avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=900&q=80",
-    newsCount: 13,
-    latestTag: "👑 Exclusive",
-    latestTagColor: "#EC4899",
-    headline: "Nayanthara's production house bags biggest OTT deal of the year",
-    subline: "Lady Superstar expands empire with ₹120Cr streaming deal.",
-    views: "44K",
-    likes: 3400,
-    timeAgo: "2 days ago",
-    specialty: "OTT & Cinema",
-    buzz: 88,
-  },
-];
+const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
-// ── BUZZ BAR ──────────────────────────────────────────────
-function BuzzBar({ value }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className="text-[9px] font-black uppercase tracking-widest"
-        style={{ color: GOLD, minWidth: 28 }}
-      >
-        {value}%
-      </span>
-      <div
-        className="flex-1 rounded-full overflow-hidden"
-        style={{ height: 3, background: "rgba(255,255,255,0.08)" }}
-      >
-        <div
-          className="h-full rounded-full"
-          style={{
-            width: `${value}%`,
-            background: `linear-gradient(to right, ${GOLD}, ${GOLD2})`,
-            transition: "width 1s ease",
-          }}
-        />
-      </div>
-      <BsLightningChargeFill
-        style={{ color: GOLD, fontSize: 9, opacity: 0.7 }}
-      />
-    </div>
-  );
-}
+const getImageUrl = (imagePath) => {
+  if (!imagePath) return "/placeholder.jpg";
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  return `${IMAGE_BASE_URL}${imagePath}`;
+};
 
-// ── CELEBRITY CARD ─────────────────────────────────────────
-function CelebCard({ celeb }) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(celeb.likes);
+const getRelativeTime = (date) => {
+  return moment(date).fromNow();
+};
+
+// ── CARD ─────────────────────────────────────────
+function WatchLaterCard({ item }) {
   const [hovered, setHovered] = useState(false);
 
-  const toggleLike = (e) => {
-    e.stopPropagation();
-    setLiked((l) => !l);
-    setLikeCount((c) => (liked ? c - 1 : c + 1));
-  };
-
-  const fmt = (n) => (n >= 1000 ? (n / 1000).toFixed(1) + "K" : n);
+  // item here is the news object inside each watchLaterNews entry
+  const news = item?.news;
 
   return (
     <div
-      className="relative flex-shrink-0 cursor-pointer overflow-hidden group"
+      className="relative overflow-hidden cursor-pointer flex-shrink-0"
       style={{
-        width: 310,
-        borderRadius: 20,
-        background: CARD,
-        border: `0.5px solid ${hovered ? GOLD + "55" : "rgba(255,255,255,0.07)"}`,
-        transition: "all 0.3s ease",
-        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        width: 290,
+        height: 390,
+        borderRadius: 16,
+        border: `0.5px solid ${hovered ? ACCENT + "70" : "rgba(255,255,255,0.07)"}`,
+        transition: "border-color 0.25s, transform 0.25s, box-shadow 0.25s",
+        transform: hovered ? "translateY(-5px)" : "translateY(0)",
         boxShadow: hovered
-          ? `0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px ${GOLD}22, 0 0 40px ${GOLD}10`
-          : "0 4px 20px rgba(0,0,0,0.4)",
+          ? `0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px ${ACCENT}20`
+          : "0 4px 24px rgba(0,0,0,0.3)",
         scrollSnapAlign: "start",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* ── COVER IMAGE ── */}
-      <div className="relative overflow-hidden" style={{ height: 160 }}>
-        <img
-          src={celeb.coverImage}
-          alt=""
-          className="w-full h-full object-cover"
-          style={{
-            transition: "transform 0.7s ease",
-            transform: hovered ? "scale(1.08)" : "scale(1)",
-          }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(14,17,24,0.9) 100%)",
-          }}
-        />
+      {/* Image */}
+      <img
+        src={getImageUrl(news?.newsImages?.[0])}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          transition: "transform 0.7s ease",
+          transform: hovered ? "scale(1.09)" : "scale(1)",
+        }}
+      />
 
-        {/* Gold shimmer line */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[1.5px]"
-          style={{
-            background: `linear-gradient(to right, transparent, ${GOLD}, transparent)`,
-            opacity: hovered ? 1 : 0.4,
-            transition: "opacity 0.3s",
-          }}
-        />
+      {/* Gradients */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.08) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(135deg, ${ACCENT}14 0%, transparent 55%)`,
+        }}
+      />
 
-        {/* Latest tag */}
-        <div className="absolute top-3 left-3">
-          <span
-            className="text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full text-white"
+      {/* Top accent line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2.5px]"
+        style={{
+          background: hovered ? ACCENT : "rgba(255,255,255,0.1)",
+          transition: "background 0.25s",
+        }}
+      />
+
+      {/* Video badge */}
+      {/* {news?.videoUrl?.length > 0 && (
+        <div className="absolute top-4 right-4">
+          <BsPlayCircleFill
+            size={28}
             style={{
-              background: celeb.latestTagColor,
-              boxShadow: `0 2px 12px ${celeb.latestTagColor}60`,
+              color: ACCENT,
+              filter: "drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
+              opacity: hovered ? 1 : 0.7,
+              transition: "opacity 0.2s",
             }}
-          >
-            {celeb.latestTag}
-          </span>
+          />
         </div>
+      )} */}
 
-        {/* Like button */}
-        <button
-          onClick={toggleLike}
-          className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full transition-all duration-200"
+      {/* Bookmark badge — top left */}
+      <div className="absolute top-4 left-4">
+        <div
+          className="flex items-center justify-center w-7 h-7 rounded-full"
           style={{
-            background: liked ? "rgba(239,68,68,0.25)" : "rgba(0,0,0,0.45)",
-            border: `0.5px solid ${liked ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.15)"}`,
+            background: `${ACCENT}22`,
+            border: `0.5px solid ${ACCENT}50`,
             backdropFilter: "blur(8px)",
           }}
         >
-          {liked ? (
-            <FaHeart style={{ color: "#EF4444", fontSize: 10 }} />
-          ) : (
-            <FaRegHeart
-              style={{ color: "rgba(255,255,255,0.6)", fontSize: 10 }}
-            />
-          )}
-          <span
-            style={{
-              color: liked ? "#EF4444" : "rgba(255,255,255,0.5)",
-              fontSize: 10,
-              fontWeight: 700,
-            }}
-          >
-            {fmt(likeCount)}
-          </span>
-        </button>
-
-        {/* News count pill */}
-        <div className="absolute bottom-3 right-3">
-          <span
-            className="flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded-full"
-            style={{
-              background: "rgba(0,0,0,0.6)",
-              color: GOLD2,
-              border: `0.5px solid ${GOLD}40`,
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <FaCamera size={8} /> {celeb.newsCount} stories
-          </span>
+          <RiBookmarkFill size={12} style={{ color: ACCENT }} />
         </div>
       </div>
 
-      {/* ── AVATAR + NAME ── */}
-      <div className="flex items-end gap-3 px-4 -mt-8 mb-3 relative z-10">
-        <div className="relative shrink-0">
-          <img
-            src={celeb.avatar}
-            alt=""
-            className="w-16 h-16 object-cover"
-            style={{
-              borderRadius: 14,
-              border: `2px solid ${GOLD}`,
-              boxShadow: `0 0 16px ${GOLD}40`,
-              filter: "saturate(1.1)",
-            }}
-          />
-          {celeb.verified && (
-            <div
-              className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
-              style={{ background: "#1D9BF0", border: "1.5px solid #0e1118" }}
-            >
-              <MdVerified style={{ color: "#fff", fontSize: 11 }} />
-            </div>
-          )}
-        </div>
-        <div className="pb-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h3 className="font-black text-white text-[15px] leading-none">
-              {celeb.name}
-            </h3>
-          </div>
-          <p
-            className="text-[10px] mt-0.5"
-            style={{ color: GOLD, opacity: 0.8 }}
-          >
-            {celeb.handle}
-          </p>
-          <p
-            className="text-[10px] mt-0.5"
-            style={{ color: "rgba(255,255,255,0.35)" }}
-          >
-            {celeb.role}
-          </p>
-        </div>
-      </div>
-
-      {/* ── HEADLINE ── */}
-      <div className="px-4 mb-4">
-        {/* Divider with star */}
-        <div className="flex items-center gap-2 mb-3">
-          <div
-            className="flex-1 h-px"
-            style={{
-              background: `linear-gradient(to right, ${GOLD}40, transparent)`,
-            }}
-          />
-          <BsStars style={{ color: GOLD, fontSize: 10, opacity: 0.7 }} />
-          <div
-            className="flex-1 h-px"
-            style={{
-              background: `linear-gradient(to left, ${GOLD}40, transparent)`,
-            }}
-          />
-        </div>
-
-        <p
-          className="font-bold leading-snug mb-1.5 line-clamp-2"
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col justify-end p-5">
+        {/* Title */}
+        <h3
+          className="font-black leading-snug mb-2"
           style={{
-            color: hovered ? "#F5E0C0" : "rgba(255,255,255,0.85)",
-            fontSize: 13,
+            fontSize: 14.5,
+            color: hovered ? "#FCD9C8" : "#fff",
             transition: "color 0.2s",
+            lineHeight: 1.35,
           }}
         >
-          {celeb.headline}
-        </p>
+          {news?.title}
+        </h3>
+
+        {/* Summary */}
         <p
-          className="text-[11px] line-clamp-1"
-          style={{ color: "rgba(255,255,255,0.38)" }}
+          className="text-[11px] leading-relaxed mb-3 line-clamp-2"
+          style={{ color: "rgba(255,255,255,0.42)" }}
         >
-          {celeb.subline}
+          {news?.shortDescription}
         </p>
-      </div>
 
-      {/* ── BUZZ METER ── */}
-      <div className="px-4 mb-4">
-        <div className="flex items-center justify-between mb-1.5">
-          <span
-            className="text-[9px] font-black uppercase tracking-widest"
-            style={{ color: "rgba(255,255,255,0.3)" }}
-          >
-            Buzz Meter
-          </span>
-          <span
-            className="text-[9px]"
-            style={{ color: "rgba(255,255,255,0.25)" }}
-          >
-            {celeb.specialty}
-          </span>
-        </div>
-        <BuzzBar value={celeb.buzz} />
-      </div>
-
-      {/* ── FOOTER ── */}
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderTop: "0.5px solid rgba(255,255,255,0.05)" }}
-      >
+        {/* Meta */}
         <div
-          className="flex items-center gap-3"
-          style={{ color: "rgba(255,255,255,0.28)", fontSize: 10 }}
+          className="flex items-center gap-2.5"
+          style={{ color: "rgba(255,255,255,0.32)", fontSize: 10 }}
         >
           <span className="flex items-center gap-1">
-            <FaEye size={9} style={{ color: GOLD, opacity: 0.6 }} />{" "}
-            {celeb.views}
+            <FaRegClock size={9} style={{ color: ACCENT, opacity: 0.75 }} />
+            {news?.readTime}
           </span>
-          <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
-          <span>{celeb.timeAgo}</span>
+          <span className="w-1 h-1 rounded-full bg-zinc-600" />
+          <span>{news?.publishedDate}</span>
+          <span className="w-1 h-1 rounded-full bg-zinc-600" />
+          <span>{getRelativeTime(item?.createdAt)}</span>
         </div>
 
-        <button
-          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-all duration-200"
+        {/* Read more reveal on hover */}
+        <div
+          className="flex items-center gap-1.5 mt-2.5 text-[10px] font-bold uppercase tracking-widest overflow-hidden"
           style={{
-            color: hovered ? BG : GOLD,
-            background: hovered
-              ? `linear-gradient(135deg, ${GOLD}, ${GOLD2})`
-              : `${GOLD}14`,
-            border: `0.5px solid ${GOLD}40`,
+            color: ACCENT,
+            maxHeight: hovered ? 24 : 0,
+            opacity: hovered ? 1 : 0,
+            transition: "max-height 0.3s ease, opacity 0.3s ease",
           }}
         >
-          Full Profile <FaArrowRight size={8} />
-        </button>
+          Read Article <FaArrowRight size={8} />
+        </div>
       </div>
     </div>
   );
 }
 
-// ── MAIN COMPONENT ────────────────────────────────────────
-const WatchLater = () => {
+// ── MAIN COMPONENT ───────────────────────────────
+const WatchLater = ({
+  watchLaterNews = [],
+  isLoading,
+  isError,
+  error,
+  refetch,
+}) => {
   const scrollRef = useRef(null);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
-  const [activeIdx, setActiveIdx] = useState(0);
 
-  const CARD_W = 326; // 310 + 16 gap
+  const CARD_W = 306; // 290 + 16 gap
 
   const syncState = () => {
     const el = scrollRef.current;
     if (!el) return;
     setCanLeft(el.scrollLeft > 8);
     setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 8);
-    setActiveIdx(Math.round(el.scrollLeft / CARD_W));
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     el.addEventListener("scroll", syncState, { passive: true });
@@ -463,38 +198,67 @@ const WatchLater = () => {
 
   const scroll = (dir) =>
     scrollRef.current?.scrollBy({ left: dir * CARD_W * 2, behavior: "smooth" });
-  const goTo = (i) =>
-    scrollRef.current?.scrollTo({ left: i * CARD_W, behavior: "smooth" });
+
+  if (isLoading) {
+    return (
+      <div className="w-full min-h-[400px] flex items-center justify-center">
+        <ImSpinner9 className="text-orange-500 text-4xl animate-spin" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full min-h-[400px] flex flex-col items-center justify-center text-center">
+        <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <span className="text-red-500 text-xl">!</span>
+        </div>
+        <h2 className="text-white text-lg mb-3">Failed to load watch later</h2>
+        <button
+          onClick={() => refetch()}
+          className="px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition text-white text-sm"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <section
-      className=" text-white pt-5 "
+      className="text-white pt-5"
       style={{
-        // background: BG,
-        borderTop: "0.5px solid rgba(255,255,255,0.04)",
+        borderTop: "0.5px solid rgba(255,255,255,0.05)",
       }}
     >
       {/* ── HEADER ── */}
-      <div className="flex items-end justify-between mb-10 px-4 md:px-10">
+      <div className="flex items-end justify-between mb-8 px-4 md:px-10">
         <div className="flex items-center gap-4">
-          {/* Gold accent mark */}
-          <div className="relative">
-            <RiUserStarFill style={{ color: GOLD, fontSize: 28 }} />
+          <div className="flex flex-col gap-1">
             <div
               style={{
-                position: "absolute",
-                inset: 0,
-                background: `radial-gradient(circle, ${GOLD}30 0%, transparent 70%)`,
-                filter: "blur(6px)",
+                width: 28,
+                height: 3,
+                background: ACCENT,
+                borderRadius: 99,
+              }}
+            />
+            <div
+              style={{
+                width: 16,
+                height: 3,
+                background: ACCENT,
+                opacity: 0.35,
+                borderRadius: 99,
               }}
             />
           </div>
           <div>
             <p
-              className="text-[9px] font-black uppercase tracking-[0.3em] mb-1"
-              style={{ color: GOLD, letterSpacing: "0.3em" }}
+              className="text-[10px] font-bold uppercase tracking-[0.25em] mb-0.5"
+              style={{ color: ACCENT }}
             >
-              ✦ Spotlight
+              EXCLUSIVE SAVED
             </p>
             <h2
               className="font-black uppercase leading-none"
@@ -503,84 +267,49 @@ const WatchLater = () => {
                 letterSpacing: "-0.02em",
               }}
             >
-              Watch{" "}
-              <span
-                style={{
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  background: `linear-gradient(135deg, ${GOLD}, ${GOLD2})`,
-                  backgroundClip: "text",
-                }}
-              >
-                Later
-              </span>
+              Read Later
             </h2>
           </div>
         </div>
-
-        {/* Controls */}
-        {/* <div className="flex items-center gap-2">
-          {[
-            { dir: -1, can: canLeft, icon: <FaArrowLeft size={12} /> },
-            { dir: 1, can: canRight, icon: <FaArrowRight size={12} /> },
-          ].map(({ dir, can, icon }) => (
-            <button
-              key={dir}
-              onClick={() => scroll(dir)}
-              disabled={!can}
-              className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
-              style={{
-                background: can ? `${GOLD}18` : "rgba(255,255,255,0.04)",
-                border: `0.5px solid ${can ? GOLD + "50" : "rgba(255,255,255,0.08)"}`,
-                color: can ? GOLD : "rgba(255,255,255,0.15)",
-                cursor: can ? "pointer" : "not-allowed",
-              }}
-            >
-              {icon}
-            </button>
-          ))}
-
-          <a
-            href="/celebrities"
-            className="hidden md:flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest px-4 py-2.5 rounded-lg transition-all duration-200 ml-1"
-            style={{
-              color: GOLD,
-              border: `0.5px solid ${GOLD}40`,
-              background: `${GOLD}10`,
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = `${GOLD}20`)
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = `${GOLD}10`)
-            }
-          >
-            All Celebs <FaArrowRight size={9} />
-          </a>
-        </div> */}
       </div>
 
       {/* ── CAROUSEL ── */}
       <div className="relative">
-        {/* Left fade */}
+        {/* ── EMPTY STATE ── */}
+        {!isLoading && !isError && watchLaterNews?.length === 0 && (
+          <div className="w-full min-h-[400px] flex flex-col items-center justify-center text-center">
+            <div className="text-5xl mb-5">🔖</div>
+            <h2 className="text-white text-2xl font-black mb-3 uppercase tracking-wide">
+              No Saved Articles
+            </h2>
+            <p className="text-white/35 text-sm md:text-base max-w-md leading-relaxed">
+              Articles you save will appear here. Start bookmarking news to read
+              later.
+            </p>
+          </div>
+        )}
+
+        {/* Left edge fade */}
         <div
           className="absolute left-0 top-0 bottom-0 w-14 z-10 pointer-events-none"
           style={{
-            background: `linear-gradient(to right, ${BG}, transparent)`,
+            background: "linear-gradient(to right, #0b0e14, transparent)",
             opacity: canLeft ? 1 : 0,
             transition: "opacity 0.3s",
           }}
         />
-        {/* Right fade */}
+        {/* Right edge fade */}
         <div
           className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
-          style={{ background: `linear-gradient(to left, ${BG}, transparent)` }}
+          style={{
+            background: "linear-gradient(to left, #0b0e14, transparent)",
+          }}
         />
 
         {/* Scrollable track */}
         <div
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto px-4 md:px-10 pb-3"
+          className="flex gap-4 overflow-x-auto px-4 md:px-10 pb-2"
           style={{
             scrollSnapType: "x mandatory",
             scrollbarWidth: "none",
@@ -588,47 +317,18 @@ const WatchLater = () => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          {celebrities.map((celeb) => (
-            <CelebCard key={celeb.id} celeb={celeb} />
+          {watchLaterNews.map((item) => (
+            <Link
+              key={item?.id}
+              to={`/news/${item?.news?.slug}`}
+              className="block"
+            >
+              <WatchLaterCard item={item} />
+            </Link>
           ))}
+          {/* Spacer */}
           <div style={{ flexShrink: 0, width: 16 }} />
         </div>
-      </div>
-
-      {/* ── GOLD DOTS ── */}
-      {/* <div className="flex items-center justify-center gap-2 mt-6 px-4">
-        {celebrities.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => goTo(i)}
-            style={{
-              width: i === activeIdx ? 22 : 6,
-              height: 6,
-              borderRadius: 99,
-              background:
-                i === activeIdx
-                  ? `linear-gradient(to right, ${GOLD}, ${GOLD2})`
-                  : "rgba(255,255,255,0.12)",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-            }}
-          />
-        ))}
-      </div> */}
-
-      {/* ── MOBILE VIEW ALL ── */}
-      <div className="md:hidden mt-6 px-4">
-        <button
-          className="w-full py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest flex items-center justify-center gap-2"
-          style={{
-            background: `linear-gradient(135deg, ${GOLD}, ${GOLD2})`,
-            color: BG,
-          }}
-        >
-          <HiSparkles size={12} /> View All Celebrities
-        </button>
       </div>
 
       <style>{`div::-webkit-scrollbar{display:none}`}</style>

@@ -10,11 +10,14 @@ const {
   googleLogin,
   logoutUser,
   getCurrentUser,
+  updateProfileImage,
+  updateUserAccountDetails,
 } = require("../../controllers/UserAuthController/UserAuthController");
 const {
   UserProtect,
   AdminProtect,
 } = require("../../middlewares/UserAuthMiddleware/UserAuthMiddleware");
+const uploadProfileImage = require("../../middlewares/ProfileUploadMiddleware/profileUpload");
 
 const router = express.Router();
 
@@ -48,6 +51,19 @@ router.post("/user-logout", UserProtect, logoutUser);
 // GET : /api/user/current-user
 // ======================================================
 router.get("/current-user", UserProtect, getCurrentUser);
+
+// ======================================================
+// ✅ UPDATE PROFILE IMAGE
+// PUT : /api/auth/user/update-profile-image
+// ======================================================
+router.put(
+  "/update-profile-image",
+  UserProtect,
+  uploadProfileImage.single("profileImage"),
+  updateProfileImage,
+);
+
+router.put("/update-account-details", UserProtect, updateUserAccountDetails);
 
 // ======================================================
 // ✅ ADMIN TEST ROUTE

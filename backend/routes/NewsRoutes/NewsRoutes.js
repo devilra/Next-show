@@ -20,6 +20,12 @@ const {
   getTrendingNews,
   getRelatedNews,
 } = require("../../controllers/CentralizedNewsController/NewsAllGetController");
+const {
+  UserProtect,
+} = require("../../middlewares/UserAuthMiddleware/UserAuthMiddleware");
+const {
+  OptionalUserProtect,
+} = require("../../middlewares/NewsMiddleware/OptionalUserNewsMiddleware");
 const router = express.Router();
 
 // Route Definition
@@ -48,7 +54,7 @@ router.get("/get-news-details/:slug", getNewsDetailsBySlug);
 
 router.get("/latest-news", getLatestNews);
 
-router.get("/hero-trending-news", getHeroTrendingNews);
+router.get("/hero-trending-news", OptionalUserProtect, getHeroTrendingNews);
 
 router.get("/trending-news", getTrendingNews);
 

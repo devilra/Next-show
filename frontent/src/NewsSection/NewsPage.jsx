@@ -54,18 +54,32 @@ const NewsPage = () => {
         refetchOnWindowFocus: false,
         retry: false,
       },
+      // {
+      //   queryKey: ["recently-viewed-news"],
+      //   queryFn: async () => {
+      //     const response = await api.get("/auth/user/recent-views", {
+      //       params: {
+      //         contentType: "NEWS",
+      //         limit: 12,
+      //       },
+      //     });
+      //     console.log("Recently Viewed News", response.data.data);
+      //     return response.data.data;
+      //   },
+      // },
       {
-        queryKey: ["recently-viewed-news"],
+        queryKey: ["user-watch-later"],
         queryFn: async () => {
-          const response = await api.get("/auth/user/recent-views", {
+          const response = await api.get("/auth/user/watch-later", {
             params: {
-              contentType: "NEWS",
-              limit: 12,
+              limit: 50,
             },
           });
-          console.log("Recently Viewed News", response.data.data);
           return response.data.data;
         },
+        staleTime: 1000 * 60 * 5,
+        refetchOnWindowFocus: false,
+        retry: false,
       },
     ],
   });
@@ -76,7 +90,9 @@ const NewsPage = () => {
   const heroNewsResponse = results[0];
   const trendingNewsResponse = results[1];
   const latestNewsResponse = results[2];
+
   // const recentViewedNewsResponse = results[3];
+  const watchLaterResponse = results[3];
   // ======================================================
   // ✅ FIRST PAGE LOADING ONLY
   // ======================================================
@@ -118,7 +134,13 @@ const NewsPage = () => {
         isLoading={latestNewsResponse.isLoading}
         refetch={latestNewsResponse.refetch}
       />
-      <WatchLater />
+      <WatchLater
+        watchLaterNews={watchLaterResponse?.data || []}
+        isLoading={watchLaterResponse?.isLoading}
+        isError={watchLaterResponse?.isError}
+        error={watchLaterResponse?.error}
+        refetch={watchLaterResponse?.refetch}
+      />
       <RecentlyViewed
       // recentViewedNews={recentViewedNewsResponse?.data || []}
       // isLoading={recentViewedNewsResponse?.isLoading}

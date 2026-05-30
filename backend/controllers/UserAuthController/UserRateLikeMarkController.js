@@ -1,8 +1,39 @@
 const sequelize = require("../../config/db");
+const { Movie } = require("../../models/associationIndex");
 const MarkWatchedMovieModel = require("../../models/UserAuth/MarkWatched");
 const UserMovieRatingModel = require("../../models/UserAuth/UserMovieRating");
 const UserRecentViewModel = require("../../models/UserAuth/UserRecentView");
 const UserWatchlistModel = require("../../models/UserAuth/UserWatchlistModel");
+const moment = require("moment");
+
+// ======================================================
+// ✅ EXTRACT YOUTUBE THUMBNAIL
+// ======================================================
+const getYoutubeThumbnail = (url) => {
+  try {
+    if (!url) {
+      return "";
+    }
+
+    // ================================================
+    // ✅ GET VIDEO ID
+    // ================================================
+
+    const videoId = url.split("v=")[1]?.split("&")[0];
+
+    if (!videoId) {
+      return "";
+    }
+
+    // ================================================
+    // ✅ RETURN THUMBNAIL
+    // ================================================
+
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  } catch (error) {
+    return "";
+  }
+};
 
 exports.toggleMarkWatched = async (req, res) => {
   // ======================================================
@@ -857,38 +888,170 @@ exports.checkWatchlistStatus = async (req, res) => {
 // ======================================================
 // ✅ GET USER WATCHLIST
 // ======================================================
+
 exports.getUserWatchlist = async (req, res) => {
   try {
     // ======================================================
-    // ✅ GET USER
+    // ✅ GET CURRENT LOGIN USER
     // ======================================================
 
-    const userId = req.user.id;
+    const userId = req.user?.id;
+
     // ======================================================
-    // ✅ GET LIMIT
+    // ✅ USER VALIDATION
     // ======================================================
-    const limit = Number(req.query.limit) || 20;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+
+        message: "User not found",
+      });
+    }
+
     // ======================================================
-    // ✅ FIND WATCHLIST
+    // ✅ GET ALL WATCHLIST
     // ======================================================
+
     const watchlist = await UserWatchlistModel.findAll({
       where: {
         userId,
       },
+      // ====================================================
+      // ✅ INCLUDE MOVIE DETAILS
+      // ====================================================
+      include: [
+        {
+          model: Movie,
+          as: "movie",
+          required: false,
+          // ================================================
+          // ✅ ONLY REQUIRED FIELDS
+          // ================================================
+          attributes: [
+            "id",
+            "title",
+            "director",
+            "cast",
+            "genres",
+            "imdbRating",
+            "trailerUrl",
+            "theatreReleaseDate",
+            "ottReleaseDate",
+            "durationOrSeason",
+            "language",
+            "status",
+          ],
+        },
+      ],
+
+      // ====================================================
+      // ✅ LATEST FIRST
+      // ====================================================
+
       order: [["createdAt", "DESC"]],
-      limit,
     });
+
+    // ======================================================
+    // ✅ CLEAN RESPONSE
+    // ======================================================
+    const formattedWatchlist = watchlist.map((item) => {
+      const movie = item.movie;
+      // ====================================================
+      // ✅ SAFETY CHECK
+      // ====================================================
+      if (!movie) {
+        return null;
+      }
+      // ====================================================
+      // ✅ RELEASE DATE
+      // THEATRE FIRST
+      // ELSE OTT
+      // ====================================================
+      const releaseDate = movie.theatreReleaseDate || movie.ottReleaseDate;
+      // ====================================================
+      // ✅ FORMAT DATE
+      // ====================================================
+      const formattedDate = releaseDate
+        ? moment(releaseDate).format("MMMM DD YYYY").toUpperCase()
+        : null;
+      // ====================================================
+      // ✅ PARSE GENRES
+      // ====================================================
+      let parsedGenres = [];
+      try {
+        parsedGenres = JSON.parse(movie.genres || []);
+      } catch (error) {
+        parsedGenres = [];
+      }
+
+      // ==============================================
+      // ✅ PARSE LANGUAGE
+      // ==============================================
+
+      let parsedLanguages = [];
+
+      try {
+        parsedLanguages = JSON.parse(movie.language || "[]");
+      } catch (error) {
+        parsedLanguages = [];
+      }
+      // ====================================================
+      // ✅ CLEAN CAST
+      // ====================================================
+      const castNames = movie.cast
+        ? movie.cast.split(",").slice(0, 2).join(", ")
+        : "";
+
+      return {
+        id: item.id,
+        createdAt: item.createdAt,
+        movie: {
+          id: movie.id,
+          title: movie.title,
+          director: movie.director,
+          cast: castNames,
+          genres: parsedGenres.join(","),
+          imdbRating: movie.imdbRating,
+          duration: movie.durationOrSeason,
+          language: parsedLanguages.join(", "),
+          status: movie.status,
+          // ==============================================
+          // ✅ FORMATTED RELEASE DATE
+          // ==============================================
+          releaseDate: formattedDate,
+          // ==============================================
+          // ✅ TRAILER
+          // ==============================================
+          trailerUrl: movie.trailerUrl,
+          trailerThumbnail: getYoutubeThumbnail(movie.trailerUrl),
+        },
+      };
+    });
+    // ======================================================
+    // ✅ REMOVE NULL MOVIES
+    // ======================================================
+    const filteredWatchlist = formattedWatchlist.filter(Boolean);
+
+    // ======================================================
+    // ✅ RESPONSE
+    // ======================================================
+
     return res.status(200).json({
       success: true,
-      count: watchlist.length,
-      data: watchlist,
+
+      count: filteredWatchlist.length,
+
+      data: filteredWatchlist,
     });
   } catch (error) {
     console.log("GET USER WATCHLIST ERROR", error);
 
     return res.status(500).json({
       success: false,
+
       message: "Failed to fetch watchlist",
+
       error: error.message,
     });
   }

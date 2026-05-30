@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { CiShare2 } from "react-icons/ci";
-import { IoMdHeartEmpty, IoMdHeart } from "react-icons/io";
 import {
   FaPlay,
   FaChevronLeft,
@@ -19,6 +18,9 @@ import { BsBookmark, BsBookmarkFill, BsPlayCircleFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import moment from "moment";
 import { ImSpinner9 } from "react-icons/im";
+import { useToggleWatchLater } from "../hooks/useWatchLater";
+import { motion, AnimatePresence } from "framer-motion";
+import { IoMdHeartEmpty, IoMdHeart } from "react-icons/io";
 
 // ─────────────────────────────────────────────────────────
 // DUMMY DATA
@@ -315,9 +317,12 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
   const [isMobile, setIsMobile] = useState(false);
   const timerRef = useRef(null);
   const touchStart = useRef(null);
-
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const news = data[current];
   const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
+  const { mutate: toggleWatchLater, isPending: watchLaterLoading } =
+    useToggleWatchLater({ newsId: news?.id });
 
   // ======================================================
   // ✅ HANDLE IMAGE URL
@@ -451,6 +456,22 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
   // ======================================================
   const getRelativeTime = (date) => {
     return moment(date).fromNow();
+  };
+
+  const handleLike = () => {
+    if (liked) {
+      setLiked(false);
+      setLikeCount((prev) => prev - 1);
+    } else {
+      setLiked(true);
+      setLikeCount((prev) => prev + 1);
+    }
+  };
+
+  const formatCount = (count) => {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}K`;
+    }
   };
 
   // ======================================================
@@ -709,7 +730,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
               </div>
 
               {/* Desktop extras */}
-              <span className="text-white/15 hidden md:inline">|</span>
+
               <span className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400">
                 {/* <FaEye style={{ fontSize: 10 }} /> {news.viewCount} */}
               </span>
@@ -721,7 +742,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
                 />
                 {news?.readTime}
               </span>
-              <span className="text-white/15 hidden md:inline">|</span>
+
               {/* <span className="hidden md:flex items-center gap-1 text-[11px] text-zinc-400">
                 🔖 {news.saveCount}
               </span> */}
@@ -762,7 +783,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
             </div> */}
 
             {/* Reactions */}
-            <div className="mb-3 md:mb-5">
+            {/* <div className="mb-3 md:mb-5">
               <ReactionRow
                 initial={{
                   fire: 0,
@@ -770,7 +791,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
                   heart: 0,
                 }}
               />
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
@@ -794,32 +815,120 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
               </Link>
 
               {/* SAVE */}
-              {/* <button
-                onClick={() =>
-                  setSaved((s) => ({ ...s, [news.id]: !s[news.id] }))
-                }
+              <button
+                onClick={() => toggleWatchLater()}
+                disabled={watchLaterLoading}
                 className="flex items-center gap-1.5 md:gap-2 rounded-xl text-white transition backdrop-blur-md"
                 style={{
-                  background: saved[news.id]
+                  background: news?.isWatchLater
                     ? "rgba(239,68,68,0.2)"
                     : "rgba(255,255,255,0.1)",
-                  border: `0.5px solid ${saved[news.id] ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.2)"}`,
+                  border: `0.5px solid ${news?.isWatchLater ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.2)"}`,
                   fontSize: isMobile ? 11 : 13,
+                  padding: isMobile ? "9px 14px" : "11px 18px",
+                  opacity: watchLaterLoading ? 0.7 : 1,
+                  cursor: watchLaterLoading ? "not-allowed" : "pointer",
+                }}
+              >
+                {watchLaterLoading ? (
+                  <>
+                    <div
+                      className="
+                      w-4 h-4
+                      rounded-full
+                      border-[2px]
+                      border-white/10
+                      border-t-red-500
+                      border-r-red-400
+                      animate-spin
+                    "
+                    />
+                  </>
+                ) : (
+                  <>
+                    {news?.isWatchLater ? (
+                      <BsBookmarkFill
+                        className="text-red-400"
+                        style={{ fontSize: isMobile ? 11 : 13 }}
+                      />
+                    ) : (
+                      <BsBookmark style={{ fontSize: isMobile ? 15 : 15 }} />
+                    )}
+
+                    <span className="uppercase font-bold">
+                      {news?.isWatchLater ? "Saved" : "Read Later"}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleLike}
+                className="
+    flex items-center gap-2
+    rounded-xl
+    text-white
+    backdrop-blur-md
+    overflow-hidden
+  "
+                style={{
+                  background: liked
+                    ? "rgba(239,68,68,0.18)"
+                    : "rgba(255,255,255,0.1)",
+
+                  border: liked
+                    ? "0.5px solid rgba(239,68,68,0.5)"
+                    : "0.5px solid rgba(255,255,255,0.2)",
+
                   padding: isMobile ? "9px 14px" : "11px 18px",
                 }}
               >
-                {saved[news.id] ? (
-                  <BsBookmarkFill
-                    className="text-red-400"
-                    style={{ fontSize: isMobile ? 11 : 13 }}
-                  />
-                ) : (
-                  <BsBookmark style={{ fontSize: isMobile ? 15 : 15 }} />
-                )}
-                <span className="hidden sm:inline">
-                  {saved[news.id] ? "SAVED" : "SAVE"}
-                </span>
-              </button> */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={liked ? "filled" : "empty"}
+                    initial={{
+                      scale: 0,
+                      rotate: -180,
+                    }}
+                    animate={{
+                      scale: 1,
+                      rotate: 0,
+                    }}
+                    exit={{
+                      scale: 0,
+                      rotate: 180,
+                    }}
+                    transition={{
+                      duration: 0.3,
+                    }}
+                  >
+                    {liked ? (
+                      <IoMdHeart className="text-red-500" size={18} />
+                    ) : (
+                      <IoMdHeartEmpty size={18} />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+
+                <motion.span
+                  key={likeCount}
+                  initial={{
+                    y: -10,
+                    opacity: 0,
+                  }}
+                  animate={{
+                    y: 0,
+                    opacity: 1,
+                  }}
+                  transition={{
+                    duration: 0.2,
+                  }}
+                  className="font-bold"
+                >
+                  {formatCount(likeCount)}
+                </motion.span>
+              </motion.button>
 
               {/* SHARE */}
               <button

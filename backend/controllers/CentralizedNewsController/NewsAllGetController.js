@@ -1,6 +1,7 @@
 const moment = require("moment");
 const { Op } = require("sequelize");
 const CentralizedNewsModel = require("../../models/CentralizedNewsModels/CentralizedNewsModel");
+const UserWatchLaterModel = require("../../models/UserAuth/UserWatchLater");
 
 // ======================================================
 // ✅ JSON PARSE HELPER
@@ -43,6 +44,12 @@ exports.getLatestNews = async (req, res) => {
   // ======================================================
 
   try {
+    // ======================================================
+    // ✅ CURRENT USER
+    // ======================================================
+
+    const userId = req.user?.id;
+
     const startDate = moment().subtract(7, "days").startOf("day").toDate();
 
     const endDate = moment().endOf("day").toDate();
@@ -90,6 +97,34 @@ exports.getLatestNews = async (req, res) => {
       });
     }
 
+    // ======================================================
+    // ✅ NEWS IDS
+    // ======================================================
+
+    const newsIds = latestNews.map((news) => news.id);
+
+    // ======================================================
+    // ✅ WATCH LATER DATA
+    // ======================================================
+
+    const watchLaterRecords = userId
+      ? await UserWatchLaterModel.findAll({
+          where: {
+            userId,
+
+            newsId: newsIds,
+          },
+
+          attributes: ["newsId"],
+        })
+      : [];
+
+    // ======================================================
+    // ✅ FAST LOOKUP
+    // ======================================================
+
+    const watchLaterIds = new Set(watchLaterRecords.map((item) => item.newsId));
+
     const parsedNews = latestNews.map((news) => ({
       ...news.toJSON(),
       newsImages: parseJSONField(news.newsImages, []),
@@ -97,6 +132,11 @@ exports.getLatestNews = async (req, res) => {
       newsTypes: parseJSONField(news.newsTypes, []),
       tags: parseJSONField(news.tags, []),
       formattedDate: moment(news.publishedAt).format("MMM D, YYYY"),
+      // ================================================
+      // ✅ WATCH LATER STATUS
+      // ================================================
+
+      inWatchLater: watchLaterIds.has(news.id),
     }));
 
     // ======================================================
@@ -160,6 +200,12 @@ exports.getLatestNews = async (req, res) => {
 // ======================================================
 exports.getHeroTrendingNews = async (req, res) => {
   try {
+    // ======================================================
+    // ✅ CURRENT USER
+    // ======================================================
+    const userId = req.user?.id;
+    console.log(userId);
+
     const startDate = moment().subtract(2, "days").startOf("day").toDate();
     const endDate = moment().endOf("day").toDate();
 
@@ -215,6 +261,26 @@ exports.getHeroTrendingNews = async (req, res) => {
       });
     }
     // ======================================================
+    // ✅ HERO NEWS IDS
+    // ======================================================
+    const newsIds = heroNews.map((news) => news.id);
+
+    const watchLaterRecords = userId
+      ? await UserWatchLaterModel.findAll({
+          where: {
+            userId,
+            newsId: newsIds,
+          },
+          attributes: ["newsId"],
+        })
+      : [];
+
+    // ======================================================
+    // ✅ FAST LOOKUP
+    // ======================================================
+    const watchLaterIds = new Set(watchLaterRecords.map((item) => item.newsId));
+
+    // ======================================================
     // ✅ PARSE JSON FIELDS
     // ======================================================
     const parsedHeroNews = heroNews.map((news) => ({
@@ -225,6 +291,10 @@ exports.getHeroTrendingNews = async (req, res) => {
       newsTypes: parseJSONField(news.newsTypes, []),
       tags: parseJSONField(news.tags, []),
       formattedDate: moment(news.publishedAt).format("MMM D, YYYY"),
+      // ====================================================
+      // ✅ WATCH LATER STATUS
+      // ====================================================
+      isWatchLater: watchLaterIds.has(news.id),
     }));
 
     // ======================================================
@@ -289,6 +359,8 @@ exports.getHeroTrendingNews = async (req, res) => {
 
 exports.getTrendingNews = async (req, res) => {
   try {
+    const userId = req.user?.id;
+
     // ======================================================
     // ✅ LAST 10 DAYS DATE RANGE
     // ======================================================
@@ -346,6 +418,35 @@ exports.getTrendingNews = async (req, res) => {
         data: [],
       });
     }
+
+    // ======================================================
+    // ✅ NEWS IDS
+    // ======================================================
+
+    const newsIds = trendingNews.map((news) => news.id);
+
+    // ======================================================
+    // ✅ USER WATCH LATER
+    // ======================================================
+
+    const watchLaterRecords = userId
+      ? await UserWatchLaterModel.findAll({
+          where: {
+            userId,
+
+            newsId: newsIds,
+          },
+
+          attributes: ["newsId"],
+        })
+      : [];
+
+    // ======================================================
+    // ✅ FAST LOOKUP
+    // ======================================================
+
+    const watchLaterIds = new Set(watchLaterRecords.map((item) => item.newsId));
+
     // ======================================================
     // ✅ PARSE JSON FIELDS
     // ======================================================
@@ -363,6 +464,7 @@ exports.getTrendingNews = async (req, res) => {
 
       tags: parseJSONField(news.tags, []),
       formattedDate: moment(news.publishedAt).format("MMM D, YYYY"),
+      inWatchLater: watchLaterIds.has(news.id),
     }));
     // ======================================================
     // ✅ RESPONSE
@@ -422,12 +524,13 @@ exports.getTrendingNews = async (req, res) => {
 
 exports.getRelatedNews = async (req, res) => {
   try {
+    const userId = req.user?.id;
     // ======================================================
     // ✅ SLUG
     // ======================================================
     const { slug } = req.params;
 
-    console.log("Related Slug", slug);
+    // console.log("Related Slug", slug);
 
     // ======================================================
     // ✅ SLUG CHECK
@@ -543,6 +646,35 @@ exports.getRelatedNews = async (req, res) => {
         data: [],
       });
     }
+
+    // ======================================================
+    // ✅ RELATED NEWS IDS
+    // ======================================================
+
+    const newsIds = relatedNews.map((news) => news.id);
+
+    // ======================================================
+    // ✅ USER WATCH LATER
+    // ======================================================
+
+    const watchLaterRecords = userId
+      ? await UserWatchLaterModel.findAll({
+          where: {
+            userId,
+
+            newsId: newsIds,
+          },
+
+          attributes: ["newsId"],
+        })
+      : [];
+
+    // ======================================================
+    // ✅ FAST LOOKUP
+    // ======================================================
+
+    const watchLaterIds = new Set(watchLaterRecords.map((item) => item.newsId));
+
     // ======================================================
     // ✅ PARSED RELATED NEWS
     // ======================================================
@@ -559,6 +691,7 @@ exports.getRelatedNews = async (req, res) => {
       tags: parseJSONField(news.tags, []),
 
       formattedDate: formatDate(news.publishedAt),
+      inWatchLater: watchLaterIds.has(news.id),
     }));
     // ======================================================
     // ✅ RESPONSE

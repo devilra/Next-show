@@ -66,6 +66,10 @@ const UserAuthModel = sequalize.define(
       allowNull: true,
       defaultValue: null,
     },
+    profileFolderId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     // ======================================================
     // ✅ AUTH PROVIDER
     // ======================================================
@@ -172,7 +176,7 @@ const UserAuthModel = sequalize.define(
       allowNull: true,
     },
     gender: {
-      type: DataTypes.ENUM("MALE", "FEMALE", "OTHER", "PREFER_NOT_TO_SAY"),
+      type: DataTypes.ENUM("Male", "Female", "Other"),
       allowNull: true,
     },
     dateOfBirth: {

@@ -115,21 +115,36 @@ const MovieGallery = ({ movie }) => {
   const playUrl = formatVideoUrl(currentRawUrl);
 
   return (
-    <div className="text-white py-10">
+    <div className="text-white mb-8">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6 px-2">
-        <div className="flex items-center gap-2 group cursor-pointer">
-          <h2 className="text-2xl md:text-3xl font-black flex items-center uppercase tracking-wider">
-            Videos
-            <ChevronRight
-              className="ml-2 group-hover:text-orange-500 transition-colors"
-              size={28}
-            />
-          </h2>
-          <span className="text-gray-500 font-normal text-xl">
-            ({mediaLinks.length})
-          </span>
-        </div>
+      <div className="flex items-center gap-4 mb-6 px-2">
+        {/* Left Orange Bar */}
+        <div
+          className="
+      w-1 md:w-1.5
+      h-10 md:h-12
+
+      bg-gradient-to-b
+      from-orange-500
+      to-yellow-500
+
+      rounded-full
+
+      shadow-[0_0_15px_rgba(249,115,22,0.4)]
+    "
+        />
+
+        {/* Title */}
+        <h2
+          className="
+      text-xl md:text-2xl
+      uppercase
+      tracking-wider
+      text-white
+    "
+        >
+          Videos
+        </h2>
       </div>
 
       {mediaLinks.length > 0 ? (

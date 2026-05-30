@@ -101,3 +101,99 @@ export const useToggleWatchlist = ({ movieId }) => {
     },
   });
 };
+
+export const useRemoveWatchlist = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+
+  return useMutation({
+    mutationFn: async ({ watchlistId }) => {
+      const response = await api.delete(
+        `/auth/user/remove-watchlist/${watchlistId}`,
+      );
+      return response.data;
+    },
+    // ====================================================
+    // ✅ SUCCESS
+    // ====================================================
+    onSuccess: (data, variables) => {
+      showSnackbar(
+        data?.message || "Removed from watchlist",
+
+        "success",
+      );
+      // ================================================
+      // ✅ REFRESH WATCHLIST PAGE
+      // ================================================
+
+      queryClient.invalidateQueries({
+        queryKey: ["user-watchlist"],
+      });
+      // ================================================
+      // ✅ REFRESH MOVIE WATCHLIST STATUS
+      // ================================================
+      queryClient.invalidateQueries({
+        queryKey: ["watchlist-status", variables.movieId],
+      });
+    },
+    // ====================================================
+    // ✅ ERROR
+    // ====================================================
+
+    onError: (error) => {
+      showSnackbar(
+        error?.response?.data?.message || "Failed to remove watchlist",
+
+        "error",
+      );
+    },
+  });
+};
+
+export const useClearAllWatchlist = () => {
+  const queryClient = useQueryClient();
+  const { showSnackbar } = useSnackbar();
+  return useMutation({
+    mutationFn: async () => {
+      const response = await api.delete("/auth/user/clear-watchlist");
+      return response.data;
+    },
+    // ====================================================
+    // ✅ SUCCESS
+    // ====================================================
+    onSuccess: async (data) => {
+      showSnackbar(
+        data?.message || "Watchlist cleared",
+
+        "success",
+      );
+
+      // ================================================
+      // ✅ REFRESH WATCHLIST PAGE
+      // ================================================
+
+      await queryClient.invalidateQueries({
+        queryKey: ["user-watchlist"],
+      });
+
+      // ================================================
+      // ✅ RESET ALL WATCHLIST STATUS
+      // ================================================
+
+      queryClient.removeQueries({
+        queryKey: ["watchlist-status"],
+      });
+    },
+    // ====================================================
+    // ✅ ERROR
+    // ====================================================
+
+    onError: (error) => {
+      showSnackbar(
+        error?.response?.data?.message || "Failed to clear watchlist",
+
+        "error",
+      );
+    },
+  });
+};

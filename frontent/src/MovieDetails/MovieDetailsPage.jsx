@@ -432,16 +432,16 @@ const MovieDetailsPage = () => {
       {/* 2. Main Content Grid (Split into Left & Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-8 ">
         {/* LEFT SIDE (8 Columns): Gallery, Description, Cast */}
-        <div className="lg:col-span-8 space-y-12">
+        <div className="lg:col-span-9 ">
           <MovieGallery movie={movieData} />
 
           <TopCast movie={movieData} />
         </div>
 
         {/* RIGHT SIDE (4 Columns): Movie Timeline (Sidebar) */}
-        <div className="lg:col-span-4">
+        {/* <div className="lg:col-span-4">
           {!isRatingModalOpen && <MovieTimeline movie={movieData} />}
-        </div>
+        </div> */}
       </div>
     </div>
   );

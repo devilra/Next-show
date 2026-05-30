@@ -12,6 +12,12 @@ const path = require("path");
 // require("./models/WebsiteTracking/AnalyticsEvents");
 // require('./models/CentralizedNewsModels/TagsModel')
 // require('./models/CentralizedNewsModels/CentralizedNewsModel')
+// require('./models/UserAuth/UserAuth')
+// require('./models/UserAuth/MarkWatched')
+// require('./models/UserAuth/UserMovieRating')
+// require('./models/UserAuth/UserRecentView')
+// require('./models/UserAuth/UserWatchLater')
+// require('./models/UserAuth/UserWatchlistModel')
 const adminAuthRoutes = require("./routes/AdminAuthRoutes/AdminRoutes");
 const VideoSectionRoutes = require("./routes/HomePageRoutes/videoRoutes");
 const BlogSectionRoutes = require("./routes/HomePageRoutes/blogRoutes");
@@ -50,6 +56,7 @@ app.use(
       "https://next-show-eight.vercel.app",
       "http://localhost:5173",
       "https://nextshow.vercel.app",
+      "http://192.168.1.51:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
@@ -134,7 +141,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5176;
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server Connected ${PORT}`);
 });
 

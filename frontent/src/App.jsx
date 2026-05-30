@@ -35,6 +35,9 @@ import {
   authSuccess,
 } from "./redux/userAuthSlice/UserAuthSlice";
 import api from "./api";
+import ProfileLayout from "./ProfileLayout/ProfileLayout";
+import MyProfilePage from "./ProfileLayout/Myprofile";
+import WatchlistPage from "./ProfileLayout/WatchList";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -138,7 +141,8 @@ const App = () => {
 
   const hideLayout =
     location.pathname.startsWith("/admin") ||
-    location.pathname.startsWith("/auth");
+    location.pathname.startsWith("/auth") ||
+    location.pathname.startsWith("/profile");
 
   return (
     <>
@@ -152,7 +156,7 @@ const App = () => {
         <Route path="/trailer" element={<Trailer />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:slug" element={<NewsDetails />} />
-        <Route path="/about" element={<About />} />
+        {/* <Route path="/about" element={<About />} /> */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/movie/:slug" element={<MovieDetailsPage />} />
 
@@ -172,6 +176,10 @@ const App = () => {
             <Route path="edit-news/:id" element={<EditNews />} />
           </Route>
         </Route>
+        <Route path="/profile" element={<ProfileLayout />}>
+          <Route index element={<MyProfilePage />} />
+          <Route path="watchlist" element={<WatchlistPage />} />
+        </Route>
         {/* Optional: 404 */}
         <Route
           path="*"
@@ -184,6 +192,19 @@ const App = () => {
       </Routes>
 
       {!hideLayout && <Footer />}
+      {/* 
+      <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+      * { font-family: 'Sora', sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in { animation: fadeIn 0.35s ease both; }
+      ::-webkit-scrollbar { width: 4px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+    `}</style> */}
     </>
   );
 };

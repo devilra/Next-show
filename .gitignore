@@ -8,3 +8,4 @@ backend/movies_bulk.json
 backend/castSeeder.json
 backend/raw_images
 backend/public
+backend/.nodemonignore

@@ -593,7 +593,7 @@ const MovieDetailsHeader = ({ movie }) => {
                 {getReleaseYear()}
               </span>
               <span className="px-3 py-1 bg-gradient-to-br from-zinc-800 to-black border border-zinc-700/50 rounded-md font-bold text-[12px] text-zinc-200 tracking-widest uppercase shadow-[0_10px_20px_rgba(0,0,0,0.4),0_2px_6px_rgba(0,0,0,0.4)] ring-1 ring-white/10 ring-inset">
-                {movie.certification}
+                {movie.certification || "TBA"}
               </span>
               {/* 🔥 DOT */}
               {/* <span className="w-1 h-1 rounded-full bg-zinc-200 shadow-[0_0_8px_rgba(255,255,255,0.2)]" /> */}
@@ -614,7 +614,7 @@ const MovieDetailsHeader = ({ movie }) => {
             </div>
             {/* Genres Card */}
             <div className="flex items-center gap-3 px-4 py-2 bg-zinc-800/40 backdrop-blur-md rounded-xl border border-white/5">
-              <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest border-r border-white/10 pr-3">
+              <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-widest border-r border-white/10 pr-3">
                 Genres
               </span>
               <div className="flex flex-wrap gap-1">
@@ -622,7 +622,7 @@ const MovieDetailsHeader = ({ movie }) => {
                   <div key={index} className="flex items-center gap-2">
                     <span
                       key={index}
-                      className="px-3 py-1 border border-gray-700 text-gray-300/65 rounded-md text-xs md:text-[12px] hover:bg-gray-800/50 transition-colors"
+                      className="px-3 py-1 border border-gray-700 text-gray-300/65 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors"
                     >
                       {genre}
                     </span>

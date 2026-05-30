@@ -35,7 +35,7 @@ const NewMovies = () => {
   });
 
   const tabs = [
-    { key: "newReleases", label: "New Releases" },
+    { key: "newReleases", label: "New" },
     { key: "upcoming", label: "Upcoming" },
     { key: "trending", label: "Trending" },
   ];
@@ -98,14 +98,14 @@ const NewMovies = () => {
     <div className="mt-16">
       <div className="rounded-[28px] border border-white/10 shadow-2xl shadow-black/30 overflow-hidden">
         <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-zinc-950 px-5 py-6 md:px-8 md:py-8">
-          <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-wrap items-center gap-3">
               {tabs.map((tab) => (
                 <button
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`rounded-full px-5 py-3 text-sm font-semibold transition cursor-pointer select-auto duration-200 ${
+                  className={`rounded-full px-5 py-2 text-[12px] md:text-base font-semibold transition cursor-pointer select-auto duration-200 ${
                     activeTab === tab.key
                       ? "bg-orange-500 shadow-lg shadow-orange-500/30 "
                       : "bg-white/5 text-slate-300 hover:bg-white/10"

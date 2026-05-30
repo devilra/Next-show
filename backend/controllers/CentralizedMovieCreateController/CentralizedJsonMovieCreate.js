@@ -691,7 +691,7 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
           releaseMode: "THEATRICAL",
           streamType: "UPCOMING",
           isTheatreReleased: false,
-          isTrending: false,
+          // isTrending: false,
           movieStatus: "WAITING",
         },
         order: [
@@ -705,7 +705,7 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
           releaseMode: "THEATRICAL",
           streamType: "NEW_RELEASE",
           isTheatreReleased: true,
-          isTrending: false,
+          // isTrending: false,
           movieStatus: "RELEASED",
         },
         // order: [
@@ -738,7 +738,7 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
           releaseMode: "DIRECT_STREAMING",
           streamType: "UPCOMING",
           isStreamingReleased: false,
-          isTrending: false,
+          // isTrending: false,
           movieStatus: "WAITING",
         },
         order: [
@@ -752,7 +752,7 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
           releaseMode: "DIRECT_STREAMING",
           streamType: "NEW_RELEASE",
           isStreamingReleased: true,
-          isTrending: false,
+          // isTrending: false,
           movieStatus: "RELEASED",
         },
         // order: [

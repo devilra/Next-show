@@ -373,7 +373,7 @@ export default function AuthComponent({ setIsAuthOpen }) {
 
   const googleLoginApi = async (googleToken) => {
     const response = await api.post("/auth/user/google-login", {
-      token: googleToken,
+      credential: googleToken,
     });
     console.log(response);
     return response.data;
@@ -381,19 +381,26 @@ export default function AuthComponent({ setIsAuthOpen }) {
 
   const googleLoginMutation = useMutation({
     mutationFn: googleLoginApi,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log("GOOGLE LOGIN SUCCESS", data);
       // ============================================
       // ✅ CLOSE MODAL IF YOU HAVE STATE
       // ============================================
+      showSnackbar(data?.message || "Google login successful", "success");
+      await queryClient.invalidateQueries({
+        queryKey: ["current-user"],
+      });
 
-      setOpenAuth(false);
+      setIsAuthOpen(false);
       navigate("/");
     },
     onError: (error) => {
       console.log("GOOGLE LOGIN ERROR", error);
 
-      alert(error?.response?.data?.message || "Google login failed");
+      showSnackbar(
+        error?.response?.data?.message || "Google login failed",
+        "error",
+      );
     },
   });
 
@@ -595,13 +602,52 @@ export default function AuthComponent({ setIsAuthOpen }) {
             <GoogleIcon />
             Continue with Google
           </motion.button> */}
-          <div className="mb-4">
+          <motion.button
+            whileHover={{
+              scale: 1.018,
+              backgroundColor: "rgba(255,255,255,0.11)",
+            }}
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              document.querySelector('[role="button"]')?.click();
+            }}
+            className="
+    w-full
+
+    flex items-center justify-center gap-3
+
+    mb-4
+
+    px-4 py-[11px]
+
+    rounded-[14px]
+
+    cursor-pointer
+
+    text-white
+    font-semibold
+    tracking-[0.01em]
+
+    transition-colors duration-200
+  "
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              fontFamily: "'DM Sans',sans-serif",
+              fontSize: "clamp(12px, 2.5vw, 13px)",
+            }}
+          >
+            <GoogleIcon />
+
+            <span>Continue with Google</span>
+          </motion.button>
+
+          {/* ============================================ */}
+          {/* ✅ HIDDEN GOOGLE BUTTON */}
+          {/* ============================================ */}
+
+          <div className="hidden">
             <GoogleLogin
-              theme="filled_black"
-              shape="pill"
-              size="large"
-              text="continue_with"
-              width="100%"
               onSuccess={(credentialResponse) => {
                 console.log("GOOGLE TOKEN", credentialResponse);
 

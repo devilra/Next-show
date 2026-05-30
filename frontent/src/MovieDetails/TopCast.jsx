@@ -30,17 +30,26 @@ const TopCast = ({ movie }) => {
   };
 
   return (
-    <div className="py-8 bg-[#121212] z-0 text-white max-w-4xl">
+    <div className="bg-[#121212] z-0 mb-8 text-white max-w-4xl">
       {/* Header Section */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex items-center gap-4 mb-6">
+        <div
+          className="
+      w-1 md:w-1.5
+      h-10 md:h-12
+
+      bg-gradient-to-b
+      from-orange-500
+      to-yellow-500
+
+      rounded-full
+
+      shadow-[0_0_15px_rgba(249,115,22,0.4)]
+    "
+        />
+
         <div className="flex items-center gap-4 group cursor-pointer">
-          <h2 className="text-2xl md:text-3xl font-bold flex items-center">
-            Top Cast{" "}
-            <ChevronRight
-              className="ml-2 group-hover:text-yellow-500 transition-colors"
-              size={28}
-            />
-          </h2>
+          <h2 className="text-2xl md:text-3xl  text-white">Top Cast</h2>
         </div>
       </div>
 
