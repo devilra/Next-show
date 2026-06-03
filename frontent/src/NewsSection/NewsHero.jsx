@@ -628,7 +628,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
 
             {/* Right: mute btn + slide counter */}
             <div className="flex items-center gap-2">
-              {hasVideo && (
+              {/* {hasVideo && (
                 <button
                   onClick={() => setMuted((m) => !m)}
                   className="p-2 rounded-full text-white transition"
@@ -644,7 +644,7 @@ const NewsHero = ({ heroNews = [], isLoading, isError, error, refetch }) => {
                     <FaVolumeUp size={11} />
                   )}
                 </button>
-              )}
+              )} */}
               {/* {data.length > 1 && (
                 <span
                   className="text-[10px] text-white/50 font-mono tracking-widest px-2 py-1 rounded-full backdrop-blur-md"

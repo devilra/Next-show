@@ -166,3 +166,18 @@ body {
 .news-marquee {
   will-change: transform;
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  30% {
+    transform: translateX(0%);
+  } /* சற்று pause */
+  70% {
+    transform: translateX(-60%);
+  } /* scroll */
+  100% {
+    transform: translateX(0%);
+  } /* reset */
+}

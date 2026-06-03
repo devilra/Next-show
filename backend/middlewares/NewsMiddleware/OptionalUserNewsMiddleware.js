@@ -6,16 +6,20 @@ exports.OptionalUserProtect = async (req, res, next) => {
     const token = req.cookies?.userToken;
 
     if (!token) {
-      next();
+      return next();
     }
 
     const decode = jwt.verify(token, process.env.JWT_SECRET);
+
     const user = await UserAuthModel.findByPk(decode.id);
+
     if (user) {
       req.user = user;
     }
-    next();
+
+    return next();
   } catch (error) {
-    next();
+    console.log("OPTIONAL USER PROTECT ERROR =>", error);
+    return next();
   }
 };

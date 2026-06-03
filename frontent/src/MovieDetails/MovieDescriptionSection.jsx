@@ -277,19 +277,22 @@ const MovieDescriptionSection = ({
             <div className="flex gap-2 w-full">
               {/* PRIMARY ACTION */}
               {movie.streamType === "UPCOMING" ? (
-                <button className="group relative md:py-4 flex items-center justify-center cursor-pointer gap-2 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white text-[10px] md:text-[13px] bg-blue-600 transition-all duration-300 hover:shadow-[0_0_10px_10px_rgba(37,99,235,0.4)] hover:scale-[1.02] active:scale-95">
+                <button className="group relative  flex flex-1 md:flex-none items-center justify-center cursor-pointer gap-2 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white text-[10px] md:text-[13px] bg-blue-600 transition-all duration-300 hover:shadow-[0_0_10px_10px_rgba(37,99,235,0.4)] hover:scale-[1.02] active:scale-95">
                   <span className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  <IoNotificationsOutline className="relative z-10 text-[12px] md:text-[18px] group-hover:animate-bounce" />
-                  <span className="relative z-10 tracking-widest">
+                  <IoNotificationsOutline className="relative z-10 text-[17px] md:text-[15px] group-hover:animate-bounce" />
+                  <span className="relative z-10 text-[13px] md:text-[15px]">
                     REMIND ME
                   </span>
                 </button>
               ) : (
                 <button
                   onClick={() => window.open(movie.watchUrl, "_blank")}
-                  className="group relative flex flex-1 md:flex-none items-center cursor-pointer justify-center gap-1 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white  bg-orange-500 transition-all duration-300 hover:shadow-[0_0_10px_5px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95"
+                  disabled={movie.releaseMode === "THEATRICAL"}
+                  className={`group relative flex flex-1 md:flex-none items-center cursor-pointer justify-center gap-1 px-4 py-2 md:px-10 rounded-lg md:rounded-xl text-white  bg-orange-500 transition-all duration-300 hover:shadow-[0_0_10px_5px_rgba(249,115,22,0.4)] hover:scale-[1.02] active:scale-95 ${movie.releaseMode === "THEATRICAL" ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <span className="absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-r from-orange-600 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span
+                    className={`absolute inset-0 rounded-lg md:rounded-xl bg-gradient-to-r from-orange-600 to-orange-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+                  />
                   <FaPlay className="relative z-10 text-[17px] md:text-[15px]" />
                   <span className="relative z-10 text-[13px] md:text-[15px] ">
                     WATCH NOW
@@ -533,7 +536,7 @@ px-20
                       className={`
           relative z-10
 
-          text-[15px] md:text-[20px]
+          text-[20px] md:text-[23px]
 
           transition-all duration-300
 
@@ -633,7 +636,7 @@ px-20
               {/* Globe Icon */}
               <div className="relative z-10 flex items-center gap-2 pr-2 border-r border-white/10">
                 <svg
-                  className="w-3 h-3 md:w-4 md:h-4 text-zinc-400 group-hover:text-white transition-colors"
+                  className="w-5 h-5 md:w-6 md:h-6 text-zinc-400 group-hover:text-white transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

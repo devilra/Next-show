@@ -291,9 +291,9 @@ const NewsTrending = ({
 
               {/* Body */}
               <div className="flex-1 min-w-0">
-                <p className="text-[9px] uppercase tracking-[2px] text-orange-500 font-bold mb-1">
+                {/* <p className="text-[9px] uppercase tracking-[2px] text-orange-500 font-bold mb-1">
                   {news?.categories?.[0] || "News"}
-                </p>
+                </p> */}
                 <h4 className="text-[11px]  text-white/50 leading-snug mb-1 line-clamp-2 break-words overflow-hidden">
                   {news?.title}
                 </h4>

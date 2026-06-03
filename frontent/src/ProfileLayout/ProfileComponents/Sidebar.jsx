@@ -581,7 +581,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
 
         {/* FOOTER */}
 
-        <div className="px-4 py-5 border-t border-zinc-800/50">
+        {/* <div className="px-4 py-5 border-t border-zinc-800/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-600 to-red-800 flex items-center justify-center text-white text-xs font-bold shrink-0">
               {USER.initials}
@@ -597,7 +597,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </aside>
     </>
   );

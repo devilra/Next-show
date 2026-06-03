@@ -17,6 +17,15 @@ const {
   getUserWatchlist,
   removeWatchlistItem,
   clearAllWatchlist,
+  getMovieReviews,
+  updateReview,
+  deleteReview,
+  toggleReviewLike,
+  addReviewReply,
+  getReviewReplies,
+  updateReviewReply,
+  deleteReviewReply,
+  toggleReplyLike,
 } = require("../../controllers/UserAuthController/UserRateLikeMarkController");
 const {
   toggleWatchLater,
@@ -29,6 +38,9 @@ const {
   getNewsLikeCount,
   getUserLikedNews,
 } = require("../../controllers/UserAuthController/UserWatchLaterController");
+const {
+  OptionalUserProtect,
+} = require("../../middlewares/NewsMiddleware/OptionalUserNewsMiddleware");
 
 const router = express.Router();
 
@@ -58,7 +70,7 @@ router.post("/toggle-watch-later", UserProtect, toggleWatchLater);
 
 router.get("/check-watch-later/:newsId", UserProtect, checkWatchLaterStatus);
 
-router.get("/watch-later", UserProtect, getUserWatchLater);
+router.get("/watch-later", OptionalUserProtect, getUserWatchLater);
 
 router.get("/check-watchlist/:movieId", UserProtect, checkWatchlistStatus);
 
@@ -86,6 +98,32 @@ router.get("/news-like-count/:newsId", UserProtect, getNewsLikeCount);
 // ✅ GET USER LIKED NEWS
 // ======================================================
 router.get("/user-liked-news", UserProtect, getUserLikedNews);
+
+// Get all reviews for a movie
+router.get("/movie-reviews/:movieId", OptionalUserProtect, getMovieReviews);
+
+// Update review
+router.put("/update-review/:reviewId", UserProtect, updateReview);
+
+// Delete review
+router.delete("/delete-review/:reviewId", UserProtect, deleteReview);
+// ======================================================
+// ✅ REVIEW LIKES
+// ======================================================
+// Toggle review like
+router.post("/toggle-review-like", UserProtect, toggleReviewLike);
+// ======================================================
+// ✅ REVIEW REPLIES
+// ======================================================
+// Add reply
+router.post("/add-review-reply", UserProtect, addReviewReply);
+router.post("/toggle-reply-like", UserProtect, toggleReplyLike);
+// Get replies
+router.get("/review-replies/:reviewId", getReviewReplies);
+// Update reply
+router.put("/update-review-reply/:replyId", UserProtect, updateReviewReply);
+// Delete reply
+router.delete("/delete-review-reply/:replyId", UserProtect, deleteReviewReply);
 
 // ======================================================
 // ✅ REMOVE SINGLE RECENT VIEW

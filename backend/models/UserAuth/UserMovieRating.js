@@ -58,6 +58,34 @@ const UserMovieRatingModel = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    containsSpoiler: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    reviewStatus: {
+      type: DataTypes.ENUM("PUBLISHED", "HIDDEN", "REPORTED"),
+      defaultValue: "PUBLISHED",
+    },
+    totalLikes: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    totalReplies: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    helpfulCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    notHelpfulCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    isVerifiedViewer: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     tableName: "user_movie_ratings",

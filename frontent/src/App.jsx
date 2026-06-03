@@ -145,7 +145,7 @@ const App = () => {
     location.pathname.startsWith("/profile");
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       {!hideLayout && <Navbar />}
       <Routes>
@@ -205,7 +205,7 @@ const App = () => {
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
     `}</style> */}
-    </>
+    </div>
   );
 };
 

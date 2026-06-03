@@ -723,10 +723,11 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
         where: {
           isTrending: true,
           releaseMode: "THEATRICAL",
-          //  streamType: "TRENDING"
         },
+        // ✅ FIXED: Date-wise sorting + NULL values bottom-க்கு போற logic சேர்த்தாச்சு
         order: [
-          ["order", "ASC"],
+          [sequelize.literal("theatreReleaseDate IS NULL"), "ASC"],
+          ["theatreReleaseDate", "DESC"], // Latest date mela varum (June first, May next)
           ["viewCount", "DESC"],
           ["id", "DESC"],
         ],
@@ -769,10 +770,11 @@ exports.getJsonMoviePublicHomeData = async (req, res) => {
         where: {
           isTrending: true,
           releaseMode: "DIRECT_STREAMING",
-          //  streamType: "TRENDING"
         },
+        // ✅ FIXED: OTT Date-wise sorting + NULL values bottom-க்கு போற logic சேர்த்தாச்சு
         order: [
-          ["order", "ASC"],
+          [sequelize.literal("ottReleaseDate IS NULL"), "ASC"],
+          ["ottReleaseDate", "DESC"], // Latest streaming data mela varum
           ["viewCount", "DESC"],
           ["id", "DESC"],
         ],

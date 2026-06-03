@@ -20,6 +20,7 @@ import {
 import api from "../api";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useToggleWatchlist, useWatchlistStatus } from "../hooks/useWatchlist";
+import ReviewsCarousel from "./Reviewscarousel";
 
 const MovieDetailsPage = () => {
   const { slug } = useParams();
@@ -359,9 +360,21 @@ const MovieDetailsPage = () => {
     // ✅ SUCCESS
     // ======================================================
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["user-movie-rating", movieData?.id],
-      });
+      await Promise.all([
+        // ============================================
+        // ✅ REFRESH CURRENT USER REVIEW
+        // ============================================
+        queryClient.invalidateQueries({
+          queryKey: ["user-movie-rating", movieData?.id],
+        }),
+
+        // ============================================
+        // ✅ REFRESH ALL MOVIE REVIEWS
+        // ============================================
+        queryClient.invalidateQueries({
+          queryKey: ["movie-reviews", movieData?.id],
+        }),
+      ]);
     },
     // ======================================================
     // ✅ ERROR ROLLBACK
@@ -434,14 +447,16 @@ const MovieDetailsPage = () => {
         {/* LEFT SIDE (8 Columns): Gallery, Description, Cast */}
         <div className="lg:col-span-9 ">
           <MovieGallery movie={movieData} />
-
+          <div className="grid grid-cols-1 lg:grid-cols-1">
+            <ReviewsCarousel movieId={movieData?.id} />
+          </div>
           <TopCast movie={movieData} />
         </div>
 
         {/* RIGHT SIDE (4 Columns): Movie Timeline (Sidebar) */}
-        {/* <div className="lg:col-span-4">
-          {!isRatingModalOpen && <MovieTimeline movie={movieData} />}
-        </div> */}
+        <div className="lg:col-span-3">
+          {/* {!isRatingModalOpen && <MovieTimeline movie={movieData} />} */}
+        </div>
       </div>
     </div>
   );

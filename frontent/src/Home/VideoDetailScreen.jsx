@@ -310,9 +310,19 @@ export default function VideoDetailScreen({
                     className="space-y-3"
                   >
                     {/* Title / Logo Style */}
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl  uppercase tracking-tighter drop-shadow-lg text-white mb-2">
-                      {currentVideo?.title}
-                    </h1>
+                    <div className="overflow-hidden max-w-full mb-2">
+                      <h1
+                        className="text-2xl md:text-3xl lg:text-4xl uppercase tracking-tighter drop-shadow-lg text-white whitespace-nowrap inline-block"
+                        style={{
+                          animation:
+                            currentVideo?.title?.length > 20
+                              ? "marquee 8s linear infinite"
+                              : "none",
+                        }}
+                      >
+                        {currentVideo?.title}
+                      </h1>
+                    </div>
 
                     {/* Metadata (IMDb, Year, Duration, Language) */}
                     {/* <div className="flex flex-wrap items-center gap-3 text-[14px] font-bold text-gray-300">
@@ -353,7 +363,24 @@ export default function VideoDetailScreen({
                     </div>
 
                     {/* Description */}
-                    <p className="text-[13px] md:text-[14px] hidden md:hidden lg:block text-gray-300 leading-relaxed line-clamp-3  max-w-xl drop-shadow-md">
+                    <p
+                      className="
+    hidden
+    lg:block
+    text-[13px]
+    md:text-[14px]
+    text-gray-300
+    leading-relaxed
+    max-w-xl
+    drop-shadow-md
+  "
+                      style={{
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {currentVideo?.longDescription || "TBA"}
                     </p>
 

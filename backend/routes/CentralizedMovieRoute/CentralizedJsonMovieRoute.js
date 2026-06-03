@@ -12,6 +12,14 @@ const {
   permanentDeleteMovies,
   getJsonMoviePublicHomeData,
 } = require("../../controllers/CentralizedMovieCreateController/CentralizedJsonMovieCreate");
+const {
+  OptionalUserProtect,
+} = require("../../middlewares/NewsMiddleware/OptionalUserNewsMiddleware");
+const {
+  startMovieSession,
+  endMovieSession,
+  getMovieAnalytics,
+} = require("../../models/CentralizedMoviesCreateModels/MovieDetailsViewsTime");
 
 const router = express.Router();
 
@@ -54,6 +62,12 @@ router.get(
   // AdminAuthProtect,
   GetAllCentralizedJsonMovies,
 );
+
+router.post("/movie-session/start", OptionalUserProtect, startMovieSession);
+
+router.post("/movie-session/end", OptionalUserProtect, endMovieSession);
+
+router.get("/movie-analytics/:movieId", getMovieAnalytics);
 
 // @desc    Move a movie to trash (Soft Delete)
 // @route   DELETE /api/v1/movies/delete-movie/:id

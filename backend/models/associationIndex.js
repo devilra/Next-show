@@ -6,6 +6,10 @@ const UserWatchlistModel = require("./UserAuth/UserWatchlistModel");
 const UserWatchLaterModel = require("./UserAuth/UserWatchLater");
 const CentralizedNewsModel = require("./CentralizedNewsModels/CentralizedNewsModel");
 const UserNewsLikeModel = require("./UserAuth/UserNewsLikeModel");
+const UserMovieRatingModel = require("./UserAuth/UserMovieRating");
+const UserReviewReplyModel = require("./UserAuth/UserReviewReplyModel");
+const UserReviewLikeModel = require("./UserAuth/UserReviewLikeModel");
+const UserReviewReplyLikeModel = require("./UserAuth/UserReviewReplyLikeModel");
 
 // 1. Oru movie-la neraiya cast irupanga
 Movie.belongsToMany(Cast, {
@@ -104,6 +108,100 @@ CentralizedNewsModel.hasMany(UserNewsLikeModel, {
 UserNewsLikeModel.belongsTo(CentralizedNewsModel, {
   foreignKey: "newsId",
   as: "news",
+});
+
+Movie.hasMany(UserMovieRatingModel, {
+  foreignKey: "movieId",
+  as: "reviews",
+});
+
+UserMovieRatingModel.belongsTo(Movie, {
+  foreignKey: "movieId",
+  as: "movie",
+});
+
+UserAuthModel.hasMany(UserMovieRatingModel, {
+  foreignKey: "userId",
+  as: "userReviews",
+});
+
+UserMovieRatingModel.belongsTo(UserAuthModel, {
+  foreignKey: "userId",
+  as: "reviewUser",
+});
+// ============================================
+// USER ↔ REVIEW REPLIES
+// ============================================
+
+UserAuthModel.hasMany(UserReviewReplyModel, {
+  foreignKey: "userId",
+  as: "reviewReplies",
+});
+
+UserReviewReplyModel.belongsTo(UserAuthModel, {
+  foreignKey: "userId",
+  as: "user",
+});
+
+// ============================================
+// REVIEW ↔ REVIEW LIKES
+// ============================================
+
+UserMovieRatingModel.hasMany(UserReviewLikeModel, {
+  foreignKey: "reviewId",
+  as: "reviewLikes",
+});
+
+UserReviewLikeModel.belongsTo(UserMovieRatingModel, {
+  foreignKey: "reviewId",
+  as: "review",
+});
+
+// ============================================
+// USER ↔ REVIEW LIKES
+// ============================================
+
+UserAuthModel.hasMany(UserReviewLikeModel, {
+  foreignKey: "userId",
+  as: "userReviewLikes",
+});
+
+UserReviewLikeModel.belongsTo(UserAuthModel, {
+  foreignKey: "userId",
+  as: "user",
+});
+UserMovieRatingModel.hasMany(UserReviewReplyModel, {
+  foreignKey: "reviewId",
+  as: "reviewReplies",
+});
+UserReviewReplyModel.belongsTo(UserMovieRatingModel, {
+  foreignKey: "reviewId",
+  as: "review",
+});
+// ============================================
+// REPLY ↔ REPLY LIKES ASSOCIATIONS
+// ============================================
+
+// Oru review reply message ku pala likes irukalam
+UserReviewReplyModel.hasMany(UserReviewReplyLikeModel, {
+  foreignKey: "replyId",
+  as: "replyLikes",
+});
+
+UserReviewReplyLikeModel.belongsTo(UserReviewReplyModel, {
+  foreignKey: "replyId",
+  as: "reply",
+});
+
+// Oru user romba replies-a like pannalam
+UserAuthModel.hasMany(UserReviewReplyLikeModel, {
+  foreignKey: "userId",
+  as: "userReplyLikes",
+});
+
+UserReviewReplyLikeModel.belongsTo(UserAuthModel, {
+  foreignKey: "userId",
+  as: "user",
 });
 
 module.exports = { Movie, Cast, MovieCast };

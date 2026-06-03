@@ -636,10 +636,8 @@ const MyProfilePage = () => {
             }}
           />
           <div className="absolute inset-0 flex items-end p-6 gap-5">
-            <div className="relative w-[120px] h-[110px]">
-              {/* ==================================================== */}
-              {/* ✅ PROFILE IMAGE */}
-              {/* ==================================================== */}
+            {/* <div className="relative w-[120px] h-[110px]">
+        
 
               <div
                 className="
@@ -710,9 +708,7 @@ const MyProfilePage = () => {
                 )}
               </div>
 
-              {/* ==================================================== */}
-              {/* ✅ ONLINE DOT */}
-              {/* ==================================================== */}
+            
 
               <div
                 className="
@@ -728,9 +724,7 @@ const MyProfilePage = () => {
                 "
               />
 
-              {/* ==================================================== */}
-              {/* ✅ FILE INPUT */}
-              {/* ==================================================== */}
+             
 
               <input
                 type="file"
@@ -740,9 +734,7 @@ const MyProfilePage = () => {
                 onChange={handleProfileImageChange}
               />
 
-              {/* ==================================================== */}
-              {/* ✅ PLUS BUTTON */}
-              {/* ==================================================== */}
+           
 
               <label
                 htmlFor="profile-avatar-upload"
@@ -778,7 +770,7 @@ const MyProfilePage = () => {
                   <path d="M5 12h14" />
                 </svg>
               </label>
-            </div>
+            </div> */}
 
             <div className="pb-2">
               {/* NAME */}

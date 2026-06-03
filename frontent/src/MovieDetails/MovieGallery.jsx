@@ -73,7 +73,7 @@ const MovieGallery = ({ movie }) => {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: 2,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
@@ -185,7 +185,7 @@ const MovieGallery = ({ movie }) => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mx-4 flex flex-col items-center justify-center py-16 px-4 rounded-2xl border-2 border-dotted border-white/5 bg-zinc-900/30"
+          className="mx-4 flex flex-col items-center justify-center py-16 min-h-[320px] px-4 rounded-2xl border-2 border-dotted border-white/5 bg-zinc-900/30"
         >
           <VideoOff size={48} className="text-zinc-700 mb-3" />
           <h3 className="text-xl font-bold text-zinc-500 uppercase tracking-widest">

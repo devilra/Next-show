@@ -828,11 +828,13 @@ const ProfileLayout = () => {
           mx-auto
         "
       >
-        {/* ================================================= */}
-        {/* ✅ MOBILE SIDEBAR */}
-        {/* ================================================= */}
-
-        <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+        {/* MOBILE SIDEBAR */}
+        <div className="lg:hidden">
+          <Sidebar
+            mobileOpen={mobileOpen}
+            onClose={() => setMobileOpen(false)}
+          />
+        </div>
 
         {/* ================================================= */}
         {/* ✅ DESKTOP SIDEBAR */}
