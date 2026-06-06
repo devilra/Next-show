@@ -330,6 +330,34 @@ const CentralizedJsonBulkCreate = sequelize.define(
       allowNull: true,
       defaultValue: [],
     },
+    theatreCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
+    ticketNewCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
+    noShowsDays: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
+    theatreStatus: {
+      type: DataTypes.ENUM("RUNNING", "ENDED"),
+      defaultValue: "RUNNING",
+    },
+    bookMyShowCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    remainingTheatreDays: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 20,
+    },
     /**
      * 💰 ADVANCED BOX OFFICE DETAILS
      * Inga innum granular-ana data store pannalam.

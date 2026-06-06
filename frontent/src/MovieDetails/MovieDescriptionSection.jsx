@@ -19,6 +19,11 @@ import { IoMdHeartEmpty } from "react-icons/io";
 import { LuCopy } from "react-icons/lu";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { AnimatePresence, motion } from "framer-motion";
+import IsUserValid from "../ProtectedRoute/IsUserValid";
+import { IoAnalytics } from "react-icons/io5";
+import { FaEye } from "react-icons/fa";
+import { LuTimerReset } from "react-icons/lu";
+import { FaRegStar } from "react-icons/fa6";
 
 const MovieDescriptionSection = ({
   movie,
@@ -43,6 +48,9 @@ const MovieDescriptionSection = ({
   watchlistError,
   toggleWatchlistMutation,
   refetchWatchlist,
+  analyticsData,
+  analyticsLoading,
+  analyticsFetching,
 }) => {
   // console.log(movie);
 
@@ -262,6 +270,40 @@ const MovieDescriptionSection = ({
 
   const isWatched = watchedData?.watched;
   const alreadyRated = userRatingData?.rated;
+  const formatViews = (num = 0) => {
+    if (num >= 1000000000) {
+      return `${(num / 1000000000).toFixed(1).replace(".0", "")}B`;
+    }
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1).replace(".0", "")}M`;
+    }
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1).replace(".0", "")}K`;
+    }
+    return num.toString();
+  };
+
+  const formatAvgTime = (seconds = 0) => {
+    if (!seconds) return "0s";
+
+    const hours = Math.floor(seconds / 3600);
+
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    const secs = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h`;
+    }
+
+    if (minutes > 0) {
+      return `${minutes}m`;
+    }
+
+    return `${secs}s`;
+  };
+  const totalViews = analyticsData?.totalViews || 0;
+  const averageTimeSpent = analyticsData?.averageTimeSpent || 0;
 
   return (
     <div className="pt-6 bg-[#121212] space-y-4 mb-8 text-white">
@@ -304,17 +346,14 @@ const MovieDescriptionSection = ({
               {/* ✅ WATCHLIST BUTTON */}
               {/* ====================================================== */}
 
-              {watchlistLoading ? (
-                <div
-                  className="
-      flex-1
-
-      h-[52px]
-
-      rounded-lg md:rounded-xl
-
+              <IsUserValid>
+                {watchlistLoading ? (
+                  <div
+                    className="
+  flex-1
+    h-[52px]
+     rounded-lg md:rounded-xl
       border border-white/10
-
       bg-gradient-to-br
       from-zinc-800
       via-zinc-900
@@ -324,13 +363,13 @@ const MovieDescriptionSection = ({
 px-20
       relative
     "
-                >
-                  {/* ================================================ */}
-                  {/* ✅ SHIMMER */}
-                  {/* ================================================ */}
+                  >
+                    {/* ================================================ */}
+                    {/* ✅ SHIMMER */}
+                    {/* ================================================ */}
 
-                  <div
-                    className="
+                    <div
+                      className="
         absolute inset-0
 
         animate-pulse
@@ -340,33 +379,33 @@ px-20
         via-white/[0.04]
         to-transparent
       "
-                  />
+                    />
 
-                  {/* ================================================ */}
-                  {/* ✅ CONTENT */}
-                  {/* ================================================ */}
+                    {/* ================================================ */}
+                    {/* ✅ CONTENT */}
+                    {/* ================================================ */}
 
-                  <div
-                    className="
+                    <div
+                      className="
         relative z-10
 
         h-full
 
         flex items-center justify-center gap-3
       "
-                  >
-                    {/* HEART */}
+                    >
+                      {/* HEART */}
 
-                    {/* TEXT */}
+                      {/* TEXT */}
 
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex items-center justify-center">
-                        {/* ============================================ */}
-                        {/* ✅ OUTER GLOW */}
-                        {/* ============================================ */}
+                      <div className="flex items-center gap-2">
+                        <div className="relative flex items-center justify-center">
+                          {/* ============================================ */}
+                          {/* ✅ OUTER GLOW */}
+                          {/* ============================================ */}
 
-                        <div
-                          className="
+                          <div
+                            className="
         absolute
 
         w-5 h-5
@@ -379,14 +418,14 @@ px-20
 
         animate-pulse
       "
-                        />
+                          />
 
-                        {/* ============================================ */}
-                        {/* ✅ JELLY SPINNER */}
-                        {/* ============================================ */}
+                          {/* ============================================ */}
+                          {/* ✅ JELLY SPINNER */}
+                          {/* ============================================ */}
 
-                        <div
-                          className="
+                          <div
+                            className="
         w-5 h-5
 
         rounded-full
@@ -402,35 +441,35 @@ px-20
 
         shadow-[0_0_12px_rgba(239,68,68,0.45)]
       "
-                          style={{
-                            animation:
-                              "spin 0.7s linear infinite, jelly 1.2s ease-in-out infinite",
-                          }}
-                        />
+                            style={{
+                              animation:
+                                "spin 0.7s linear infinite, jelly 1.2s ease-in-out infinite",
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <motion.button
-                  layout
-                  disabled={toggleWatchlistMutation?.isPending}
-                  onClick={() => {
-                    // ================================================
-                    // ✅ PREVENT DOUBLE CLICK
-                    // ================================================
+                ) : (
+                  <motion.button
+                    layout
+                    disabled={toggleWatchlistMutation?.isPending}
+                    onClick={() => {
+                      // ================================================
+                      // ✅ PREVENT DOUBLE CLICK
+                      // ================================================
 
-                    if (toggleWatchlistMutation?.isPending) {
-                      return;
-                    }
+                      if (toggleWatchlistMutation?.isPending) {
+                        return;
+                      }
 
-                    // ================================================
-                    // ✅ TOGGLE WATCHLIST
-                    // ================================================
+                      // ================================================
+                      // ✅ TOGGLE WATCHLIST
+                      // ================================================
 
-                    toggleWatchlistMutation.mutate();
-                  }}
-                  className={`
+                      toggleWatchlistMutation.mutate();
+                    }}
+                    className={`
       group
 
       cursor-pointer
@@ -493,13 +532,13 @@ px-20
           : ""
       }
     `}
-                >
-                  {/* ================================================ */}
-                  {/* ✅ HOVER LAYER */}
-                  {/* ================================================ */}
+                  >
+                    {/* ================================================ */}
+                    {/* ✅ HOVER LAYER */}
+                    {/* ================================================ */}
 
-                  <span
-                    className="
+                    <span
+                      className="
         absolute inset-0
 
         rounded-lg md:rounded-xl
@@ -512,28 +551,28 @@ px-20
 
         transition-opacity duration-300
       "
-                  />
+                    />
 
-                  {/* ================================================ */}
-                  {/* ✅ ICON */}
-                  {/* ================================================ */}
+                    {/* ================================================ */}
+                    {/* ✅ ICON */}
+                    {/* ================================================ */}
 
-                  <motion.div
-                    key={isInWatchlist ? "added" : "default"}
-                    initial={{
-                      scale: 0.8,
-                      opacity: 0,
-                    }}
-                    animate={{
-                      scale: 1,
-                      opacity: 1,
-                    }}
-                    transition={{
-                      duration: 0.35,
-                    }}
-                  >
-                    <IoMdHeartEmpty
-                      className={`
+                    <motion.div
+                      key={isInWatchlist ? "added" : "default"}
+                      initial={{
+                        scale: 0.8,
+                        opacity: 0,
+                      }}
+                      animate={{
+                        scale: 1,
+                        opacity: 1,
+                      }}
+                      transition={{
+                        duration: 0.35,
+                      }}
+                    >
+                      <IoMdHeartEmpty
+                        className={`
           relative z-10
 
           text-[20px] md:text-[23px]
@@ -554,38 +593,38 @@ px-20
               `
           }
         `}
-                    />
-                  </motion.div>
+                      />
+                    </motion.div>
 
-                  {/* ================================================ */}
-                  {/* ✅ TEXT */}
-                  {/* ================================================ */}
+                    {/* ================================================ */}
+                    {/* ✅ TEXT */}
+                    {/* ================================================ */}
 
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={
-                        toggleWatchlistMutation?.isPending
-                          ? "updating"
-                          : isInWatchlist
-                            ? "remove"
-                            : "watchlist"
-                      }
-                      initial={{
-                        y: 10,
-                        opacity: 0,
-                      }}
-                      animate={{
-                        y: 0,
-                        opacity: 1,
-                      }}
-                      exit={{
-                        y: -10,
-                        opacity: 0,
-                      }}
-                      transition={{
-                        duration: 0.25,
-                      }}
-                      className={`
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={
+                          toggleWatchlistMutation?.isPending
+                            ? "updating"
+                            : isInWatchlist
+                              ? "remove"
+                              : "watchlist"
+                        }
+                        initial={{
+                          y: 10,
+                          opacity: 0,
+                        }}
+                        animate={{
+                          y: 0,
+                          opacity: 1,
+                        }}
+                        exit={{
+                          y: -10,
+                          opacity: 0,
+                        }}
+                        transition={{
+                          duration: 0.25,
+                        }}
+                        className={`
           relative z-10
 
           tracking-widest
@@ -594,16 +633,17 @@ px-20
           hidden md:inline-block
           ${isInWatchlist ? "text-red-400" : "text-white"}
         `}
-                    >
-                      {toggleWatchlistMutation?.isPending
-                        ? "UPDATING..."
-                        : isInWatchlist
-                          ? "REMOVE WATCHLIST"
-                          : "WATCHLIST"}
-                    </motion.span>
-                  </AnimatePresence>
-                </motion.button>
-              )}
+                      >
+                        {toggleWatchlistMutation?.isPending
+                          ? "UPDATING..."
+                          : isInWatchlist
+                            ? "WATCHLISTED"
+                            : "WATCHLIST"}
+                      </motion.span>
+                    </AnimatePresence>
+                  </motion.button>
+                )}
+              </IsUserValid>
 
               {/* SHARE */}
               <button
@@ -794,7 +834,7 @@ px-20
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                  <span className="px-3 py-1 border border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors">
                     {movie.director || "N/A"}
                   </span>
                 </div>
@@ -811,7 +851,7 @@ px-20
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                  <span className="px-3 py-1 border border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors">
                     {movie.writer || "N/A"}
                   </span>
                 </div>
@@ -859,7 +899,7 @@ px-20
                   </span>
                 </div>
                 <div className="flex-1">
-                  <span className="text-zinc-400  text-[13px] md:text-[14px] cursor-pointer hover:text-blue-300 transition-colors   sm:text-[16px] ml-11 sm:ml-0">
+                  <span className="px-3 py-1 border border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors">
                     {movie.musicDirector || "N/A"}
                   </span>
                 </div>
@@ -925,61 +965,94 @@ px-20
                   </div>
                 </div>
               ) : (
-                <button
-                  disabled={alreadyRated || addMovieRatingMutation?.isPending}
-                  onClick={() => {
-                    if (alreadyRated || addMovieRatingMutation?.isPending)
-                      return;
-                    setIsRatingModalOpen(true);
-                  }}
-                  className={`
-    flex-1 py-4 w-full rounded-xl
-    flex items-center justify-center gap-2
-    border
-    transition-all duration-300
-    active:scale-95
-
-    ${
-      alreadyRated
-        ? `
-        bg-yellow-500/10
-        border-yellow-400/18
-        text-yellow-200
-        cursor-not-allowed
-        pointer-events-none
-      `
-        : `
-        bg-zinc-800
-        hover:bg-zinc-800/45
-        border-white/5
+                <IsUserValid>
+                  <button
+                    disabled={alreadyRated || addMovieRatingMutation?.isPending}
+                    onClick={() => {
+                      if (alreadyRated || addMovieRatingMutation?.isPending)
+                        return;
+                      setIsRatingModalOpen(true);
+                    }}
+                    // பட்டனுக்கு 'overflow-hidden' அவசியம், அப்போதான் corner text வெளியே தெரியாது
+                    className={`
+      relative flex-1 py-4 w-full rounded-xl flex items-center justify-center gap-2 border transition-all duration-300 active:scale-95 overflow-hidden
+      ${
+        alreadyRated
+          ? "bg-zinc-900 border-zinc-800 text-zinc-400 cursor-not-allowed pointer-events-none"
+          : " bg-zinc-800 hover:bg-zinc-800/45 border-white/5  text-white cursor-pointer"
+      }
+      ${addMovieRatingMutation?.isPending ? "opacity-70 cursor-not-allowed" : ""}
+    `}
+                  >
+                    {/* RATED RIBBON (Edge Corner) */}
+                    {alreadyRated && (
+                      <div
+                        className="
+      absolute
+      top-0
+      left-0
+      w-16
+      h-16
+      overflow-hidden
+      z-20
+    "
+                      >
+                        <span
+                          className="
+        absolute
+        top-[10px]
+        -left-[18px]
+        w-[80px]
+        rotate-[-45deg]
+        bg-gradient-to-r
+        from-blue-700
+        via-blue-500
+        to-blue-300
         text-white
-        cursor-pointer
-      `
-    }
+        text-[8px]
+        font-black
+        text-center
+        py-[3px]
+        uppercase
+        tracking-wider
+        shadow-[0_4px_15px_rgba(59,130,246,0.5)]
+        border-t
+        border-white/40
+      "
+                        >
+                          Rated
+                        </span>
+                      </div>
+                    )}
 
-    ${addMovieRatingMutation?.isPending ? "opacity-70 cursor-not-allowed pointer-events-none" : ""}
-  `}
-                >
-                  {addMovieRatingMutation?.isPending ? (
-                    <>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                      <span className="text-xs font-bold uppercase tracking-wide">
-                        Submitting...
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      {alreadyRated ? (
-                        <FaStar size={18} className="text-yellow-400" />
-                      ) : (
-                        <Star size={18} className="text-yellow-400" />
-                      )}
-                      <span className="text-xs  uppercase font-bold text-white tracking-wide">
-                        {alreadyRated ? "Already Rated" : "Rate Now"}
-                      </span>
-                    </>
-                  )}
-                </button>
+                    {addMovieRatingMutation?.isPending ? (
+                      <div className="flex items-center justify-center gap-3">
+                        <div className="relative flex items-center justify-center">
+                          <div className="absolute w-5 h-5 rounded-full bg-yellow-500/20 blur-[6px] animate-pulse" />
+                          <div
+                            className="w-5 h-5 rounded-full border-[2px] border-white/10 border-t-yellow-500 border-r-yellow-400 animate-spin"
+                            style={{
+                              animation:
+                                "spin 0.7s linear infinite, jelly 1.2s ease-in-out infinite",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <FaRegStar
+                          size={16}
+                          className={
+                            alreadyRated ? "text-zinc-600" : "text-yellow-400"
+                          }
+                        />
+                        <span className="text-xs uppercase font-bold tracking-widest">
+                          {alreadyRated ? "Already Rated" : "Rate Now"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </IsUserValid>
               )}
 
               <div className="mt-4 flex items-center justify-center gap-4">
@@ -1029,100 +1102,134 @@ px-20
                     </div>
                   </div>
                 ) : (
-                  <button
-                    disabled={toggleMarkWatchedMutation?.isPending}
-                    onClick={() => {
-                      // ============================================
-                      // ✅ PREVENT DOUBLE CLICK
-                      // ============================================
+                  <IsUserValid>
+                    <button
+                      disabled={toggleMarkWatchedMutation?.isPending}
+                      onClick={() => {
+                        if (toggleMarkWatchedMutation?.isPending) {
+                          return;
+                        }
 
-                      if (toggleMarkWatchedMutation?.isPending) {
-                        return;
-                      }
+                        toggleMarkWatchedMutation.mutate();
+                      }}
+                      className={`
+      relative
+      overflow-hidden
 
-                      // ============================================
-                      // ✅ TOGGLE WATCHED
-                      // ============================================
+      flex-1
+      py-4
+      rounded-xl
 
-                      toggleMarkWatchedMutation.mutate();
-                    }}
-                    className={`
-        flex-1
+      flex items-center justify-center gap-2
 
-        py-4
+      cursor-pointer
 
-        rounded-xl
+      border
 
-        flex items-center justify-center gap-2
+      transition-all duration-300
 
-        cursor-pointer
+      active:scale-95
 
-        border
+      ${
+        isWatched
+          ? `
+            bg-zinc-900 border-zinc-800 text-zinc-400 
+          `
+          : `
+            bg-zinc-800
 
-        transition-all duration-300
+            hover:bg-zinc-800/45
 
-        active:scale-95
+            border-white/5
 
-        ${
-          isWatched
-            ? `
-              bg-emerald-500/12
-              hover:bg-emerald-500/18
+            text-white
+          `
+      }
 
-              border-emerald-400/20
+      ${
+        toggleMarkWatchedMutation?.isPending
+          ? "opacity-70 cursor-not-allowed"
+          : ""
+      }
+    `}
+                    >
+                      {/* ============================================ */}
+                      {/* WATCHED RIBBON */}
+                      {/* ============================================ */}
 
-              text-emerald-300
+                      {isWatched && (
+                        <div
+                          className="
+      absolute
+      top-0
+      left-0
+      w-16
+      h-16
+      overflow-hidden
+      z-20
+    "
+                        >
+                          <span
+                            className="
+        absolute
+        top-[10px]
+        -left-[18px]
+        w-[80px]
+        rotate-[-45deg]
+        bg-gradient-to-r
+        from-blue-700
+        via-blue-500
+        to-blue-300
+        text-white
+        text-[8px]
+        font-black
+        text-center
+        py-[3px]
+        uppercase
+        tracking-wider
+        shadow-[0_4px_15px_rgba(59,130,246,0.5)]
+        border-t
+        border-white/40
+      "
+                          >
+                            Watched
+                          </span>
+                        </div>
+                      )}
 
-              shadow-[0_0_20px_rgba(16,185,129,0.12)]
-            `
-            : `
-              bg-zinc-800
+                      {/* ============================================ */}
+                      {/* PENDING UI */}
+                      {/* ============================================ */}
 
-              hover:bg-zinc-800/45
+                      {toggleMarkWatchedMutation?.isPending ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="relative flex items-center justify-center">
+                            <div className="absolute w-5 h-5 rounded-full bg-red-500/20 blur-[6px] animate-pulse" />
 
-              border-white/5
+                            <div
+                              className="w-5 h-5 rounded-full border-[2px] border-white/10 border-t-red-500 border-r-red-400 animate-spin"
+                              style={{
+                                animation:
+                                  "spin 0.7s linear infinite, jelly 1.2s ease-in-out infinite",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {isWatched ? (
+                            <Eye size={18} className="text-zinc-600" />
+                          ) : (
+                            <Eye size={18} className="text-blue-400" />
+                          )}
 
-              text-white
-            `
-        }
-
-        ${
-          toggleMarkWatchedMutation?.isPending
-            ? "opacity-70 cursor-not-allowed"
-            : ""
-        }
-      `}
-                  >
-                    {/* ============================================ */}
-                    {/* ✅ PENDING UI */}
-                    {/* ============================================ */}
-
-                    {toggleMarkWatchedMutation?.isPending ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-
-                        <span className="text-xs font-bold uppercase tracking-wide">
-                          Updating...
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        {/* ======================================== */}
-                        {/* ✅ WATCHED TRUE */}
-                        {/* ======================================== */}
-
-                        {isWatched ? (
-                          <Eye size={18} className="text-emerald-400" />
-                        ) : (
-                          <Eye size={18} className="text-blue-400" />
-                        )}
-
-                        <span className="text-xs font-bold uppercase tracking-wide">
-                          {isWatched ? "Watched" : "Mark Watched"}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                          <span className="text-xs font-bold uppercase tracking-wide">
+                            {isWatched ? "Watched" : "Mark Watched"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                  </IsUserValid>
                 )}
               </div>
             </div>
@@ -1345,46 +1452,74 @@ px-20
             </AnimatePresence>
 
             {/* 📊 Quick Stats (Optional but attractive) */}
-            {/* <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-5 border border-white/10 shadow-2xl relative overflow-hidden group">
-              
+            <div className="bg-gradient-to-br from-zinc-900 to-black rounded-3xl p-5 border border-white/10 shadow-2xl relative overflow-hidden group">
               <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/10 blur-3xl rounded-full group-hover:bg-blue-500/20 transition-all duration-700" />
 
-              <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[2px] mb-6 flex items-center gap-2">
-              
-                Community Impact
-              </h4>
+              <div className="flex items-center gap-2 mb-6">
+                <IoAnalytics
+                  className="
+      text-blue-400
+      text-[16px]
+      drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]
+    "
+                />
 
-              <div className="flex items-center justify-around relative z-10">
-              
-                <div className="flex flex-col items-center">
-                  <div className="relative">
-                    <span className="block text-2xl  text-white tracking-tight">
-                      12K+
-                    </span>
-                    <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
-                  </div>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase mt-3 tracking-widest">
-                    Saves
-                  </span>
-                </div>
-
-             
-                <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
-
-            
-                <div className="flex flex-col items-center">
-                  <div className="relative">
-                    <span className="block text-2xl  text-white tracking-tight">
-                      85%
-                    </span>
-                    <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
-                  </div>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase mt-3 tracking-widest">
-                    Rating
-                  </span>
-                </div>
+                <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[2px]">
+                  Movie Analytics
+                </h4>
               </div>
-            </div> */}
+
+              {analyticsLoading ? (
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 h-16 rounded-xl bg-white/5 animate-pulse" />
+                  <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+
+                  <div className="flex-1 h-16 rounded-xl bg-white/5 animate-pulse" />
+                </div>
+              ) : (
+                <div className="flex items-center justify-around relative z-10">
+                  <div className="flex flex-col items-center">
+                    <div className="relative">
+                      <span className="block text-2xl  text-white tracking-tight">
+                        {formatViews(totalViews)}
+                      </span>
+                      <div className="absolute -bottom-1 -left-5 w-[55px] h-[2px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+                    </div>
+                    <span className="text-[10px] flex items-center gap-1 font-bold text-zinc-500 uppercase mt-3 tracking-widest">
+                      <FaEye
+                        className="
+        text-blue-400
+        text-[15px]
+        drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]
+      "
+                      />{" "}
+                      Views
+                    </span>
+                  </div>
+
+                  <div className="h-10 w-[1px] bg-gradient-to-b from-transparent via-zinc-700 to-transparent" />
+
+                  <div className="flex flex-col items-center">
+                    <div className="relative">
+                      <span className="block text-2xl  text-white tracking-tight">
+                        {formatAvgTime(averageTimeSpent)}
+                      </span>
+                      <div className="absolute -bottom-1 -left-2  w-[55px] h-[2px] bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
+                    </div>
+                    <span className="text-[10px] flex gap-1 font-bold text-zinc-500 uppercase mt-3 tracking-widest">
+                      <LuTimerReset
+                        className="
+         text-blue-400
+        text-[15px]
+        drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]
+      "
+                      />{" "}
+                      Avg Time
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -38,6 +38,9 @@ import api from "./api";
 import ProfileLayout from "./ProfileLayout/ProfileLayout";
 import MyProfilePage from "./ProfileLayout/Myprofile";
 import WatchlistPage from "./ProfileLayout/WatchList";
+import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import AuthComponent from "./Components/LoginSignupComponent";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -45,6 +48,7 @@ import WatchlistPage from "./ProfileLayout/WatchList";
 const App = () => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const { isAuthOpen, closeAuth } = useAuth();
 
   NProgress.configure({
     showSpinner: false,
@@ -148,6 +152,35 @@ const App = () => {
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       {!hideLayout && <Navbar />}
+      {/* ✅ குளோபல் Auth மாடல் - UI ரெண்டரிங் */}
+      <AnimatePresence>
+        {isAuthOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[99999] bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            {/* CLICK OUTSIDE */}
+            <div className="absolute inset-0" onClick={closeAuth} />
+
+            {/* MODAL CONTENT */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{
+                type: "spring",
+                stiffness: 260,
+                damping: 24,
+              }}
+              className="relative z-10"
+            >
+              <AuthComponent />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/new" element={<NewMovies />} />

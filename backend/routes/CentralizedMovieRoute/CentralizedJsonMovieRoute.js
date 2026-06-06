@@ -19,7 +19,7 @@ const {
   startMovieSession,
   endMovieSession,
   getMovieAnalytics,
-} = require("../../models/CentralizedMoviesCreateModels/MovieDetailsViewsTime");
+} = require("../../controllers/CentralizedMovieCreateController/MovieDetailsViewsTime");
 
 const router = express.Router();
 

@@ -305,6 +305,28 @@ const CentralizedJsonMovie = ({
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
+                  {/* Remaining Days Badge */}
+                  {movie.releaseMode === "THEATRICAL" &&
+                    movie.movieStatus === "RELEASED" && (
+                      <div
+                        className="
+    absolute
+    top-2
+    left-2
+    bg-black/80
+    border
+    border-orange-500
+    text-orange-400
+    px-2
+    py-1
+    rounded-xl
+    text-[10px]
+    font-bold
+  "
+                      >
+                        {movie.remainingDays} Days
+                      </div>
+                    )}
                   {/* Date Badge (07 APR 2026 style) */}
                 </div>
 

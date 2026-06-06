@@ -141,13 +141,13 @@ const NewsPage = () => {
         error={watchLaterResponse?.error}
         refetch={watchLaterResponse?.refetch}
       />
-      <RecentlyViewed
+      {/* <RecentlyViewed
       // recentViewedNews={recentViewedNewsResponse?.data || []}
       // isLoading={recentViewedNewsResponse?.isLoading}
       // isError={recentViewedNewsResponse?.isError}
       // error={recentViewedNewsResponse?.error}
       // refetch={recentViewedNewsResponse?.refetch}
-      />
+      /> */}
     </div>
   );
 };

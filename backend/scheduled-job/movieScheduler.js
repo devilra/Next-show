@@ -1,17 +1,24 @@
 const cron = require("node-cron");
 const CentralizedJsonBulkCreate = require("../models/CentralizedMoviesCreateModels/CentralizedJsonBulkCreate");
 const { Op } = require("sequelize");
+const fs = require("fs");
 
 exports.initMovieSchedular = () => {
   // Every minute run aagum
   cron.schedule("* * * * *", async () => {
     // console.log("Schedule Runnung Start");
+    // fs.appendFileSync(
+    //   "./cron.log",
+    //   `CRON RUNNING => ${new Date().toISOString()}\n`,
+    // );
+
+    // console.log("CRON RUNNING", new Date());
     try {
       const now = new Date(); // Current UTC time
 
       const commonWhere = {
         isManualUpdate: false,
-        isTrending: false,
+        // isTrending: false,
         movieStatus: {
           [Op.ne]: "COMPLETED", // IMPORTANT: Completed movies-ai thoda koodathu
         },
@@ -19,46 +26,85 @@ exports.initMovieSchedular = () => {
 
       // Rendu update process-ayum parallel-ah start panrom (Fastest way)
 
-      const [theatreResult, ottResult] = await Promise.all([
-        // 1. Theatre Release Update
-        CentralizedJsonBulkCreate.update(
-          {
-            streamType: "NEW_RELEASE",
-            isTheatreReleased: true,
-            releaseMode: "THEATRICAL",
-            movieStatus: "RELEASED", // Status update
-          },
-          {
-            where: {
-              ...commonWhere,
-              theatreReleaseDate: {
-                [Op.ne]: null,
-                [Op.lte]: now,
-              },
+      const [theatreRollback, ottRollback, theatreResult, ottResult] =
+        await Promise.all([
+          // THEATRE ROLLBACK
+          CentralizedJsonBulkCreate.update(
+            {
+              streamType: "UPCOMING",
               isTheatreReleased: false,
+              movieStatus: "WAITING",
             },
-          },
-        ),
-        // 2. OTT Release Update
-        CentralizedJsonBulkCreate.update(
-          {
-            streamType: "NEW_RELEASE",
-            isStreamingReleased: true,
-            movieStatus: "RELEASED", // Status update
-            releaseMode: "DIRECT_STREAMING", // OTT-la release aagum pothu 'DIRECT_STREAMING' mode-ku mathurom
-          },
-          {
-            where: {
-              ...commonWhere,
-              ottReleaseDate: {
-                [Op.ne]: null,
-                [Op.lte]: now,
+            {
+              where: {
+                releaseMode: "THEATRICAL",
+                isManualUpdate: false,
+                theatreReleaseDate: {
+                  [Op.gt]: now,
+                },
+                isTheatreReleased: true,
               },
-              isStreamingReleased: false,
             },
-          },
-        ),
-      ]);
+          ),
+          // OTT ROLLBACK
+          CentralizedJsonBulkCreate.update(
+            {
+              streamType: "UPCOMING",
+              isStreamingReleased: false,
+              movieStatus: "WAITING",
+            },
+            {
+              where: {
+                releaseMode: "DIRECT_STREAMING",
+                isManualUpdate: false,
+                ottReleaseDate: {
+                  [Op.gt]: now,
+                },
+                isStreamingReleased: true,
+              },
+            },
+          ),
+          // 1. Theatre Release Update
+          CentralizedJsonBulkCreate.update(
+            {
+              streamType: "NEW_RELEASE",
+              isTheatreReleased: true,
+              releaseMode: "THEATRICAL",
+              movieStatus: "RELEASED", // Status update
+            },
+            {
+              where: {
+                ...commonWhere,
+                releaseMode: "THEATRICAL",
+                theatreReleaseDate: {
+                  [Op.ne]: null,
+                  [Op.lte]: now,
+                },
+                isTheatreReleased: false,
+              },
+            },
+          ),
+          // 2. OTT Release Update
+          CentralizedJsonBulkCreate.update(
+            {
+              streamType: "NEW_RELEASE",
+              isStreamingReleased: true,
+              movieStatus: "RELEASED", // Status update
+              releaseMode: "DIRECT_STREAMING", // OTT-la release aagum pothu 'DIRECT_STREAMING' mode-ku mathurom
+            },
+            {
+              where: {
+                ...commonWhere,
+                releaseMode: "DIRECT_STREAMING",
+                ottReleaseDate: {
+                  [Op.ne]: null,
+                  [Op.lte]: now,
+                },
+                isStreamingReleased: false,
+              },
+            },
+          ),
+        ]);
 
       const theatreUpdated = theatreResult[0]; // Update count edukirom
       const ottUpdated = ottResult[0];
@@ -85,8 +131,9 @@ exports.initMovieSchedular = () => {
     try {
       const now = new Date();
       await Promise.all([
-        this.checkAndCompleteMovies(now),
-        this.checkTrendingMovies(now),
+        await this.decreaseRemainingDays(),
+        await this.checkAndCompleteMovies(now),
+        await this.checkTrendingMovies(now),
       ]);
     } catch (error) {
       console.error("[MIDNIGHT CRON ERROR]:", error.message);
@@ -123,45 +170,57 @@ exports.checkAndCompleteMovies = async (now) => {
         isTrending: false,
         releaseMode: "THEATRICAL", // OTT movies-ai thoda koodathu
         isManualUpdate: false,
+        isTheatreReleased: true,
         theatreReleaseDate: {
           [Op.ne]: null,
         },
       },
     });
 
+    // for (const movie of activeMovies) {
+    //   // 2. DB-la irunthu vara Date-ai Object-ah matharom (String-ah irunthalum ithu handle pannum)
+    //   const releaseDateRaw = new Date(movie.theatreReleaseDate);
+
+    //   if (isNaN(releaseDateRaw.getTime())) {
+    //     console.log(`[CRON-ERROR] ${movie.title} has an invalid date format.`);
+    //     continue;
+    //   }
+
+    //   // 2. Release Date-ai "Start of the Day" (00:00:00) ku maathurom
+    //   const releaseDate = new Date(releaseDateRaw);
+    //   releaseDate.setHours(0, 0, 0, 0);
+
+    //   // 3. Current Date (Now)-aiyum "Start of the Day" (00:00:00) ku maathurom
+    //   const today = new Date(now);
+    //   today.setHours(0, 0, 0, 0);
+
+    //   // 4. Milliseconds diff kandupudichu "Calendar Days" calculate panrom
+    //   const diffInTime = today.getTime() - releaseDate.getTime();
+    //   const daysDiff = Math.floor(diffInTime / (1000 * 60 * 60 * 24));
+
+    //   // 5. UNGA SCHEMA FIELD: theatreRunDays (Default 20)
+    //   const limit = movie.theatreRunDays || 20;
+
+    //   // Midnight 12 AM cross aanaale diff update aagidum
+    //   if (daysDiff >= limit) {
+    //     await movie.update({
+    //       movieStatus: "COMPLETED",
+    //       isTheatreReleased: false, // Website-la automatic hide aagidum
+    //     });
+    //     console.log(
+    //       `[CRON] ${movie.title}: ${daysDiff} days over. Status updated to COMPLETED.`,
+    //     );
+    //   }
+    // }
+
     for (const movie of activeMovies) {
-      // 2. DB-la irunthu vara Date-ai Object-ah matharom (String-ah irunthalum ithu handle pannum)
-      const releaseDateRaw = new Date(movie.theatreReleaseDate);
-
-      if (isNaN(releaseDateRaw.getTime())) {
-        console.log(`[CRON-ERROR] ${movie.title} has an invalid date format.`);
-        continue;
-      }
-
-      // 2. Release Date-ai "Start of the Day" (00:00:00) ku maathurom
-      const releaseDate = new Date(releaseDateRaw);
-      releaseDate.setHours(0, 0, 0, 0);
-
-      // 3. Current Date (Now)-aiyum "Start of the Day" (00:00:00) ku maathurom
-      const today = new Date(now);
-      today.setHours(0, 0, 0, 0);
-
-      // 4. Milliseconds diff kandupudichu "Calendar Days" calculate panrom
-      const diffInTime = today.getTime() - releaseDate.getTime();
-      const daysDiff = Math.floor(diffInTime / (1000 * 60 * 60 * 24));
-
-      // 5. UNGA SCHEMA FIELD: theatreRunDays (Default 20)
-      const limit = movie.theatreRunDays || 20;
-
-      // Midnight 12 AM cross aanaale diff update aagidum
-      if (daysDiff >= limit) {
+      if (movie.remainingTheatreDays <= 0) {
         await movie.update({
           movieStatus: "COMPLETED",
-          isTheatreReleased: false, // Website-la automatic hide aagidum
+          isTheatreReleased: false,
+          theatreStatus: "ENDED",
         });
-        console.log(
-          `[CRON] ${movie.title}: ${daysDiff} days over. Status updated to COMPLETED.`,
-        );
+        console.log(`[COMPLETE CRON] ${movie.title} moved to COMPLETED`);
       }
     }
   } catch (error) {
@@ -520,5 +579,33 @@ exports.checkTrendingMovies = async (now) => {
     }
   } catch (error) {
     console.error("[TRENDING CRON ERROR]:", error);
+  }
+};
+
+exports.decreaseRemainingDays = async () => {
+  try {
+    const runningMovies = await CentralizedJsonBulkCreate.findAll({
+      where: {
+        releaseMode: "THEATRICAL",
+        movieStatus: "RELEASED",
+        isTheatreReleased: true,
+        remainingTheatreDays: {
+          [Op.gt]: 0,
+        },
+      },
+    });
+
+    for (const movie of runningMovies) {
+      const newDays = movie.remainingTheatreDays - 1;
+      await movie.update({
+        remainingTheatreDays: newDays,
+      });
+      console.log(
+        `[DAYS CRON] ${movie.title}
+         Remaining Days: ${newDays}`,
+      );
+    }
+  } catch (error) {
+    console.error("[REMAINING DAYS ERROR]", error);
   }
 };

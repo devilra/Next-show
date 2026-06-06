@@ -16,6 +16,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useRef, useEffect } from "react";
+import { MessageCircleOff } from "lucide-react";
+import { useSnackbar } from "../../context/SnackbarContext";
+import { MdReply } from "react-icons/md";
+import IsUserValid from "../ProtectedRoute/IsUserValid";
+import { useMovieDetailsAvgRatingData } from "../hooks/useMovieDetailsAnalytics";
+import { FaStar } from "react-icons/fa";
 
 dayjs.extend(relativeTime);
 
@@ -78,22 +85,22 @@ const Avatar = ({ user, size = "md" }) => {
 
 // ── StarRating ────────────────────────────────────────────
 const StarRating = ({ rating }) => {
-  const val = parseFloat(rating);
+  const val = Number(rating || 0);
+  const displayRating = Number.isInteger(val) ? val : Number(val.toFixed(1));
   const filled = Math.round(val / 2);
   return (
     <div className="flex items-center gap-1 mt-1 flex-nowrap whitespace-nowrap">
-      <div className="flex gap-px flex-shrink-0">
+      <div className="flex gap-1 flex-shrink-0">
         {[1, 2, 3, 4, 5].map((i) => (
-          <span
+          <FaStar
             key={i}
-            className={`text-[13px] ${i <= filled ? "text-orange-500" : "text-zinc-700"}`}
-          >
-            ★
-          </span>
+            size={12}
+            className={i <= filled ? "text-orange-500" : "text-zinc-700"}
+          />
         ))}
       </div>
       <span className="text-[11px] font-bold text-orange-500 bg-orange-500/10 rounded px-1.5 py-px ml-1 flex-shrink-0">
-        {val.toFixed(1)}
+        {displayRating}
       </span>
       <span className="text-[11px] text-zinc-600 flex-shrink-0">/ 10</span>
     </div>
@@ -101,9 +108,6 @@ const StarRating = ({ rating }) => {
 };
 
 // ── DotsMenu ──────────────────────────────────────────────
-import { useRef, useEffect } from "react";
-import { MessageCircleOff } from "lucide-react";
-import { useSnackbar } from "../../context/SnackbarContext";
 
 const DotsMenu = ({ isOwn, onEdit, onDelete, onReport }) => {
   const [open, setOpen] = useState(false);
@@ -390,39 +394,45 @@ const ReplyItem = ({
         {/* Action row: like · comment count · reply */}
         <div className="flex items-center gap-3 mt-1.5 px-1">
           {/* Like Button */}
-          <motion.button
-            whileTap={{ scale: 0.8 }}
-            whileHover={{ scale: 1.1 }}
-            onClick={() => onReplyLike(reply.id)} // ✅ பேரண்ட் கரூசல் மியூட்டேஷனை டைரக்டா ட்ரிகர் பண்ணும்
-            className="relative flex items-center gap-1 text-[11px] transition-all"
-          >
-            <AnimatePresence>
-              {reply.isLiked && ( // ✅ reply.isLiked செக் பண்ணுது
-                <motion.span
-                  initial={{ scale: 0, opacity: 1 }}
-                  animate={{ scale: 2.2, opacity: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="absolute inset-0 rounded-full bg-red-500/40 blur-sm"
-                />
-              )}
-            </AnimatePresence>
-            <motion.div
-              animate={reply.isLiked ? { scale: [1, 1.4, 1] } : {}}
-              transition={{ duration: 0.35 }}
+          <IsUserValid>
+            <motion.button
+              whileTap={{ scale: 0.8 }}
+              whileHover={{ scale: 1.1 }}
+              onClick={() => onReplyLike(reply.id)} // ✅ பேரண்ட் கரூசல் மியூட்டேஷனை டைரக்டா ட்ரிகர் பண்ணும்
+              className="relative flex items-center gap-1 text-[11px] transition-all"
             >
-              <Heart
-                size={12}
-                className={
-                  reply.isLiked ? "fill-red-500 text-red-500" : "text-zinc-600"
-                } // ✅ உன்னோட ப்ராப்ஸ் வேல்யூக்கு கலர் மாறும்
-              />
-            </motion.div>
-            <span className={reply.isLiked ? "text-red-400" : "text-zinc-600"}>
-              {reply.totalLikes || 0}{" "}
-              {/* ✅ டேட்டாபேஸ் கவுண்ட் அப்படியே கரெக்டா காட்டும் */}
-            </span>
-          </motion.button>
+              <AnimatePresence>
+                {reply.isLiked && ( // ✅ reply.isLiked செக் பண்ணுது
+                  <motion.span
+                    initial={{ scale: 0, opacity: 1 }}
+                    animate={{ scale: 2.2, opacity: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 rounded-full bg-red-500/40 blur-sm"
+                  />
+                )}
+              </AnimatePresence>
+              <motion.div
+                animate={reply.isLiked ? { scale: [1, 1.4, 1] } : {}}
+                transition={{ duration: 0.35 }}
+              >
+                <Heart
+                  size={12}
+                  className={
+                    reply.isLiked
+                      ? "fill-red-500 text-red-500"
+                      : "text-zinc-600"
+                  } // ✅ உன்னோட ப்ராப்ஸ் வேல்யூக்கு கலர் மாறும்
+                />
+              </motion.div>
+              <span
+                className={reply.isLiked ? "text-red-400" : "text-zinc-600"}
+              >
+                {reply.totalLikes || 0}{" "}
+                {/* ✅ டேட்டாபேஸ் கவுண்ட் அப்படியே கரெக்டா காட்டும் */}
+              </span>
+            </motion.button>
+          </IsUserValid>
 
           {/* Comment count */}
           <div className="flex items-center gap-1 text-zinc-600 text-[11px]">
@@ -431,18 +441,21 @@ const ReplyItem = ({
           </div>
 
           {depth < 2 && !isOwn && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                setShowNestedInput((p) => !p);
-                if (!showNestedReplies && hasNested) setShowNestedReplies(true);
-              }}
-              className="flex items-center gap-1 text-[11px] text-zinc-600 hover:text-orange-500 transition-all"
-            >
-              <Reply size={12} />
-              <span>Reply</span>
-            </motion.button>
+            <IsUserValid>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setShowNestedInput((p) => !p);
+                  if (!showNestedReplies && hasNested)
+                    setShowNestedReplies(true);
+                }}
+                className="flex items-center gap-1 text-[11px] text-zinc-600 hover:text-orange-500 transition-all"
+              >
+                <Reply size={12} />
+                <span>Reply</span>
+              </motion.button>
+            </IsUserValid>
           )}
         </div>
 
@@ -452,6 +465,7 @@ const ReplyItem = ({
             onClick={() => setShowNestedReplies((p) => !p)}
             className="flex items-center gap-1 text-[10px] text-orange-500/60 hover:text-orange-500 mt-1 px-1 transition-colors bg-transparent border-none cursor-pointer"
           >
+            <Reply size={12} />
             {showNestedReplies ? "Hide" : "View"} {nestedReplies.length}{" "}
             {nestedReplies.length === 1 ? "reply" : "replies"}
           </button>
@@ -749,42 +763,44 @@ const ReviewCard = ({
         <div className="mt-auto pt-3 border-t border-white/[0.05] flex-shrink-0">
           <div className="flex items-center gap-4">
             {/* Like */}
-            <motion.button
-              whileTap={{ scale: 0.8 }}
-              whileHover={{ scale: 1.08 }}
-              onClick={() => onLike(review.id)}
-              className="relative flex items-center gap-1.5 text-[12px] transition-all"
-            >
-              <AnimatePresence>
-                {review.isLiked && (
-                  <motion.span
-                    initial={{ scale: 0, opacity: 1 }}
-                    animate={{ scale: 2.5, opacity: 0 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="absolute inset-0 rounded-full bg-red-500/40 blur-md"
+            <IsUserValid>
+              <motion.button
+                whileTap={{ scale: 0.8 }}
+                whileHover={{ scale: 1.08 }}
+                onClick={() => onLike(review.id)}
+                className="relative flex items-center gap-1.5 text-[12px] transition-all"
+              >
+                <AnimatePresence>
+                  {review.isLiked && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 1 }}
+                      animate={{ scale: 2.5, opacity: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="absolute inset-0 rounded-full bg-red-500/40 blur-md"
+                    />
+                  )}
+                </AnimatePresence>
+                <motion.div
+                  animate={review.isLiked ? { scale: [1, 1.4, 1] } : {}}
+                  transition={{ duration: 0.4 }}
+                >
+                  <Heart
+                    size={15}
+                    className={
+                      review.isLiked
+                        ? "fill-red-500 text-red-500"
+                        : "text-zinc-500"
+                    }
                   />
-                )}
-              </AnimatePresence>
-              <motion.div
-                animate={review.isLiked ? { scale: [1, 1.4, 1] } : {}}
-                transition={{ duration: 0.4 }}
-              >
-                <Heart
-                  size={15}
-                  className={
-                    review.isLiked
-                      ? "fill-red-500 text-red-500"
-                      : "text-zinc-500"
-                  }
-                />
-              </motion.div>
-              <span
-                className={review.isLiked ? "text-red-400" : "text-zinc-500"}
-              >
-                {review.totalLikes}
-              </span>
-            </motion.button>
+                </motion.div>
+                <span
+                  className={review.isLiked ? "text-red-400" : "text-zinc-500"}
+                >
+                  {review.totalLikes}
+                </span>
+              </motion.button>
+            </IsUserValid>
 
             {/* Comment count */}
             <div className="flex items-center gap-1.5 text-zinc-500 text-[12px]">
@@ -801,24 +817,26 @@ const ReviewCard = ({
 
             {/* ✅ CONDITION UPDATED DYNAMICALLY: Ennoda own review card ah irundha reply button inge show aagathu */}
             {!isOwn && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setShowInput((p) => {
-                    if (!p) scrollCardToBottom();
-                    return !p;
-                  });
-                  if (!showReplies && hasReplies) {
-                    setShowReplies(true);
-                    scrollCardToBottom();
-                  }
-                }}
-                className="flex items-center gap-1.5 text-[12px] text-zinc-500 hover:text-orange-500 transition-all ml-auto"
-              >
-                <Reply size={14} />
-                <span>Reply</span>
-              </motion.button>
+              <IsUserValid>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setShowInput((p) => {
+                      if (!p) scrollCardToBottom();
+                      return !p;
+                    });
+                    if (!showReplies && hasReplies) {
+                      setShowReplies(true);
+                      scrollCardToBottom();
+                    }
+                  }}
+                  className="flex items-center gap-1.5 text-[12px] text-zinc-500 hover:text-orange-500 transition-all ml-auto"
+                >
+                  <Reply size={14} />
+                  <span>Reply</span>
+                </motion.button>
+              </IsUserValid>
             )}
           </div>
 
@@ -833,7 +851,8 @@ const ReviewCard = ({
               }}
               className="flex items-center gap-1 text-[11px] text-orange-500/70 hover:text-orange-500 mt-2 transition-colors bg-transparent border-none cursor-pointer"
             >
-              ↳ {showReplies ? "Hide" : "View"} {replyList.length}{" "}
+              <Reply size={12} />
+              {showReplies ? "Hide" : "View"} {replyList.length}{" "}
               {replyList.length === 1 ? "reply" : "replies"}
             </button>
           )}
@@ -919,36 +938,6 @@ const ReviewsCarousel = ({ movieId }) => {
     if (!trackRef.current) return;
     trackRef.current.scrollBy({ left: dir * 356, behavior: "smooth" });
   };
-
-  // ── Fetch reviews ──────────────────────────────────────
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ["movie-reviews", movieId],
-        queryFn: async () => {
-          const response = await api.get(`/auth/user/movie-reviews/${movieId}`);
-          console.log("ALL MOVIE REVIEWS", response.data);
-          return response.data;
-        },
-        enabled: !!movieId,
-        staleTime: 1000 * 60 * 5,
-        refetchOnWindowFocus: false,
-        retry: false,
-      },
-      {
-        queryKey: ["user-movie-review", movieId],
-        queryFn: async () => {
-          const response = await api.get(`/auth/user/movie-reviews/${movieId}`);
-          console.log("CURRENT USER REVIEW", response.data);
-          return response.data;
-        },
-        enabled: !!movieId,
-        refetchOnWindowFocus: false,
-        staleTime: 1000 * 60 * 2,
-        retry: false,
-      },
-    ],
-  });
 
   // ── ReviewsCarousel Component kulla (Line 475 approx) ─────────────────
   const toggleReplyLikeMutation = useMutation({
@@ -1084,26 +1073,19 @@ const ReviewsCarousel = ({ movieId }) => {
     },
   });
 
-  const allReviewsResponse = results[0];
-  const userReviewResponse = results[1];
-  const isLoading = allReviewsResponse.isLoading;
-  const isError = allReviewsResponse.isError;
-  const data = allReviewsResponse.data;
-  const reviews = data?.data ?? [];
+  const {
+    reviews,
+    averageRating,
+    totalReviews,
+    currentUserReview,
+    hasReviewed,
+    isLoading,
+    isError,
+    reviewsResponse,
+  } = useMovieDetailsAvgRatingData(movieId);
+
   const noReviews = !isLoading && !isError && reviews.length === 0;
-  const averageRating = data?.averageRating;
-  const totalReviews = data?.totalReviews ?? reviews.length;
-
-  const currentUserReview = userReviewResponse?.data?.data || null;
-  const hasReviewed = userReviewResponse?.data?.rated || false;
-
-  const avg =
-    averageRating ||
-    (reviews.length
-      ? (
-          reviews.reduce((s, r) => s + parseFloat(r.rating), 0) / reviews.length
-        ).toFixed(1)
-      : "—");
+  const avg = averageRating || "";
 
   // ── local optimistic helpers ──────────────────────────
   const updateReviews = (updater) => {

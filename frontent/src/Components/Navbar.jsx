@@ -23,6 +23,7 @@ import api from "../api";
 import { logoutUser } from "../redux/userAuthSlice/UserAuthSlice";
 import ReusableConfirmDialog from "./ReusableConfirmDialog";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { useAuth } from "../../context/AuthContext";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -89,7 +90,7 @@ const Navbar = () => {
   const [selectedLang, setSelectedLang] = useState("Tamil");
   const [isLangOpen, setIsLangOpen] = useState(false);
   const langRef = useRef(null); // Language outside click-kku
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  // const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const dispatch = useDispatch();
   // ======================================================
@@ -102,6 +103,7 @@ const Navbar = () => {
   const navbarRef = useRef(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { openAuth, closeAuth, isAuthOpen } = useAuth();
   const IMAGE_BASE_URL = import.meta.env.VITE_IMAGE_BASE_URL;
 
   useEffect(() => {
@@ -503,7 +505,7 @@ const Navbar = () => {
               <div className="hidden md:hidden lg:block profile-dropdown">
                 <button
                   onClick={() => {
-                    setIsAuthOpen(true);
+                    openAuth();
                     setNavMenuOpen(false);
                   }}
                   className="
@@ -1001,7 +1003,8 @@ const Navbar = () => {
 
                           <button
                             onClick={() => {
-                              setIsAuthOpen(true);
+                              // setIsAuthOpen(true);
+                              openAuth();
                               setIsOpen(false);
                             }}
                             className="
@@ -1130,10 +1133,7 @@ p-4
           >
             {/* CLICK OUTSIDE */}
 
-            <div
-              className="absolute inset-0"
-              onClick={() => setIsAuthOpen(false)}
-            />
+            <div className="absolute inset-0" onClick={() => closeAuth()} />
 
             {/* MODAL CONTENT */}
 
@@ -1148,7 +1148,7 @@ p-4
               }}
               className="relative "
             >
-              <AuthComponent setIsAuthOpen={setIsAuthOpen} />
+              <AuthComponent />
             </motion.div>
           </motion.div>
         )}

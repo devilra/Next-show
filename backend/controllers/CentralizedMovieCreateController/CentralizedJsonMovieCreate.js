@@ -72,6 +72,7 @@ exports.CentralizedCreateMovie = async (req, res) => {
       let isTheatreReleased = false;
       let isStreamingReleased = false;
       let currentReleaseMode = releaseMode || "THEATRICAL";
+      const runDays = rest.theatreRunDays || 20;
 
       // 🛑 RULE 1: Frontend-la irundhu status vandha athukuthan top priority
       if (movieStatus) {
@@ -93,22 +94,38 @@ exports.CentralizedCreateMovie = async (req, res) => {
           : null;
         const ottDate = ottReleaseDate ? new Date(ottReleaseDate) : null;
 
-        // 1. Theatre Release Check (Upload pannum pothe time cross aagi iruntha)
-        if (theatreDate && theatreDate <= now) {
-          currentStatus = "RELEASED";
-          currentStreamType = "NEW_RELEASE";
-          isTheatreReleased = true;
-          currentReleaseMode = "THEATRICAL";
+        if (currentReleaseMode === "THEATRICAL") {
+          if (theatreDate && theatreDate <= now) {
+            currentStatus = "RELEASED";
+            currentStreamType = "NEW_RELEASE";
+            isTheatreReleased = true;
+            currentReleaseMode = "THEATRICAL";
+          }
+        } else if (currentReleaseMode === "DIRECT_STREAMING") {
+          if (ottDate && ottDate <= now) {
+            currentStatus = "RELEASED";
+            currentStreamType = "NEW_RELEASE";
+            isStreamingReleased = true;
+            currentReleaseMode = "DIRECT_STREAMING";
+          }
         }
 
-        // 2. OTT Release Check (Upload pannum pothe OTT time cross aagi iruntha)
+        // // 1. Theatre Release Check (Upload pannum pothe time cross aagi iruntha)
+        // if (theatreDate && theatreDate <= now) {
+        //   currentStatus = "RELEASED";
+        //   currentStreamType = "NEW_RELEASE";
+        //   isTheatreReleased = true;
+        //   currentReleaseMode = "THEATRICAL";
+        // }
 
-        if (ottDate && ottDate <= now) {
-          currentStatus = "RELEASED";
-          currentStreamType = "NEW_RELEASE";
-          isStreamingReleased = true;
-          currentReleaseMode = "DIRECT_STREAMING"; // OTT thaan latest release-na mode mathurom
-        }
+        // // 2. OTT Release Check (Upload pannum pothe OTT time cross aagi iruntha)
+
+        // if (ottDate && ottDate <= now) {
+        //   currentStatus = "RELEASED";
+        //   currentStreamType = "NEW_RELEASE";
+        //   isStreamingReleased = true;
+        //   currentReleaseMode = "DIRECT_STREAMING"; // OTT thaan latest release-na mode mathurom
+        // }
       }
 
       // Trending start date logic
@@ -131,6 +148,8 @@ exports.CentralizedCreateMovie = async (req, res) => {
           isTheatreReleased: isTheatreReleased,
           isStreamingReleased: isStreamingReleased,
           releaseMode: currentReleaseMode,
+          theatreRunDays: runDays,
+          remainingTheatreDays: runDays,
           trendingStartDate: movie.trendingStartDate || rest.trendingStartDate,
         },
         { transaction: t },
@@ -170,6 +189,100 @@ exports.CentralizedCreateMovie = async (req, res) => {
   } catch (error) {
     if (t) await t.rollback(); // Error vantha cancel pannu
     console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+exports.CentralizedEditMovie = async (req, res) => {
+  const t = await sequelize.transaction();
+  try {
+    const { editMovieId } = req.params;
+    const movie = await CentralizedJsonBulkCreate.findByPk(editMovieId, {
+      transaction: t,
+    });
+    if (!movie) {
+      await t.rollback();
+
+      return res.status(404).json({
+        success: false,
+        message: "Movie not found",
+      });
+    }
+    const updateData = { ...req.body };
+    // =====================================================
+    // THEATRE RUN DAYS RESET
+    // =====================================================
+
+    if (
+      updateData.theatreRunDays &&
+      Number(updateData.theatreRunDays) !== Number(movie.theatreRunDays)
+    ) {
+      const difference =
+        Number(updateData.theatreRunDays) - Number(movie.theatreRunDays);
+
+      updateData.remainingTheatreDays =
+        Number(movie.remainingTheatreDays) + difference;
+    }
+    const now = new Date();
+    const theatreDate = updateData.theatreReleaseDate
+      ? new Date(updateData.theatreReleaseDate)
+      : null;
+    const ottDate = updateData.ottReleaseDate
+      ? new Date(updateData.ottReleaseDate)
+      : null;
+    // =====================================================
+    // THEATRICAL FUTURE DATE
+    // =====================================================
+    if (
+      updateData.releaseMode === "THEATRICAL" &&
+      theatreDate &&
+      theatreDate > now
+    ) {
+      updateData.movieStatus = "WAITING";
+      updateData.streamType = "UPCOMING";
+      updateData.isTheatreReleased = false;
+      updateData.releaseMode = "THEATRICAL";
+      updateData.theatreStatus = "RUNNING";
+      updateData.remainingTheatreDays =
+        updateData.theatreRunDays || movie.theatreRunDays;
+    }
+    // =====================================================
+    // OTT FUTURE DATE
+    // =====================================================
+    if (
+      updateData.releaseMode === "DIRECT_STREAMING" &&
+      ottDate &&
+      ottDate > now
+    ) {
+      updateData.movieStatus = "WAITING";
+      updateData.streamType = "UPCOMING";
+      updateData.isStreamingReleased = false;
+      updateData.releaseMode = "DIRECT_STREAMING";
+    }
+    // =====================================================
+    // TRENDING START DATE
+    // =====================================================
+    if (updateData.isTrending === true && !movie.trendingStartDate) {
+      updateData.trendingStartDate = new Date();
+    }
+    await movie.update(updateData, {
+      transaction: t,
+    });
+    await t.commit();
+    return res.status(200).json({
+      success: true,
+      message: "Movie updated successfully",
+      data: movie,
+    });
+  } catch (error) {
+    await t.rollback();
+
+    console.error("Centralized Edit Movie Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -231,9 +344,29 @@ exports.GetAllCentralizedJsonMovies = async (req, res) => {
           }
         }
       });
+      // =====================================
+      // THEATRE DAYS CALCULATION
+      // =====================================
+      // if (movie.releaseMode === "THEATRICAL" && movie.isTheatreReleased) {
+      //   movie.runningDays =
+      //     Number(movie.theatreRunDays || 0) -
+      //     Number(movie.remainingTheatreDays || 0);
+      // } else {
+      //   movie.runDays = 0;
+      if (movie.releaseMode === "THEATRICAL") {
+        console.log(movie);
+        movie.totalRunDays = Number(movie.theatreRunDays || 0);
+
+        movie.remainingDays = Number(movie.remainingTheatreDays || 0);
+
+        movie.completedDays = movie.totalRunDays - movie.remainingDays;
+      }
+      // }
 
       return movie;
     });
+
+    // console.log(parsedMovies);
 
     // 3. Success Response - Returning full JSON objects for each movie
     return res.status(200).json({

@@ -488,7 +488,7 @@ export default function VideoDetailScreen({
               <div className="w-1 h-5 rounded-full bg-orange-500" />
 
               <h2 className="text-white text-[13px] font-black uppercase tracking-widest">
-                Trending Now
+                Trending News
               </h2>
             </div>
 

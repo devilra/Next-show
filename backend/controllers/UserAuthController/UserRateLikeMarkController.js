@@ -779,6 +779,8 @@ exports.toggleWatchlist = async (req, res) => {
       transaction,
     });
 
+    // console.log("toggle end unuthorized");
+
     // ======================================================
     // ✅ REMOVE FROM WATCHLIST
     // ======================================================

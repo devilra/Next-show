@@ -18,6 +18,13 @@ const path = require("path");
 // require('./models/UserAuth/UserRecentView')
 // require('./models/UserAuth/UserWatchLater')
 // require('./models/UserAuth/UserWatchlistModel')
+
+// require("./models/WebsiteTracking/DailyStats");
+// require("./models/CentralizedMoviesCreateModels/MovieDetailsAnalyticsModel");
+// require("./models/UserAuth/UserNewsLikeModel");
+// require("./models/UserAuth/UserReviewLikeModel");
+// require("./models/UserAuth/UserReviewReplyModel");
+// require("./models/UserAuth/UserReviewReplyLikeModel");
 const adminAuthRoutes = require("./routes/AdminAuthRoutes/AdminRoutes");
 const VideoSectionRoutes = require("./routes/HomePageRoutes/videoRoutes");
 const BlogSectionRoutes = require("./routes/HomePageRoutes/blogRoutes");
@@ -57,6 +64,7 @@ app.use(
       "http://localhost:5173",
       "https://nextshow.vercel.app",
       "http://192.168.1.51:5173",
+      "http://10.181.5.237:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
@@ -70,15 +78,16 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
 (async () => {
   try {
+    require("./models/associationIndex");
     await sequelize.authenticate();
-    console.log("✅ MySQL connected successfully!");
+    // console.log("✅ MySQL connected successfully!");
 
     // 2. Ippo sync pannum pothu Cast, Movie and MovieCast link aagidhum
     await sequelize.sync({
-      alter: true,
+      alter: false,
+      force: false,
     });
-    console.log("✅ Tables synced successfully!");
-    initMovieSchedular();
+    // console.log("✅ Tables synced successfully!");
   } catch (error) {
     console.error("❌ DB Errors:", error);
   }
@@ -143,6 +152,7 @@ const PORT = process.env.PORT || 5176;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server Connected ${PORT}`);
+  initMovieSchedular();
 });
 
 server.timeout = 700000;

@@ -21,6 +21,10 @@ import api from "../api";
 import { useSnackbar } from "../../context/SnackbarContext";
 import { useToggleWatchlist, useWatchlistStatus } from "../hooks/useWatchlist";
 import ReviewsCarousel from "./Reviewscarousel";
+import {
+  useMovieAnalytics,
+  useMovieDetailsAnalyticQuery,
+} from "../hooks/useMovieDetailsAnalytics";
 
 const MovieDetailsPage = () => {
   const { slug } = useParams();
@@ -37,41 +41,6 @@ const MovieDetailsPage = () => {
   );
 
   // console.log("CURRENT MOVIE", currentMovie);
-
-  // useEffect(() => {
-  //   const fetchFullMovieDetails = async () => {
-  //     // 🛑 Guard: slug illana API call poga koodathu
-  //     if (!slug || slug === "undefined") {
-  //       console.error("Slug is missing in the URL!");
-  //       return;
-  //     }
-  //     // Oru vela vera movie data munnadiye iruntha current slug kooda match aagutha nu check panrom
-  //     if (currentMovie && currentMovie.slug === slug) {
-  //       setIsPageLoading(false);
-  //       return;
-  //     }
-
-  //     try {
-  //       setIsPageLoading(true);
-  //       Nprogress.start();
-
-  //       await dispatch(fetchMovieBySlug(slug)).then(unwrapResult);
-  //     } catch (error) {
-  //       console.error("Movie Details Parallel Fetch Error:", error);
-  //     } finally {
-  //       setIsPageLoading(false);
-  //       Nprogress.done();
-  //     }
-  //   };
-
-  //   if (slug) {
-  //     fetchFullMovieDetails();
-  //   }
-  // }, [dispatch, slug, currentMovie?.slug]);
-
-  // ✅ 1. useMutation Function to fetch movie data by slug
-
-  console.log("Movie Data", movieData);
 
   // ======================================================
   // ✅ WATCHLIST STATUS
@@ -96,6 +65,17 @@ const MovieDetailsPage = () => {
 
   const isInWatchlist = watchlistData?.inWatchlist || false;
   // console.log("IsWatchList", isInWatchlist);
+
+  // ======================================
+  // MOVIE ANALYTICS
+  // ======================================
+
+  useMovieAnalytics(movieData?.id);
+  const {
+    data: analyticsData,
+    isLoading: analyticsLoading,
+    isFetching: analyticsFetching,
+  } = useMovieDetailsAnalyticQuery(movieData?.id);
 
   const movieDetailsMutation = useMutation({
     mutationFn: async (movieSlug) => {
@@ -185,14 +165,15 @@ const MovieDetailsPage = () => {
           // ✅ GET MOVIE ID FROM QUERY KEY
           // ============================================
           const [, movieId] = queryKey;
-          console.log("MovieID", movieId);
+          // console.log("MovieID", movieId);
           const response = await api.get(
             `/auth/user/check-mark-watched/${movieId}`,
           );
-          console.log("Watched Data Movie", response.data);
+          // console.log("Watched Data Movie", response.data);
           return response.data;
         },
         enabled: !!movieData?.id,
+        refetchOnWindowFocus: false,
       },
       // ==================================================
       // ✅ USER MOVIE RATING
@@ -206,6 +187,7 @@ const MovieDetailsPage = () => {
           return response.data;
         },
         enabled: !!movieData?.id,
+        refetchOnWindowFocus: false,
       },
     ],
   });
@@ -412,7 +394,14 @@ const MovieDetailsPage = () => {
 
   return (
     <div className="mt-16 max-w-7xl mx-auto px-4 md:px-6">
-      <MovieDetailsHeader movie={movieData} />
+      <MovieDetailsHeader
+        movie={movieData}
+        isRatingModalOpen={isRatingModalOpen}
+        setIsRatingModalOpen={setIsRatingModalOpen}
+        userRatingData={userRatingData}
+        userRatingLoading={userRatingLoading}
+        addMovieRatingMutation={addMovieRatingMutation}
+      />
       <MovieDescriptionSection
         movie={movieData}
         isRatingModalOpen={isRatingModalOpen}
@@ -440,6 +429,9 @@ const MovieDetailsPage = () => {
         watchlistErrorMessage={watchlistErrorMessage}
         refetchWatchlist={refetchWatchlist}
         toggleWatchlistMutation={toggleWatchlistMutation}
+        analyticsData={analyticsData}
+        analyticsLoading={analyticsLoading}
+        analyticsFetching={analyticsFetching}
       />
 
       {/* 2. Main Content Grid (Split into Left & Right) */}

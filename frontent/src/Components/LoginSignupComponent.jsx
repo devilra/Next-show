@@ -5,6 +5,7 @@ import api from "../api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { GoogleLogin } from "@react-oauth/google";
 import { useSnackbar } from "../../context/SnackbarContext";
+import { useAuth } from "../../context/AuthContext";
 
 const GoogleIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -278,6 +279,9 @@ export default function AuthComponent({ setIsAuthOpen }) {
   const { showSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { closeAuth, isAuthOpen } = useAuth();
+
+  console.log("LOGINSIGNUP", isAuthOpen);
 
   const signupMutation = useMutation({
     mutationFn: async (userdata) => {
@@ -321,7 +325,7 @@ export default function AuthComponent({ setIsAuthOpen }) {
           // ✅ CLOSE MODAL
           // ======================================================
 
-          setIsAuthOpen(false);
+          closeAuth();
 
           // ======================================================
           // ✅ NAVIGATE
@@ -361,7 +365,7 @@ export default function AuthComponent({ setIsAuthOpen }) {
         queryKey: ["current-user"],
       });
 
-      setIsAuthOpen(false);
+      closeAuth();
       navigate("/");
     },
     onError: (error) => {
@@ -391,7 +395,7 @@ export default function AuthComponent({ setIsAuthOpen }) {
         queryKey: ["current-user"],
       });
 
-      setIsAuthOpen(false);
+      closeAuth();
       navigate("/");
     },
     onError: (error) => {
