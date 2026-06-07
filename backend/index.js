@@ -45,6 +45,7 @@ const UserAuthRoutes = require("./routes/UserAuthRoutes/UserAuthRoutes");
 const UserRateLikeMarkRoutes = require("./routes/UserRateLikeMarkRoutes/UserRateLikeMarkRoutes");
 
 const app = express();
+const BASE_URL = process.env.BASE_URL || ""; // Production-la "/nextshow_backend_v2" nu varum
 
 app.use(express.json({ limit: "100mb" }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -93,33 +94,33 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
   }
 })();
 
-app.use("/api/auth", adminAuthRoutes);
-app.use("/api/home", VideoSectionRoutes);
-app.use("/api/home", BlogSectionRoutes);
-app.use("/api/home", HomeStreamRoutes);
-app.use("/api/stream", StreamingVideoRoutes);
-app.use("/api/home", HomeMoviesRoutes);
-app.use("/api/home", HomeTrailersRoutes);
-app.use("/api/centralized", CentralizedMovieRoutes);
-app.use("/api/trailers", NewTrailersRoutes);
+app.use(`${BASE_URL}/api/auth`, adminAuthRoutes);
+app.use(`${BASE_URL}/api/home`, VideoSectionRoutes);
+app.use(`${BASE_URL}/api/home`, BlogSectionRoutes);
+app.use(`${BASE_URL}/api/home`, HomeStreamRoutes);
+app.use(`${BASE_URL}/api/stream`, StreamingVideoRoutes);
+app.use(`${BASE_URL}/api/home`, HomeMoviesRoutes);
+app.use(`${BASE_URL}/api/home`, HomeTrailersRoutes);
+app.use(`${BASE_URL}/api/centralized`, CentralizedMovieRoutes);
+app.use(`${BASE_URL}/api/trailers`, NewTrailersRoutes);
 
 //Centralized Json BulK Movie Create Route
 
-app.use("/api/admin", CentralizedJsonMovieRoute);
-app.use("/api/admin", CastRoutes);
-app.use("/api/admin", TmdbRoutes);
+app.use(`${BASE_URL}/api/admin`, CentralizedJsonMovieRoute);
+app.use(`${BASE_URL}/api/admin`, CastRoutes);
+app.use(`${BASE_URL}/api/admin`, TmdbRoutes);
 
 //Website Tracking Routes
-app.use("/api/admin", WebsiteVisitCountTracking);
-app.use("/api/admin", TagsRoutes);
-app.use("/api/admin", NewsRoutes);
+app.use(`${BASE_URL}/api/admin`, WebsiteVisitCountTracking);
+app.use(`${BASE_URL}/api/admin`, TagsRoutes);
+app.use(`${BASE_URL}/api/admin`, NewsRoutes);
 
 //UserAuthRoutes
-app.use("/api/auth/user", UserAuthRoutes);
-app.use("/api/auth/user", UserRateLikeMarkRoutes);
+app.use(`${BASE_URL}/api/auth/user`, UserAuthRoutes);
+app.use(`${BASE_URL}/api/auth/user`, UserRateLikeMarkRoutes);
 
 // Simple root route for testing
-app.get("/", (req, res) => {
+app.get(`${BASE_URL}/`, (req, res) => {
   res.send("NextShow Express Backend is running.");
 });
 
