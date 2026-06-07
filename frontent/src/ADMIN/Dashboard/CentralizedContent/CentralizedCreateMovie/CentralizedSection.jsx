@@ -34,6 +34,7 @@ import CentralizedNews from "../CentralizedNewsSection/CentralizedNews";
 import UploadNews from "../CentralizedNewsSection/UploadNews";
 import CentralizedNewsDetails from "../CentralizedNewsSection/CentralizedNewsDetails";
 import NewsJsonEditor from "../CentralizedNewsSection/NewsJsonEditor";
+import CentralizedEditMovie from "./MovieEdit/CentralizedEditMovie";
 
 const centralizedTabs = [
   {
@@ -64,6 +65,8 @@ const CentralizedSection = () => {
   const [bulkNewsData, setBulkNewsData] = useState([]);
   const [activeTab, setActiveTab] = useState("json"); // "json" or "centralized"
   const [selectedJsonMovie, setSelectedJsonMovie] = useState(null);
+
+  const [editingJsonMovie, setEditingJsonMovie] = useState(null);
 
   // console.log("IS Model Open", isModalOpen);
 
@@ -313,8 +316,15 @@ const CentralizedSection = () => {
             {/* 🔄 CONDITIONAL CONTENT RENDERING */}
 
             {activeTab === "json" &&
-              // Logic: Details state irundha Details Component, illana List Component
-              (selectedJsonMovie ? (
+              (editingJsonMovie ? (
+                // Level 3: Edit screen
+                <CentralizedEditMovie
+                  movie={editingJsonMovie}
+                  onBack={() => setEditingJsonMovie(null)}
+                  setAlert={setAlert}
+                />
+              ) : selectedJsonMovie ? (
+                // Level 2: Details screen
                 <motion.div
                   initial={{ x: 50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
@@ -325,10 +335,12 @@ const CentralizedSection = () => {
                   />
                 </motion.div>
               ) : (
+                // Level 1: List screen
                 <CentralizedJsonMovie
                   setAlert={setAlert}
                   setShowBulkUpload={setShowBulkUpload}
                   onMovieSelect={(movie) => setSelectedJsonMovie(movie)}
+                  onMovieEdit={(movie) => setEditingJsonMovie(movie)} // ← NEW
                 />
               ))}
 

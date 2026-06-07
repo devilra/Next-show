@@ -354,7 +354,7 @@ exports.GetAllCentralizedJsonMovies = async (req, res) => {
       // } else {
       //   movie.runDays = 0;
       if (movie.releaseMode === "THEATRICAL") {
-        console.log(movie);
+        // console.log(movie);
         movie.totalRunDays = Number(movie.theatreRunDays || 0);
 
         movie.remainingDays = Number(movie.remainingTheatreDays || 0);
@@ -403,6 +403,7 @@ exports.GetAllCentralizedJsonMovies = async (req, res) => {
 exports.GetMovieAdminDetailsBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+    // console.log("SLUG", slug);
 
     // 1. Database-la slug base panni search panrom
     const movieInstance = await CentralizedJsonBulkCreate.findOne({

@@ -21,6 +21,7 @@ const CentralizedJsonMovie = ({
   setAlert,
   onMovieSelect,
   setShowBulkUpload,
+  onMovieEdit,
 }) => {
   // எந்த மூவிக்கு மெனு ஓப்பனா இருக்குனு டிராக் பண்ண state
   const [activeMenu, setActiveMenu] = useState(null);
@@ -83,6 +84,25 @@ const CentralizedJsonMovie = ({
     },
     onError: (error) => {
       // console.log(error.response?.data?.message);
+      setAlert(
+        "error",
+        error.response?.data?.message || "Something went wrong!",
+      );
+    },
+  });
+
+  // ✅ Edit-ku தனி mutation add பண்ணு (existing movieDetailsMutation கீழ)
+  const movieEditMutation = useMutation({
+    mutationFn: async (slug) => {
+      const response = await api.get(
+        `/admin/get-movie-admin-details-by-slug/${slug}`,
+      );
+      return response.data;
+    },
+    onSuccess: (data) => {
+      onMovieEdit(data.data); // ← Edit page-ku அனுப்பு
+    },
+    onError: (error) => {
       setAlert(
         "error",
         error.response?.data?.message || "Something went wrong!",
@@ -260,7 +280,7 @@ const CentralizedJsonMovie = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-
+                            movieEditMutation.mutate(movie.slug); // ← தனி mutation
                             setActiveMenu(null);
                           }}
                           className="w-full flex items-center cursor-pointer gap-1 px-2 transition-all duration-300 py-2 text-[14px] hover:bg-orange-500 rounded-lg "
@@ -311,12 +331,12 @@ const CentralizedJsonMovie = ({
                       <div
                         className="
     absolute
-    top-2
-    left-2
-    bg-black/80
+    -top-3
+    -left-3
+    bg-blue-500
     border
-    border-orange-500
-    text-orange-400
+    border-blue-100
+    text-white
     px-2
     py-1
     rounded-xl

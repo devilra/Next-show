@@ -11,6 +11,7 @@ const {
   restoreMovie,
   permanentDeleteMovies,
   getJsonMoviePublicHomeData,
+  CentralizedEditMovie,
 } = require("../../controllers/CentralizedMovieCreateController/CentralizedJsonMovieCreate");
 const {
   OptionalUserProtect,
@@ -68,6 +69,12 @@ router.post("/movie-session/start", OptionalUserProtect, startMovieSession);
 router.post("/movie-session/end", OptionalUserProtect, endMovieSession);
 
 router.get("/movie-analytics/:movieId", getMovieAnalytics);
+
+router.put(
+  "/edit-json-movie/:editMovieId",
+  AdminAuthProtect,
+  CentralizedEditMovie,
+);
 
 // @desc    Move a movie to trash (Soft Delete)
 // @route   DELETE /api/v1/movies/delete-movie/:id
