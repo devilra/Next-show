@@ -20,6 +20,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          # Port 21 (Plain FTP) work aagala na, indha 2 lines-ai add pannunga
+          # port: 22
 
           # GitHub repo-la backend folder
           local-dir: ./backend/
