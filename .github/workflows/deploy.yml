@@ -27,7 +27,7 @@ jobs:
           local-dir: ./backend/
 
           # CPanel Application Root
-          server-dir: /nextshow_backend_v2/
+          server-dir: /
 
           # .env upload aaga koodathu
           exclude: |
