@@ -229,8 +229,9 @@ const CentralizedJsonBulkCreate = sequelize.define(
     },
     // 🔗 OTT link or Ticket booking link
     watchUrl: {
-      type: DataTypes.STRING,
-      defaultValue: "",
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: [],
     },
     // 🎵 Music Director
     musicDirector: {

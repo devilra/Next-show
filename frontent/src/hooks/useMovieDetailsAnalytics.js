@@ -151,6 +151,7 @@ export const useMovieDetailsAvgRatingData = (movieId) => {
   });
   const data = reviewsResponse?.data;
   const reviews = data?.data ?? [];
+  const myReview = reviews.find((review) => review.isOwn);
 
   const averageRating =
     data?.averageRating ||
@@ -168,7 +169,8 @@ export const useMovieDetailsAvgRatingData = (movieId) => {
     reviews,
     averageRating,
     totalReviews: data?.totalReviews ?? reviews.length,
-    currentUserReview: data?.currentUserReview || null,
+    // currentUserReview: data?.currentUserReview || null,
+    currentUserReview: myReview || null,
     hasReviewed: data?.rated || false,
     isLoading: reviewsResponse.isLoading,
     isError: reviewsResponse.isError,

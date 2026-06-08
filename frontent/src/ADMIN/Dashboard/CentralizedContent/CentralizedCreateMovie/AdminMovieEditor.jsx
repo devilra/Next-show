@@ -804,35 +804,45 @@ const AdminMovieEditor = ({
     try {
       const parsed = JSON.parse(editorValue);
 
-      const cast = parsed.cast || [];
+      const cast = Array.isArray(parsed.cast)
+        ? parsed.cast
+        : typeof parsed.cast === "string"
+          ? parsed.cast
+              .split(",")
+              .map((c) => c.trim())
+              .filter(Boolean)
+          : [];
+
       const existingDetails = parsed.castDetails || [];
 
-      // 🔥 castsData இல்லனா skip (API load ஆகணும்)
+      // 🔥 castsData load aagala na skip
       if (!castsData || castsData.length === 0) return;
 
-      // 🔥 map name → id
       const updatedCastDetails = cast
         .map((name) => {
-          const foundCast = castsData.find((c) => c.label === name);
+          const foundCast = castsData.find(
+            (c) => c.label?.trim().toLowerCase() === name?.trim().toLowerCase(),
+          );
 
           if (!foundCast) return null;
 
           const existing = existingDetails.find(
-            (c) => c.castId === foundCast.value,
+            (c) => Number(c.castId) === Number(foundCast.value),
           );
 
-          return (
-            existing || {
-              castId: foundCast.value,
-              characterName: "",
-              roleCategory: "",
-              isLeadRole: false,
-            }
-          );
+          return {
+            castId: foundCast.value,
+            castName: foundCast.label || "",
+
+            // existing values preserve pannum
+            characterName: existing?.characterName || "",
+            roleCategory: existing?.roleCategory || "",
+            isLeadRole: existing?.isLeadRole || false,
+          };
         })
         .filter(Boolean);
 
-      // 🔥 compare panna (infinite loop avoid)
+      // 🔥 unnecessary rerender avoid
       const isSame =
         JSON.stringify(existingDetails) === JSON.stringify(updatedCastDetails);
 
@@ -845,7 +855,7 @@ const AdminMovieEditor = ({
         setEditorValue(JSON.stringify(updatedJson, null, 2));
       }
     } catch (err) {
-      // invalid JSON ignore
+      // invalid json ignore
     }
   }, [editorValue, castsData]);
 
@@ -1074,9 +1084,19 @@ const AdminMovieEditor = ({
                                 name="cast"
                                 options={castsData || []}
                                 styles={customStyles}
-                                value={castsData?.filter((opt) =>
-                                  currentJsonData.cast?.includes(opt.label),
-                                )}
+                                value={castsData?.filter((opt) => {
+                                  const castList = Array.isArray(
+                                    currentJsonData.cast,
+                                  )
+                                    ? currentJsonData.cast
+                                    : typeof currentJsonData.cast === "string"
+                                      ? currentJsonData.cast
+                                          .split(",")
+                                          .map((c) => c.trim())
+                                      : [];
+
+                                  return castList.includes(opt.label);
+                                })}
                                 placeholder={
                                   castsLoading
                                     ? "Loading Casts..."
@@ -1127,7 +1147,7 @@ const AdminMovieEditor = ({
                                       );
                                       const updatedJson = {
                                         ...currentJson,
-                                        cast: castNames,
+                                        cast: castNames.join(", "),
                                         castDetails: castDetails,
                                       };
                                       return JSON.stringify(
@@ -1263,10 +1283,14 @@ const AdminMovieEditor = ({
                                 multiple
                                 open={openSelect === field.id}
                                 value={
-                                  Array.isArray(currentJsonData[field.id])
-                                    ? currentJsonData[field.id]
-                                    : currentJsonData[field.id]
-                                      ? [currentJsonData[field.id]]
+                                  field.id === "availableOn"
+                                    ? Array.isArray(currentJsonData.availableOn)
+                                      ? currentJsonData.availableOn.map(
+                                          (platform) => platform.id,
+                                        )
+                                      : []
+                                    : Array.isArray(val)
+                                      ? val
                                       : []
                                 }
                                 onOpen={() => setOpenSelect(field.id)}
@@ -1275,7 +1299,30 @@ const AdminMovieEditor = ({
                                   const value = e.target.value;
 
                                   if (field.id === "availableOn") {
-                                    handleFieldChange(field.id, value); // already ids
+                                    const existingPlatforms =
+                                      currentJsonData.availableOn || [];
+                                    const selectedPlatforms = value.map(
+                                      (platformId) => {
+                                        const platform =
+                                          STREAMING_PLATFORMS.find(
+                                            (p) => p.id === platformId,
+                                          );
+
+                                        const existing = existingPlatforms.find(
+                                          (item) => item.id === platformId,
+                                        );
+                                        return {
+                                          id: platform.id,
+                                          name: platform.name,
+                                          // URL preserve pannum
+                                          url: existing?.url || "",
+                                        };
+                                      },
+                                    );
+                                    handleFieldChange(
+                                      "availableOn",
+                                      selectedPlatforms,
+                                    ); // already ids
                                     setOpenSelect(null);
                                   } else {
                                     handleFieldChange(field.id, value); // string array
@@ -1314,15 +1361,31 @@ const AdminMovieEditor = ({
                                           label={label}
                                           size="small"
                                           onDelete={(e) => {
-                                            e.stopPropagation(); // ✅ VERY IMPORTANT
+                                            e.stopPropagation();
 
-                                            const updated = selected.filter(
-                                              (v) => v !== val,
-                                            );
-                                            handleFieldChange(
-                                              field.id,
-                                              updated,
-                                            );
+                                            if (field.id === "availableOn") {
+                                              const updatedPlatforms = (
+                                                currentJsonData.availableOn ||
+                                                []
+                                              ).filter(
+                                                (platform) =>
+                                                  platform.id !== val,
+                                              );
+
+                                              handleFieldChange(
+                                                "availableOn",
+                                                updatedPlatforms,
+                                              );
+                                            } else {
+                                              const updated = (
+                                                currentJsonData[field.id] || []
+                                              ).filter((item) => item !== val);
+
+                                              handleFieldChange(
+                                                field.id,
+                                                updated,
+                                              );
+                                            }
                                           }}
                                           deleteIcon={
                                             <X

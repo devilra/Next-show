@@ -38,6 +38,8 @@ const MovieDetailsHeader = ({
   userRatingData,
   userRatingLoading,
   addMovieRatingMutation,
+  averageRating,
+  avgRatingLoading,
 }) => {
   console.log("Movie Details Header", movie);
 
@@ -101,8 +103,8 @@ const MovieDetailsHeader = ({
   const ottArray = availableOn.length > 0 ? availableOn : [];
   const languageArray = languages.length > 0 ? languages : [];
   const isBoxOfficeAvailable = !!overAllBoxOffice;
-  const { averageRating, isLoading: avgRatingLoading } =
-    useMovieDetailsAvgRatingData(movie?.id);
+  // const { averageRating, isLoading: avgRatingLoading } =
+  //   useMovieDetailsAvgRatingData(movie?.id);
 
   // ============================================
   // ✅ DERIVED RATING STATE

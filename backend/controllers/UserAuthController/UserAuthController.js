@@ -3,7 +3,7 @@
 // FILE: controllers/UserAuthController/UserAuthController.js
 // ======================================================
 
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const UserAuthModel = require("../../models/UserAuth/UserAuth");

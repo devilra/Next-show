@@ -24,6 +24,7 @@ import ReviewsCarousel from "./Reviewscarousel";
 import {
   useMovieAnalytics,
   useMovieDetailsAnalyticQuery,
+  useMovieDetailsAvgRatingData,
 } from "../hooks/useMovieDetailsAnalytics";
 
 const MovieDetailsPage = () => {
@@ -191,6 +192,12 @@ const MovieDetailsPage = () => {
       },
     ],
   });
+
+  const {
+    averageRating,
+    currentUserReview,
+    isLoading: avgRatingLoading,
+  } = useMovieDetailsAvgRatingData(movieData?.id);
 
   // ======================================================
   // ✅ WATCHED QUERY
@@ -401,6 +408,8 @@ const MovieDetailsPage = () => {
         userRatingData={userRatingData}
         userRatingLoading={userRatingLoading}
         addMovieRatingMutation={addMovieRatingMutation}
+        averageRating={averageRating}
+        avgRatingLoading={avgRatingLoading}
       />
       <MovieDescriptionSection
         movie={movieData}
@@ -432,6 +441,7 @@ const MovieDetailsPage = () => {
         analyticsData={analyticsData}
         analyticsLoading={analyticsLoading}
         analyticsFetching={analyticsFetching}
+        currentUserReview={currentUserReview}
       />
 
       {/* 2. Main Content Grid (Split into Left & Right) */}

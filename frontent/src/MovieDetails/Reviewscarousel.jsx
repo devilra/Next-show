@@ -1084,6 +1084,8 @@ const ReviewsCarousel = ({ movieId }) => {
     reviewsResponse,
   } = useMovieDetailsAvgRatingData(movieId);
 
+  console.log("Review Carosel", reviews);
+
   const noReviews = !isLoading && !isError && reviews.length === 0;
   const avg = averageRating || "";
 
@@ -1175,12 +1177,12 @@ const ReviewsCarousel = ({ movieId }) => {
       </div>
 
       {/* Right: avg rating pill (hidden while loading or no data) */}
-      {!isLoading && reviews.length > 0 && avg !== "—" && (
+      {/* {!isLoading && reviews.length > 0 && avg !== "—" && (
         <div className="flex items-center gap-1 bg-orange-500/8 border border-orange-500/15 rounded-full px-3 py-1">
           <span className="text-sm font-bold text-orange-500">{avg}</span>
           <span className="text-xs text-zinc-500">avg / 10</span>
         </div>
-      )}
+      )} */}
     </div>
   );
 

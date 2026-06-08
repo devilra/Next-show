@@ -181,3 +181,44 @@ body {
     transform: translateX(0%);
   } /* reset */
 }
+
+/* ========================================= */
+/* FORM SCROLLBAR */
+/* ========================================= */
+
+.scrollable-form::-webkit-scrollbar {
+  width: 3px;
+}
+
+.scrollable-form::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.scrollable-form::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* index.css */
+/* Scrollbar-ai innum neat-a, subtle-a matha indha code-ai use pannunga */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15); /* Light white/zinc spread */
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
