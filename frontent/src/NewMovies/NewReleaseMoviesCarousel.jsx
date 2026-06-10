@@ -28,49 +28,65 @@ const getYouTubeThumbnail = (url) => {
 // ─────────────────────────────────────────────────────────
 // ARROWS
 // ─────────────────────────────────────────────────────────
-const NextArrow = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20
+const NextArrow = ({ onClick, currentSlide, slideCount }) => {
+  const isDisabled = currentSlide >= slideCount - 3;
+  return (
+    <button
+      onClick={isDisabled ? undefined : onClick}
+      disabled={isDisabled}
+      className={`hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-20
                w-11 h-11 items-center justify-center rounded-full
-               transition-all duration-200"
-    style={{
-      background: "rgba(255,255,255,0.08)",
-      border: "0.5px solid rgba(255,255,255,0.18)",
-      backdropFilter: "blur(10px)",
-    }}
-    onMouseEnter={(e) =>
-      (e.currentTarget.style.background = "rgba(249,115,22,0.25)")
-    }
-    onMouseLeave={(e) =>
-      (e.currentTarget.style.background = "rgba(255,255,255,0.08)")
-    }
-  >
-    <HiChevronRight className="text-white text-2xl" />
-  </button>
-);
+               transition-all duration-200  ${
+                 isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+               }`}
+      style={{
+        background: isDisabled
+          ? "rgba(255,255,255,0.04)"
+          : "rgba(255,255,255,0.08)",
+        border: "0.5px solid rgba(255,255,255,0.18)",
+        backdropFilter: "blur(10px)",
+      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.background = "rgba(249,115,22,0.25)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.background = "rgba(255,255,255,0.08)")
+      }
+    >
+      <HiChevronRight className="text-white text-2xl" />
+    </button>
+  );
+};
 
-const PrevArrow = ({ onClick }) => (
-  <button
-    onClick={onClick}
-    className="hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20
+const PrevArrow = ({ onClick, currentSlide }) => {
+  const isDisabled = currentSlide === 0;
+  return (
+    <button
+      onClick={isDisabled ? undefined : onClick}
+      disabled={isDisabled}
+      className={`hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-20
                w-11 h-11 items-center justify-center rounded-full
-               transition-all duration-200"
-    style={{
-      background: "rgba(255,255,255,0.08)",
-      border: "0.5px solid rgba(255,255,255,0.18)",
-      backdropFilter: "blur(10px)",
-    }}
-    onMouseEnter={(e) =>
-      (e.currentTarget.style.background = "rgba(249,115,22,0.25)")
-    }
-    onMouseLeave={(e) =>
-      (e.currentTarget.style.background = "rgba(255,255,255,0.08)")
-    }
-  >
-    <HiChevronLeft className="text-white text-2xl" />
-  </button>
-);
+               transition-all duration-200  ${
+                 isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
+               }`}
+      style={{
+        background: isDisabled
+          ? "rgba(255,255,255,0.04)"
+          : "rgba(255,255,255,0.08)",
+        border: "0.5px solid rgba(255,255,255,0.18)",
+        backdropFilter: "blur(10px)",
+      }}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.background = "rgba(249,115,22,0.25)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.background = "rgba(255,255,255,0.08)")
+      }
+    >
+      <HiChevronLeft className="text-white text-2xl" />
+    </button>
+  );
+};
 
 // ─────────────────────────────────────────────────────────
 // MOVIE CARD
@@ -262,8 +278,8 @@ const MovieCard = ({ movie }) => {
 const NewReleaseMoviesCarousel = ({ newReleases, newMovies = [] }) => {
   const settings = {
     className: "center",
-    centerMode: true,
-    infinite: true,
+    centerMode: false,
+    infinite: false,
     centerPadding: "60px",
     slidesToShow: 3,
     speed: 500,
@@ -273,7 +289,7 @@ const NewReleaseMoviesCarousel = ({ newReleases, newMovies = [] }) => {
     responsive: [
       {
         breakpoint: 1280,
-        settings: { slidesToShow: 4, centerPadding: "40px" },
+        settings: { slidesToShow: 3, centerPadding: "40px" },
       },
       {
         breakpoint: 1024,
@@ -290,6 +306,7 @@ const NewReleaseMoviesCarousel = ({ newReleases, newMovies = [] }) => {
     ...settings,
     slidesToShow: 1,
     centerPadding: "48px",
+    centerMode: false,
     arrows: false,
   };
 

@@ -43,6 +43,7 @@ const TagsRoutes = require("./routes/TagsRoutes/TagsRoutes");
 const NewsRoutes = require("./routes/NewsRoutes/NewsRoutes");
 const UserAuthRoutes = require("./routes/UserAuthRoutes/UserAuthRoutes");
 const UserRateLikeMarkRoutes = require("./routes/UserRateLikeMarkRoutes/UserRateLikeMarkRoutes");
+const CentralizedTrailerTeaserRoutes = require("./routes/CentralizedTrailerTeaseRoutes/CentralizedTrailerteaserRoute");
 
 const app = express();
 const BASE_URL = process.env.BASE_URL || ""; // Production-la "/nextshow_backend_v2" nu varum
@@ -118,6 +119,8 @@ app.use(`${BASE_URL}/api/admin`, NewsRoutes);
 //UserAuthRoutes
 app.use(`${BASE_URL}/api/auth/user`, UserAuthRoutes);
 app.use(`${BASE_URL}/api/auth/user`, UserRateLikeMarkRoutes);
+//Trailer-Teaser-Route
+app.use(`${BASE_URL}/api/centralized-trailer`, CentralizedTrailerTeaserRoutes);
 
 // Simple root route for testing
 app.get(`${BASE_URL}/`, (req, res) => {
