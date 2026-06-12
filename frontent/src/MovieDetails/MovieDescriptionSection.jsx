@@ -99,11 +99,12 @@ const MovieDescriptionSection = ({
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
   const [showWatchPopup, setShowWatchPopup] = useState(false);
+  const [activeCreditTooltip, setActiveCreditTooltip] = useState(null);
   // ============================================================
   // ✅ NEW: Book Now Popup State
   // ============================================================
   const [showBookPopup, setShowBookPopup] = useState(false);
-
+  const [showRatingTooltip, setShowRatingTooltip] = useState(false);
   const [reviewText, setReviewText] = useState("");
 
   const getYouTubeID = (url) => {
@@ -305,6 +306,21 @@ const MovieDescriptionSection = ({
   // ✅ Is THEATRICAL mode?
   // ============================================================
   const isTheatrical = movie.releaseMode === "THEATRICAL";
+  const availableOTTs = Array.isArray(movie?.availableOn)
+    ? movie.availableOn
+    : [];
+  const matchedOTTs = availableOTTs
+    .map((ott) => {
+      const ottId = typeof ott === "string" ? ott : ott?.id;
+      return STREAMING_PLATFORMS.find(
+        (platform) =>
+          platform.id?.toLocaleLowerCase() === ottId?.toLocaleLowerCase(),
+      );
+    })
+    .filter(Boolean);
+  const isUpcomingMovie = movie?.streamType === "UPCOMING";
+  const disableRating =
+    isUpcomingMovie || alreadyRated || addMovieRatingMutation?.isPending;
 
   return (
     <div className="pt-6 bg-[#121212] space-y-4 mb-8 text-white">
@@ -499,6 +515,104 @@ const MovieDescriptionSection = ({
                 ))}
               </div>
             </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 md:ml-3">
+            {/* THEATRE CARD */}
+
+            {(movie?.isTheatreReleased ||
+              (movie?.isStreamingReleased && matchedOTTs.length > 0)) && (
+              <div
+                className="
+      relative
+      flex
+      flex-col
+
+      px-4 md:px-5
+      py-2.5 md:py-3
+
+      rounded-xl
+      md:rounded-2xl
+
+      bg-gradient-to-br
+      from-zinc-800
+      via-zinc-900
+      to-black/40
+
+      border
+      border-white/10
+
+      shadow-2xl
+    "
+              >
+                {/* Title */}
+                <span
+                  className="
+        text-[9px]
+        md:text-[10px]
+
+        uppercase
+        tracking-[0.25em]
+
+        text-zinc-500
+
+        mb-2 md:mb-3
+      "
+                >
+                  Availability
+                </span>
+
+                <div className="flex items-center flex-wrap gap-3">
+                  {/* Theatre */}
+                  {movie?.isTheatreReleased && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <LuClapperboard className="text-orange-400 text-[15px]" />
+
+                        <span
+                          className="
+                text-[10px]
+                uppercase
+                font-semibold
+                tracking-wider
+                text-orange-300
+              "
+                        >
+                          Theatre
+                        </span>
+                      </div>
+
+                      {movie?.isStreamingReleased && matchedOTTs.length > 0 && (
+                        <div className="w-px h-8 bg-white/10" />
+                      )}
+                    </>
+                  )}
+
+                  {/* OTT Platforms */}
+                  {movie?.isStreamingReleased && matchedOTTs.length > 0 && (
+                    <div className="flex items-center gap-3">
+                      {matchedOTTs.map((ott, index) => (
+                        <React.Fragment key={ott.id}>
+                          <img
+                            src={ott.logo}
+                            alt={ott.name}
+                            className="
+                    h-8 md:h-9
+                    w-auto
+                    object-contain
+                    rounded-md
+                  "
+                          />
+
+                          {index !== matchedOTTs.length - 1 && (
+                            <span className="text-zinc-600 text-base">|</span>
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -860,7 +974,7 @@ const MovieDescriptionSection = ({
               ].map(({ icon, label, value }) => (
                 <div
                   key={label}
-                  className="flex flex-col sm:flex-row sm:items-center py-2 border-b border-white/5 hover:bg-white/[0.02] transition-all px-4 rounded-2xl"
+                  className="flex flex-row items-center gap-3 md:gap-0 py-2 border-b border-white/5 hover:bg-white/[0.02] transition-all px-4 rounded-2xl"
                 >
                   <div className="flex items-center gap-4 sm:w-40 shrink-0">
                     <div className="w-8 h-8 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400">
@@ -870,10 +984,86 @@ const MovieDescriptionSection = ({
                       {label}
                     </span>
                   </div>
-                  <div className="flex-1">
-                    <span className="px-3 py-1 border border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors">
-                      {value || "N/A"}
-                    </span>
+                  <div className="flex-1 relative">
+                    <div>
+                      <span
+                        onClick={() =>
+                          setActiveCreditTooltip(
+                            activeCreditTooltip === label ? null : label,
+                          )
+                        }
+                        className="px-3 py-1 block md:inline border w-[180px] md:w-full  truncate border-gray-700 text-zinc-400 rounded-md text-[13px] md:text-[14px] hover:bg-gray-800/50 transition-colors"
+                      >
+                        {value || "N/A"}
+                      </span>
+                    </div>
+                    <AnimatePresence>
+                      {activeCreditTooltip === label && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                          transition={{ duration: 0.2 }}
+                          className="
+          md:hidden
+          absolute
+          -left-3
+          top-full
+          mt-3
+          z-50
+          min-w-[240px]
+          max-w-[300px]
+        "
+                        >
+                          <div
+                            className="fixed inset-0 z-[-1]"
+                            onClick={() => setActiveCreditTooltip(null)}
+                          />
+
+                          <div
+                            className="
+          relative
+          overflow-hidden
+          rounded-[20px]
+          border border-white/10
+          bg-gradient-to-br
+          from-zinc-950
+          via-neutral-900
+          to-neutral-950
+          backdrop-blur-3xl
+          px-4 py-3
+          shadow-[0_10px_40px_rgba(0,0,0,0.5)]
+        "
+                          >
+                            <div
+                              className="
+            absolute
+            -top-8
+            -right-8
+            w-20
+            h-20
+            bg-orange-500/10
+            blur-[50px]
+            rounded-full
+          "
+                            />
+
+                            <p
+                              className="
+            relative z-10
+            text-[14px]
+            leading-6
+            font-semibold
+            text-zinc-100
+            break-words
+          "
+                            >
+                              {value}
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               ))}
@@ -920,54 +1110,151 @@ const MovieDescriptionSection = ({
                 </div>
               ) : (
                 <IsUserValid>
-                  <button
-                    disabled={alreadyRated || addMovieRatingMutation?.isPending}
-                    onClick={() => {
-                      if (alreadyRated || addMovieRatingMutation?.isPending)
-                        return;
-                      setIsRatingModalOpen(true);
-                    }}
-                    className={`relative flex-1 py-4 w-full rounded-xl flex items-center justify-center gap-2 border transition-all duration-300 active:scale-95 overflow-hidden ${alreadyRated ? "bg-zinc-900 border-zinc-800 text-zinc-400 cursor-not-allowed pointer-events-none" : "bg-zinc-800 hover:bg-zinc-800/45 border-white/5 text-white cursor-pointer"} ${addMovieRatingMutation?.isPending ? "opacity-70 cursor-not-allowed" : ""}`}
-                  >
-                    {alreadyRated && (
-                      <div className="absolute top-[12px] -left-[20px] w-[90px] rotate-[-45deg] bg-gradient-to-r from-zinc-950 to-zinc-800 text-center py-[4px] border-t border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.25)] backdrop-blur-sm">
-                        <div className="flex justify-center gap-[2px]">
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <FaStar
-                              key={i}
-                              size={10}
-                              className={
-                                i <=
-                                Math.round((currentUserReview?.rating || 0) / 2)
-                                  ? "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]"
-                                  : "text-zinc-700"
-                              }
-                            />
-                          ))}
+                  <div className="relative flex-1 group">
+                    <button
+                      disabled={disableRating}
+                      onClick={() => {
+                        if (isUpcomingMovie) {
+                          setShowRatingTooltip(!showRatingTooltip);
+                          return;
+                        }
+
+                        if (disableRating) return;
+
+                        setIsRatingModalOpen(true);
+                      }}
+                      className={`relative flex-1 py-4 w-full rounded-xl flex items-center justify-center gap-2 border transition-all duration-300 active:scale-95 overflow-hidden ${alreadyRated ? "bg-zinc-900 border-zinc-800 text-zinc-400 cursor-not-allowed pointer-events-none" : "bg-zinc-800 hover:bg-zinc-800/45 border-white/5 text-white cursor-pointer"} ${addMovieRatingMutation?.isPending ? "opacity-70 cursor-not-allowed" : ""}`}
+                    >
+                      {alreadyRated && !isUpcomingMovie && (
+                        <div className="absolute top-[12px] -left-[20px] w-[90px] rotate-[-45deg] bg-gradient-to-r from-zinc-950 to-zinc-800 text-center py-[4px] border-t border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.25)] backdrop-blur-sm">
+                          <div className="flex justify-center gap-[2px]">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                              <FaStar
+                                key={i}
+                                size={10}
+                                className={
+                                  i <=
+                                  Math.round(
+                                    (currentUserReview?.rating || 0) / 2,
+                                  )
+                                    ? "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]"
+                                    : "text-zinc-700"
+                                }
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {addMovieRatingMutation?.isPending ? (
+                        <div className="flex items-center justify-center gap-3">
+                          <div className="relative flex items-center justify-center">
+                            <div className="absolute w-5 h-5 rounded-full bg-yellow-500/20 blur-[6px] animate-pulse" />
+                            <div className="w-5 h-5 rounded-full border-[2px] border-white/10 border-t-yellow-500 border-r-yellow-400 animate-spin" />
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <FaRegStar
+                            size={16}
+                            className={
+                              disableRating
+                                ? "text-zinc-600"
+                                : "text-yellow-400"
+                            }
+                          />
+                          <span className="text-xs uppercase font-bold tracking-widest">
+                            {/* {alreadyRated ? "Already Rated" : "Rate Now"} */}
+                            {isUpcomingMovie
+                              ? "Not Released"
+                              : alreadyRated
+                                ? "Already Rated"
+                                : "Rate Now"}
+                          </span>
+                        </>
+                      )}
+                    </button>
+                    {isUpcomingMovie && (
+                      <div
+                        className="
+                        w-[250px]
+      hidden md:block
+      absolute
+      bottom-full
+      left-1/2
+      -translate-x-1/2
+      mb-3
+      opacity-0
+      invisible
+      group-hover:opacity-100
+      group-hover:visible
+      transition-all
+      duration-300
+      z-50
+      pointer-events-none
+    "
+                      >
+                        <div className="rounded-[20px] border border-white/10 bg-zinc-950 px-4 py-3">
+                          <p className="text-[13px] text-zinc-200">
+                            Movie is not released yet
+                          </p>
                         </div>
                       </div>
                     )}
-                    {addMovieRatingMutation?.isPending ? (
-                      <div className="flex items-center justify-center gap-3">
-                        <div className="relative flex items-center justify-center">
-                          <div className="absolute w-5 h-5 rounded-full bg-yellow-500/20 blur-[6px] animate-pulse" />
-                          <div className="w-5 h-5 rounded-full border-[2px] border-white/10 border-t-yellow-500 border-r-yellow-400 animate-spin" />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <FaRegStar
-                          size={16}
-                          className={
-                            alreadyRated ? "text-zinc-600" : "text-yellow-400"
-                          }
-                        />
-                        <span className="text-xs uppercase font-bold tracking-widest">
-                          {alreadyRated ? "Already Rated" : "Rate Now"}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                    <AnimatePresence>
+                      {showRatingTooltip && isUpcomingMovie && (
+                        <motion.div
+                          initial={{
+                            opacity: 0,
+                            y: 6,
+                            scale: 0.97,
+                          }}
+                          animate={{
+                            opacity: 1,
+                            y: 0,
+                            scale: 1,
+                          }}
+                          exit={{
+                            opacity: 0,
+                            y: 6,
+                            scale: 0.97,
+                          }}
+                          className="
+          md:hidden
+          absolute
+          top-full
+          left-0
+          mt-3
+          z-50
+          min-w-[240px]
+        "
+                        >
+                          <div
+                            className="fixed inset-0 z-[-1]"
+                            onClick={() => setShowRatingTooltip(false)}
+                          />
+
+                          <div
+                            className="
+            rounded-[20px]
+            border border-white/10
+            bg-gradient-to-br
+            from-zinc-950
+            via-neutral-900
+            to-neutral-950
+            backdrop-blur-3xl
+            px-4
+            py-3
+            shadow-[0_10px_40px_rgba(0,0,0,0.5)]
+          "
+                          >
+                            <p className="text-[14px] text-zinc-100 font-semibold">
+                              Movie is not released yet
+                            </p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </IsUserValid>
               )}
 

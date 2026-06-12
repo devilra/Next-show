@@ -3,17 +3,81 @@ const sequelize = require("../../config/db");
 const slugify = require("slugify");
 
 const MEDIA_TYPE_ENUM = [
+  // Announcement Stage
+
   "ANNOUNCEMENT",
+
+  "TITLE_REVEAL",
+
+  "FIRST_LOOK",
+
+  "MOTION_POSTER",
+
+  "CHARACTER_POSTER",
+
+  // Video Content
+
   "GLIMPSE",
+
   "TEASER",
+
   "TEASER_2",
+
   "TRAILER",
+
   "TRAILER_2",
+
   "FINAL_TRAILER",
+
+  // Songs
+
   "SONG",
+
   "LYRIC_VIDEO",
-  "BEHIND_THE_SCENES",
+
+  "JUKEBOX",
+
+  "AUDIO_LAUNCH",
+
+  // Promotions
+
+  "PROMO",
+
+  "TV_SPOT",
+
+  "SPECIAL_VIDEO",
+
+  // Interviews
+
   "INTERVIEW",
+
+  "PRESS_MEET",
+
+  "PRESS_CONFERENCE",
+
+  // Behind The Scenes
+
+  "BEHIND_THE_SCENES",
+
+  "MAKING_VIDEO",
+
+  "VFX_BREAKDOWN",
+
+  // Character / Cast
+
+  "CAST_INTRODUCTION",
+
+  "CHARACTER_INTRO",
+
+  // Public Response
+
+  "PUBLIC_REVIEW",
+
+  "FAN_SHOW_REACTION",
+
+  "SUCCESS_MEET",
+
+  "THANK_YOU_VIDEO",
 ];
 
 const CentralizedTrailerTeaser = sequelize.define(

@@ -29,6 +29,7 @@ const navLinks = [
   { to: "/", label: "Home" },
   { to: "/stream", label: "Streaming Now" },
   { to: "/new", label: "New Movies" },
+  { to: "/videos", label: "Videos" },
   { to: "/news", label: "News" },
   // { to: "/about", label: "About Us" },
   { to: "/auth/login", label: "Login", isLogin: true },
@@ -656,8 +657,8 @@ const Navbar = () => {
 
             {/* MOBILE MENU ICON */}
             <button
-              className="
-      flex flex-col gap-[6px]
+              className=" hidden
+       flex-col gap-[6px]
       p-2
       cursor-pointer
       group

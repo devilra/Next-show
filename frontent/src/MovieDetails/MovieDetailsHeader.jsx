@@ -79,6 +79,7 @@ const MovieDetailsHeader = ({
   const formatText = formats.length > 0 ? formats.join(", ") : "--/--";
   const totalScreens = getValue(screenCount?.worldwideTotal);
   const availableOn = movie?.availableOn || [];
+
   const streamInfo = movie?.streamReleaseInfo || {};
   const languages = movie?.language || [];
 
@@ -100,7 +101,14 @@ const MovieDetailsHeader = ({
     movie?.theatreReleaseDate && movie.theatreReleaseDate !== "TBA";
   const isOTTAvailable =
     movie?.ottReleaseDate && movie.ottReleaseDate !== "TBA";
-  const ottArray = availableOn.length > 0 ? availableOn : [];
+  const ottArray =
+    availableOn?.map((item) => {
+      if (typeof item === "object" && item !== null) {
+        return item.name || "";
+      }
+
+      return item;
+    }) || [];
   const languageArray = languages.length > 0 ? languages : [];
   const isBoxOfficeAvailable = !!overAllBoxOffice;
   // const { averageRating, isLoading: avgRatingLoading } =
@@ -439,7 +447,12 @@ const MovieDetailsHeader = ({
       {type === "chips" ? (
         value
       ) : (
-        <p className="text-[13px] pt-1 text-white">{value}</p>
+        <p className="text-[13px] pt-1 text-white">
+          {/* Object-a handle panna check */}
+          {typeof value === "object" && value !== null
+            ? JSON.stringify(value)
+            : value}
+        </p>
       )}
     </div>
   );
@@ -976,52 +989,54 @@ const MovieDetailsHeader = ({
           </div>
 
           <div className="col-span-8 md:hidden flex flex-col">
-            <div
-              onClick={() => {
-                if (
-                  addMovieRatingMutation?.isPending ||
-                  userRatingLoading ||
-                  alreadyRated
-                )
-                  return;
-                setIsRatingModalOpen(true);
-              }}
-              className="w-full rounded-xl px-4 pb-2 bg-gradient-to-b from-zinc-900/80 to-black/80 border border-white/5 active:scale-[0.98] cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-[13px] font-semibold uppercase tracking-widest transition-colors duration-300 ${
-                    alreadyRated
-                      ? "text-yellow-400"
-                      : "text-white group-hover:text-yellow-400"
-                  }`}
-                >
-                  {alreadyRated ? "Rated" : "Rate"}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  {userRatingLoading || addMovieRatingMutation?.isPending ? (
-                    <div className="w-4 h-4 rounded-full border-[2px] border-white/10 border-t-yellow-500 animate-spin" />
-                  ) : alreadyRated ? (
-                    <FaStar size={13} className="text-yellow-400" />
-                  ) : (
-                    <FaRegStar size={13} className="text-yellow-400" />
-                  )}
-                  <span className="text-[14px] font-semibold text-white">
-                    {avgRatingLoading ? (
-                      <span className="inline-block w-8 h-2 rounded-full bg-white/10 animate-pulse align-middle" />
-                    ) : (
-                      `${averageRating}/10`
-                    )}
-                  </span>
-                </div>
-              </div>
+            <IsUserValid>
               <div
-                className="mt-1 h-[2px] w-[50px] rounded-full"
-                style={{
-                  background: `linear-gradient(to right, transparent, #eab308, transparent)`,
+                onClick={() => {
+                  if (
+                    addMovieRatingMutation?.isPending ||
+                    userRatingLoading ||
+                    alreadyRated
+                  )
+                    return;
+                  setIsRatingModalOpen(true);
                 }}
-              />
-            </div>
+                className="w-full rounded-xl px-4 pb-2 bg-gradient-to-b from-zinc-900/80 to-black/80 border border-white/5 active:scale-[0.98] cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`text-[13px] font-semibold uppercase tracking-widest transition-colors duration-300 ${
+                      alreadyRated
+                        ? "text-yellow-400"
+                        : "text-white group-hover:text-yellow-400"
+                    }`}
+                  >
+                    {alreadyRated ? "Rated" : "Rate"}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {userRatingLoading || addMovieRatingMutation?.isPending ? (
+                      <div className="w-4 h-4 rounded-full border-[2px] border-white/10 border-t-yellow-500 animate-spin" />
+                    ) : alreadyRated ? (
+                      <FaStar size={13} className="text-yellow-400" />
+                    ) : (
+                      <FaRegStar size={13} className="text-yellow-400" />
+                    )}
+                    <span className="text-[14px] font-semibold text-white">
+                      {avgRatingLoading ? (
+                        <span className="inline-block w-8 h-2 rounded-full bg-white/10 animate-pulse align-middle" />
+                      ) : (
+                        `${averageRating}/10`
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className="mt-1 h-[2px] w-[50px] rounded-full"
+                  style={{
+                    background: `linear-gradient(to right, transparent, #eab308, transparent)`,
+                  }}
+                />
+              </div>
+            </IsUserValid>
             <MobileInfoCard
               label="Box Office"
               value={displayBoxOffice}

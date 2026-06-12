@@ -41,6 +41,8 @@ import WatchlistPage from "./ProfileLayout/WatchList";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import AuthComponent from "./Components/LoginSignupComponent";
+import TrailerHub from "./TrailerHub/TrailerHub";
+import MobileBottomNavigation from "./MobileBottomNavigation/MobileBottomNavigation";
 // import "swiper/css";
 // import "swiper/css/navigation";
 // import "swiper/css/pagination";
@@ -192,6 +194,7 @@ const App = () => {
         {/* <Route path="/about" element={<About />} /> */}
         <Route path="/auth/login" element={<Login />} />
         <Route path="/movie/:slug" element={<MovieDetailsPage />} />
+        <Route path="/videos" element={<TrailerHub />} />
 
         {/* Admin Dashboard */}
         <Route path="/admin" element={<AdminProtect />}>
@@ -223,7 +226,7 @@ const App = () => {
           }
         />
       </Routes>
-
+      {!hideLayout && <MobileBottomNavigation />}
       {!hideLayout && <Footer />}
       {/* 
       <style>{`
